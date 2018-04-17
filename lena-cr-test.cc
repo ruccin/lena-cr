@@ -36,12 +36,16 @@ int main (int argc, char *argv[])
 {
 
   uint8_t bandwidth = 25;
+  uint8_t earfcn = 100;
   double simTime = 3.0;
 
   Ptr<LteHelper> lteHelper = CreateObject<LteHelper> ();
 
   lteHelper->SetEnbDeviceAttribute ("DlBandwidth", UintegerValue (bandwidth));
   lteHelper->SetEnbDeviceAttribute ("UlBandwidth", UintegerValue (bandwidth));
+  lteHelper->SetEnbDeviceAttribute ("DlEarfcn", UintegerValue (earfcn));
+  lteHelper->SetEnbDeviceAttribute ("UlEarfcn", UintegerValue (earfcn + 100));
+  lteHelper->SetUeDeviceAttribute ("DlEarfcn", UintegerValue (earfcn));
 
   CommandLine cmd;
   cmd.AddValue ("radius", "the radius of the disc where UEs are placed around an eNB", radius);
