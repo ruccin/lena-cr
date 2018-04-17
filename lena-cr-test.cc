@@ -37,6 +37,7 @@ int main (int argc, char *argv[])
 
   uint8_t bandwidth = 25;
   uint8_t earfcn = 100;
+  uint8_t radius = 50;
   double simTime = 3.0;
 
   Ptr<LteHelper> lteHelper = CreateObject<LteHelper> ();
@@ -79,7 +80,7 @@ int main (int argc, char *argv[])
   ue1mobility.SetPositionAllocator ("ns3::UniformDiscPositionAllocator",
                                     "X", DoubleValue (0.0),
                                     "Y", DoubleValue (0.0),
-                                    "rho", DoubleValue (50));
+                                    "rho", DoubleValue (radius));
   ue1mobility.SetMobilityModel ("ns3::ConstantPositionMobilityModel");
   ue1mobility.Install (ueNodes1);
 
@@ -88,7 +89,7 @@ int main (int argc, char *argv[])
   ue2mobility.SetPositionAllocator ("ns3::UniformDiscPositionAllocator",
                                     "X", DoubleValue (0.3),
                                     "Y", DoubleValue (0.3),
-                                    "rho", DoubleValue (80));
+                                    "rho", DoubleValue (radius + 30));
   ue2mobility.SetMobilityModel ("ns3::ConstantPositionMobilityModel");
   ue2mobility.Install (ueNodes2);
 
