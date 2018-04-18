@@ -98,18 +98,8 @@ int main (int argc, char *argv[])
   NetDeviceContainer ueNodes1;
   NetDeviceContainer ueNodes2;
   enbDevs = lteHelper->InstallEnbDevice (enbNodes);
-  ueNodes1 = lteHelper->InstallUeDevice (ueNodes1);
-  ueNodes2 = lteHelper->InstallUeDevice (ueNodes2);
-
-  // Attach UEs to a eNB
-  lteHelper->Attach (ueNodes1, enbDevs.Get (0));
-  lteHelper->Attach (ueNodes2, enbDevs.Get (1));
-
-  // Activate a data radio bearer each UE
-  enum EpsBearer::Qci q = EpsBearer::GBR_CONV_VOICE;
-  EpsBearer bearer (q);
-  lteHelper->ActivateDataRadioBearer (ueNodes1, bearer);
-  lteHelper->ActivateDataRadioBearer (ueNodes2, bearer);
+  ueDevs1 = lteHelper->InstallUeDevice (ueNodes1);
+  ueDevs2 = lteHelper->InstallUeDevice (ueNodes2);
 
   Ptr<Node> pgw = epcHelper->GetPgwNode ();
 
@@ -137,13 +127,13 @@ int main (int argc, char *argv[])
   remoteHostStaticRouting->AddNetworkRouteTo (Ipv4Address ("7.0.0.0"), Ipv4Mask ("255.0.0.0"), 1);
 
   // Install the IP stack on the UEs
-  internet.Install (ueNodes1);
-  internet.Install (ueNodes2);
+  internet.Install (ueDevs1);
+  internet.Install (ueDevs2);
   Ipv4InterfaceContainer ueIpIface;
   ueIpIface = epcHelper->AssignUeIpv4Address (NetDeviceContainer (ueLteDevs));
   // Assign IP address to UEs, and install applications
-  Ptr<Node> ueNode = ueNodes1;
-  Ptr<Node> ueNode = ueNodes2;
+  Ptr<Node> ueNode = ueDevs1;
+  Ptr<Node> ueNode = ueDevs2;
   // Set the default gateway for the UE
   Ptr<Ipv4StaticRouting> ueStaticRouting = ipv4RoutingHelper.GetStaticRouting (ueNode->GetObject<Ipv4> ());
   ueStaticRouting->SetDefaultRoute (epcHelper->GetUeDefaultGatewayAddress (), 1);
@@ -177,6 +167,16 @@ int main (int argc, char *argv[])
       serverApps.Start (Seconds (startTimeSeconds->GetValue ()));
       clientApps.Start (Seconds (startTimeSeconds->GetValue ()));  
     }
+
+  // Attach UEs to a eNB
+  lteHelper->Attach (ueDevs1, enbDevs.Get (0));
+  lteHelper->Attach (ueDevs2, enbDevs.Get (1));
+
+  // Activate a data radio bearer each UE
+  enum EpsBearer::Qci q = EpsBearer::GBR_CONV_VOICE;
+  EpsBearer bearer (q);
+  lteHelper->ActivateDataRadioBearer (ueDevs1, bearer);
+  lteHelper->ActivateDataRadioBearer (ueDevs2, bearer);
 
   Simulator::Stop (Seconds (simTime));
 
