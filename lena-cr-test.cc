@@ -36,35 +36,16 @@ int main (int argc, char *argv[])
 {
 
   uint8_t bandwidth = 25;
- // uint8_t earfcn = 100;
   uint8_t radius = 50;
   double simTime = 3.0;
 
   Ptr<LteHelper> lteHelper = CreateObject<LteHelper> ();
 
-  lteHelper->SetEnbDeviceAttribute ("DlBandwidth", UintegerValue (bandwidth));
-  lteHelper->SetEnbDeviceAttribute ("UlBandwidth", UintegerValue (bandwidth));
-  //lteHelper->SetEnbDeviceAttribute ("DlEarfcn", UintegerValue (earfcn));
-  //lteHelper->SetEnbDeviceAttribute ("UlEarfcn", UintegerValue (earfcn + 100));
-  //lteHelper->SetUeDeviceAttribute ("DlEarfcn", UintegerValue (earfcn));
-
-  CommandLine cmd;
-  cmd.AddValue ("radius", "the radius of the disc where UEs are placed around an eNB", radius);
-  cmd.AddValue ("simTime", "Total duration of the simulation (in seconds)", simTime);
-  cmd.Parse (argc, argv);
-
-  // parse again so you can override default values from the command line
-  cmd.Parse (argc, argv);
-
-  IntegerValue runValue;
-  GlobalValue::GetValueByName ("RngRun", runValue);
-
   // Create Nodes: eNodeB and UE
   NodeContainer enbNodes;
-  NodeContainer ueNodes1, ueNodes2;
+  NodeContainer ueNodes;
   enbNodes.Create (2);
-  ueNodes1.Create (1);
-  ueNodes2.Create (1);
+  ueNodes.Create (1);
 
   // Position of eNBs
   Ptr<ListPositionAllocator> positionAlloc = CreateObject<ListPositionAllocator> ();
@@ -75,31 +56,24 @@ int main (int argc, char *argv[])
   enbMobility.SetPositionAllocator (positionAlloc);
   enbMobility.Install (enbNodes);
 
-  // Position of UEs attached to eNB 1
+  // Position of UEs attached to eNB
   MobilityHelper ue1mobility;
   ue1mobility.SetPositionAllocator ("ns3::UniformDiscPositionAllocator",
                                     "X", DoubleValue (0.0),
                                     "Y", DoubleValue (0.0),
                                     "rho", DoubleValue (radius));
   ue1mobility.SetMobilityModel ("ns3::ConstantPositionMobilityModel");
-  ue1mobility.Install (ueNodes1);
-
-  // Position of UEs attached to eNB 2
-  MobilityHelper ue2mobility;
-  ue2mobility.SetPositionAllocator ("ns3::UniformDiscPositionAllocator",
-                                    "X", DoubleValue (0.3),
-                                    "Y", DoubleValue (0.3),
-                                    "rho", DoubleValue (radius + 30));
-  ue2mobility.SetMobilityModel ("ns3::ConstantPositionMobilityModel");
-  ue2mobility.Install (ueNodes2);
+  ue1mobility.Install (ueNodes);
 
   // Create Devices and install them in the Nodes (eNB and UE)
   NetDeviceContainer enbDevs;
-  NetDeviceContainer ueNodes1;
-  NetDeviceContainer ueNodes2;
+  NetDeviceContainer ueDevs;
+
+  lteHelper->SetEnbDeviceAttribute ("DlBandwidth", UintegerValue (bandwidth));
+  lteHelper->SetEnbDeviceAttribute ("UlBandwidth", UintegerValue (bandwidth));
+
   enbDevs = lteHelper->InstallEnbDevice (enbNodes);
-  ueDevs1 = lteHelper->InstallUeDevice (ueNodes1);
-  ueDevs2 = lteHelper->InstallUeDevice (ueNodes2);
+  ueDevs = lteHelper->InstallUeDevice (ueNodes);
 
   Ptr<Node> pgw = epcHelper->GetPgwNode ();
 
@@ -127,13 +101,11 @@ int main (int argc, char *argv[])
   remoteHostStaticRouting->AddNetworkRouteTo (Ipv4Address ("7.0.0.0"), Ipv4Mask ("255.0.0.0"), 1);
 
   // Install the IP stack on the UEs
-  internet.Install (ueDevs1);
-  internet.Install (ueDevs2);
+  internet.Install (ueNodes);
   Ipv4InterfaceContainer ueIpIface;
-  ueIpIface = epcHelper->AssignUeIpv4Address (NetDeviceContainer (ueLteDevs));
+  ueIpIface = epcHelper->AssignUeIpv4Address (NetDeviceContainer (ueDevs));
   // Assign IP address to UEs, and install applications
-  Ptr<Node> ueNode = ueDevs1;
-  Ptr<Node> ueNode = ueDevs2;
+  Ptr<Node> ueNode = ueNodes;
   // Set the default gateway for the UE
   Ptr<Ipv4StaticRouting> ueStaticRouting = ipv4RoutingHelper.GetStaticRouting (ueNode->GetObject<Ipv4> ());
   ueStaticRouting->SetDefaultRoute (epcHelper->GetUeDefaultGatewayAddress (), 1);
@@ -141,42 +113,38 @@ int main (int argc, char *argv[])
   // Install and start applications on UEs and remote host
   uint16_t dlPort = 1234;
   uint16_t ulPort = 2000;
-  for (uint32_t u = 0; u < ueNodes.GetN (); ++u)
-    {
-      ++ulPort;
-      ApplicationContainer clientApps;
-      ApplicationContainer serverApps;
+
+  ++ulPort;
+  ApplicationContainer clientApps;
+  ApplicationContainer serverApps;
 
 
-      PacketSinkHelper dlPacketSinkHelper ("ns3::UdpSocketFactory", InetSocketAddress (Ipv4Address::GetAny (), dlPort));
-      PacketSinkHelper ulPacketSinkHelper ("ns3::UdpSocketFactory", InetSocketAddress (Ipv4Address::GetAny (), ulPort));
-      serverApps.Add (dlPacketSinkHelper.Install (ueNodes.Get(u)));
-      serverApps.Add (ulPacketSinkHelper.Install (remoteHost));
+  PacketSinkHelper dlPacketSinkHelper ("ns3::UdpSocketFactory", InetSocketAddress (Ipv4Address::GetAny (), dlPort));
+  PacketSinkHelper ulPacketSinkHelper ("ns3::UdpSocketFactory", InetSocketAddress (Ipv4Address::GetAny (), ulPort));
+  serverApps.Add (dlPacketSinkHelper.Install (ueNodes));
+  serverApps.Add (ulPacketSinkHelper.Install (remoteHost));
 
-      UdpClientHelper dlClient (ueIpIface.GetAddress (u), dlPort);
-      dlClient.SetAttribute ("Interval", TimeValue (MilliSeconds(interPacketInterval)));
-      dlClient.SetAttribute ("MaxPackets", UintegerValue(1000000));
+  UdpClientHelper dlClient (ueIpIface.GetAddress (0), dlPort);
+  dlClient.SetAttribute ("Interval", TimeValue (MilliSeconds(interPacketInterval)));
+  dlClient.SetAttribute ("MaxPackets", UintegerValue(1000000));
 
-      UdpClientHelper ulClient (remoteHostAddr, ulPort);
-      ulClient.SetAttribute ("Interval", TimeValue (MilliSeconds(interPacketInterval)));
-      ulClient.SetAttribute ("MaxPackets", UintegerValue(1000000));
+  UdpClientHelper ulClient (remoteHostAddr, ulPort);
+  ulClient.SetAttribute ("Interval", TimeValue (MilliSeconds(interPacketInterval)));
+  ulClient.SetAttribute ("MaxPackets", UintegerValue(1000000));
 
-      clientApps.Add (dlClient.Install (remoteHost));
-      clientApps.Add (ulClient.Install (ueNodes.Get(u)));
+  clientApps.Add (dlClient.Install (remoteHost));
+  clientApps.Add (ulClient.Install (ueNodes);
 
-      serverApps.Start (Seconds (startTimeSeconds->GetValue ()));
-      clientApps.Start (Seconds (startTimeSeconds->GetValue ()));  
-    }
+  serverApps.Start (Seconds (startTimeSeconds->GetValue ()));
+  clientApps.Start (Seconds (startTimeSeconds->GetValue ())); 
 
   // Attach UEs to a eNB
-  lteHelper->Attach (ueDevs1, enbDevs.Get (0));
-  lteHelper->Attach (ueDevs2, enbDevs.Get (1));
+  lteHelper->Attach (ueDevs, enbDevs.Get (0));
 
   // Activate a data radio bearer each UE
   enum EpsBearer::Qci q = EpsBearer::GBR_CONV_VOICE;
   EpsBearer bearer (q);
-  lteHelper->ActivateDataRadioBearer (ueDevs1, bearer);
-  lteHelper->ActivateDataRadioBearer (ueDevs2, bearer);
+  lteHelper->ActivateDataRadioBearer (ueDevs, bearer);
 
   Simulator::Stop (Seconds (simTime));
 
