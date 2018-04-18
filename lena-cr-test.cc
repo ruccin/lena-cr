@@ -95,26 +95,90 @@ int main (int argc, char *argv[])
 
   // Create Devices and install them in the Nodes (eNB and UE)
   NetDeviceContainer enbDevs;
-  NetDeviceContainer ueDevs1;
-  NetDeviceContainer ueDevs2;
+  NetDeviceContainer ueNodes1;
+  NetDeviceContainer ueNodes2;
   enbDevs = lteHelper->InstallEnbDevice (enbNodes);
-  ueDevs1 = lteHelper->InstallUeDevice (ueNodes1);
-  ueDevs2 = lteHelper->InstallUeDevice (ueNodes2);
+  ueNodes1 = lteHelper->InstallUeDevice (ueNodes1);
+  ueNodes2 = lteHelper->InstallUeDevice (ueNodes2);
 
   // Attach UEs to a eNB
-  lteHelper->Attach (ueDevs1, enbDevs.Get (0));
-  lteHelper->Attach (ueDevs2, enbDevs.Get (1));
+  lteHelper->Attach (ueNodes1, enbDevs.Get (0));
+  lteHelper->Attach (ueNodes2, enbDevs.Get (1));
 
   // Activate a data radio bearer each UE
   enum EpsBearer::Qci q = EpsBearer::GBR_CONV_VOICE;
   EpsBearer bearer (q);
-  lteHelper->ActivateDataRadioBearer (ueDevs1, bearer);
-  lteHelper->ActivateDataRadioBearer (ueDevs2, bearer);
+  lteHelper->ActivateDataRadioBearer (ueNodes1, bearer);
+  lteHelper->ActivateDataRadioBearer (ueNodes2, bearer);
+
+  Ptr<Node> pgw = epcHelper->GetPgwNode ();
+
+  // Create a single RemoteHost
+  NodeContainer remoteHostContainer;
+  remoteHostContainer.Create (1);
+  Ptr<Node> remoteHost = remoteHostContainer.Get (0);
+  InternetStackHelper internet;
+  internet.Install (remoteHostContainer);
+
+  // Create the Internet
+  PointToPointHelper p2ph;
+  p2ph.SetDeviceAttribute ("DataRate", DataRateValue (DataRate ("100Gb/s")));
+  p2ph.SetDeviceAttribute ("Mtu", UintegerValue (1500));
+  p2ph.SetChannelAttribute ("Delay", TimeValue (Seconds (0.010)));
+  NetDeviceContainer internetDevices = p2ph.Install (pgw, remoteHost);
+  Ipv4AddressHelper ipv4h;
+  ipv4h.SetBase ("1.0.0.0", "255.0.0.0");
+  Ipv4InterfaceContainer internetIpIfaces = ipv4h.Assign (internetDevices);
+  // interface 0 is localhost, 1 is the p2p device
+  Ipv4Address remoteHostAddr = internetIpIfaces.GetAddress (1);
+
+  Ipv4StaticRoutingHelper ipv4RoutingHelper;
+  Ptr<Ipv4StaticRouting> remoteHostStaticRouting = ipv4RoutingHelper.GetStaticRouting (remoteHost->GetObject<Ipv4> ());
+  remoteHostStaticRouting->AddNetworkRouteTo (Ipv4Address ("7.0.0.0"), Ipv4Mask ("255.0.0.0"), 1);
+
+  // Install the IP stack on the UEs
+  internet.Install (ueNodes1);
+  internet.Install (ueNodes2);
+  Ipv4InterfaceContainer ueIpIface;
+  ueIpIface = epcHelper->AssignUeIpv4Address (NetDeviceContainer (ueLteDevs));
+  // Assign IP address to UEs, and install applications
+  Ptr<Node> ueNode = ueNodes1;
+  Ptr<Node> ueNode = ueNodes2;
+  // Set the default gateway for the UE
+  Ptr<Ipv4StaticRouting> ueStaticRouting = ipv4RoutingHelper.GetStaticRouting (ueNode->GetObject<Ipv4> ());
+  ueStaticRouting->SetDefaultRoute (epcHelper->GetUeDefaultGatewayAddress (), 1);
+
+  // Install and start applications on UEs and remote host
+  uint16_t dlPort = 1234;
+  uint16_t ulPort = 2000;
+  for (uint32_t u = 0; u < ueNodes.GetN (); ++u)
+    {
+      ++ulPort;
+      ApplicationContainer clientApps;
+      ApplicationContainer serverApps;
+
+
+      PacketSinkHelper dlPacketSinkHelper ("ns3::UdpSocketFactory", InetSocketAddress (Ipv4Address::GetAny (), dlPort));
+      PacketSinkHelper ulPacketSinkHelper ("ns3::UdpSocketFactory", InetSocketAddress (Ipv4Address::GetAny (), ulPort));
+      serverApps.Add (dlPacketSinkHelper.Install (ueNodes.Get(u)));
+      serverApps.Add (ulPacketSinkHelper.Install (remoteHost));
+
+      UdpClientHelper dlClient (ueIpIface.GetAddress (u), dlPort);
+      dlClient.SetAttribute ("Interval", TimeValue (MilliSeconds(interPacketInterval)));
+      dlClient.SetAttribute ("MaxPackets", UintegerValue(1000000));
+
+      UdpClientHelper ulClient (remoteHostAddr, ulPort);
+      ulClient.SetAttribute ("Interval", TimeValue (MilliSeconds(interPacketInterval)));
+      ulClient.SetAttribute ("MaxPackets", UintegerValue(1000000));
+
+      clientApps.Add (dlClient.Install (remoteHost));
+      clientApps.Add (ulClient.Install (ueNodes.Get(u)));
+
+      serverApps.Start (Seconds (startTimeSeconds->GetValue ()));
+      clientApps.Start (Seconds (startTimeSeconds->GetValue ()));  
+    }
 
   Simulator::Stop (Seconds (simTime));
-
-  lteHelper->EnableMacTraces ();
-  lteHelper->EnableRlcTraces ();
 
   Simulator::Run ();
   Simulator::Destroy ();
