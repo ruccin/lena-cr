@@ -175,10 +175,8 @@ int main (int argc, char *argv[])
   serverApps.Start (Seconds (0.01));
   clientApps.Start (Seconds (0.01));
   lteHelper->EnableTraces ();
-  // Uncomment to enable PCAP tracing
-  //p2ph.EnablePcapAll("lena-epc-first");
 
-  Simulator::Stop (Seconds (simTime));
+  Simulator::Stop (Seconds(simTime));
   Simulator::Run ();
   Simulator::Destroy ();
 
