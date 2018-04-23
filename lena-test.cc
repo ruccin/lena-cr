@@ -25,7 +25,8 @@ int
 main (int argc, char *argv[])
 {
 
-  uint16_t numberOfNodes = 2;
+  uint16_t numberOfNodes = 1;
+  uint8_t radius = 50;
   double simTime = 1.1;
   double distance = 60.0;
   double interPacketInterval = 100;
@@ -34,7 +35,7 @@ main (int argc, char *argv[])
   CommandLine cmd;
   cmd.AddValue("numberOfNodes", "Number of eNodeBs + UE pairs", numberOfNodes);
   cmd.AddValue("simTime", "Total duration of the simulation [s])", simTime);
-  cmd.AddValue("distance", "Distance between eNBs [m]", distance);
+  cmd.AddValue("distance", "Distance between eNB and UE [m]", distance);
   cmd.AddValue("interPacketInterval", "Inter packet interval [ms])", interPacketInterval);
   cmd.Parse(argc, argv);
 
@@ -78,6 +79,24 @@ main (int argc, char *argv[])
   enbNodes.Create(numberOfNodes);
   ueNodes.Create(numberOfNodes);
 
+  // Position of eNB
+  Ptr<ListPositionAllocator> positionAlloc = CreateObject<ListPositionAllocator> ();
+  positionAlloc->Add (Vector (0.866, 0.1, 0.0));
+  MobilityHelper enbMobility;
+  enbMobility.SetMobilityModel ("ns3::ConstantPositionMobilityModel");
+  enbMobility.SetPositionAllocator (positionAlloc);
+  enbMobility.Install (enbNodes);
+
+  // Position of UE
+  MobilityHelper ue1mobility;
+  ue1mobility.SetPositionAllocator ("ns3::UniformDiscPositionAllocator",
+                                    "X", DoubleValue (0.0),
+                                    "Y", DoubleValue (0.0),
+                                    "rho", DoubleValue (radius));
+  ue1mobility.SetMobilityModel ("ns3::ConstantPositionMobilityModel");
+  ue1mobility.Install (ueNodes);
+
+  /*
   // Install Mobility Model
   Ptr<ListPositionAllocator> positionAlloc = CreateObject<ListPositionAllocator> ();
   for (uint16_t i = 0; i < numberOfNodes; i++)
@@ -89,6 +108,7 @@ main (int argc, char *argv[])
   mobility.SetPositionAllocator(positionAlloc);
   mobility.Install(enbNodes);
   mobility.Install(ueNodes);
+  */
 
   // Install LTE Devices to the nodes
   NetDeviceContainer enbLteDevs = lteHelper->InstallEnbDevice (enbNodes);
@@ -111,7 +131,6 @@ main (int argc, char *argv[])
   for (uint16_t i = 0; i < numberOfNodes; i++)
       {
         lteHelper->Attach (ueLteDevs.Get(i), enbLteDevs.Get(i));
-        // side effect: the default EPS bearer will be activated
       }
 
 
@@ -158,8 +177,6 @@ main (int argc, char *argv[])
   serverApps.Start (Seconds (0.01));
   clientApps.Start (Seconds (0.01));
   lteHelper->EnableTraces ();
-  // Uncomment to enable PCAP tracing
-  //p2ph.EnablePcapAll("lena-epc-first");
 
   FlowMonitorHelper flowmon;
   Ptr<FlowMonitor> monitor = flowmon.InstallAll();
