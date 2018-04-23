@@ -21,9 +21,11 @@ main (int argc, char *argv[])
 {
 
   uint16_t numberOfNodes = 1;
-  double simTime = 1.1;
+  uint8_t radius = 50;
+  double simTime = 5;
   double distance = 60.0;
   double interPacketInterval = 100;
+
 
   // Command line arguments
   CommandLine cmd;
@@ -171,7 +173,7 @@ main (int argc, char *argv[])
 
   for (std::map<FlowId, FlowMonitor::FlowStats>::const_iterator iter = status.begin (); iter != status.enb (); ++iter)
   {
-    Ipv4AddressClassifier::FiveTuple t = Classifier->FindFlow (iter->first);
+    Ipv4FlowClassifier::FiveTuple t = Classifier->FindFlow (iter->first);
 
     NS_LOG_UNCOND("Flow ID:" << iter->first << "Src Addr" << t.sourceAddress << "Dst Addr" << t.destinationAddress );
     NS_LOG_UNCOND("Tx Packet =" << iter->second.txPackets);
