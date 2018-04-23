@@ -171,8 +171,7 @@ main (int argc, char *argv[])
   Ptr<Ipv4FlowClassifier> classifier = DynamicCast<Ipv4FlowClassifier> (flowmonHelper.GetClassifier ());
   std::map<FlowId, FlowMonitor::FlowStats> status = flowmon->GetFlowStats ();
 
-  for (std::map<FlowId, FlowMonitor::FlowStats>::const_iterator iter = status.begin (); iter != status.end (); ++iter)
-  {
+  for (std::map<FlowId, FlowMonitor::FlowStats>::const_iterator iter = status.begin (); iter != status.end (); ++iter){
     Ipv4FlowClassifier::FiveTuple t = Classifier->FindFlow (iter->first);
 
     NS_LOG_UNCOND("Flow ID:" << iter->first << "Src Addr" << t.sourceAddress << "Dst Addr" << t.destinationAddress );
