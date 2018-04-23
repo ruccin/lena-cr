@@ -50,7 +50,12 @@ int main (int argc, char *argv[])
   Ptr<FlowMonitor> flowMonitor = flowHelper.InstallAll();
 
   Ptr<LteHelper> lteHelper = CreateObject<LteHelper> ();
+  Ptr<PointToPointEpcHelper>  epcHelper = CreateObject<PointToPointEpcHelper> ();
+  lteHelper->SetEpcHelper (epcHelper);
   Ptr<Node> pgw = epcHelper->GetPgwNode ();
+
+  ConfigStore inputConfig;
+  inputConfig.ConfigureDefaults();
 
   // Create a single RemoteHost
   NodeContainer remoteHostContainer;
