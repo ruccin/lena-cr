@@ -39,7 +39,7 @@ main (int argc, char *argv[])
   cmd.Parse(argc, argv);
 
   Ptr<LteHelper> lteHelper = CreateObject<LteHelper> ();
-  Ptr<EpcHelper>  epcHelper = CreateObject<EpcHelper> ();
+  Ptr<PointToPointEpcHelper> epcHelper = CreateObject<PointToPointEpcHelper> ();
   lteHelper->SetEpcHelper (epcHelper);
 
   ConfigStore inputConfig;
@@ -181,7 +181,7 @@ main (int argc, char *argv[])
           NS_LOG_UNCOND("Rx Packets = " << iter->second.rxPackets);
           NS_LOG_UNCOND("Throughput: " << iter->second.rxBytes * 8.0 / (iter->second.timeLastRxPacket.GetSeconds()-iter->second.timeFirstTxPacket.GetSeconds()) / 1024  << " Kbps");
   }
-  
+
   monitor->SerializeToXmlFile ("result-test.xml" , true, true );
   
   Simulator::Destroy();
