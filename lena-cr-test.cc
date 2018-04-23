@@ -26,7 +26,7 @@
 #include "ns3/lte-module.h"
 #include "ns3/config-store.h"
 #include "ns3/radio-bearer-stats-calculator.h"
-#include "ns3/src/flow-monitor/helper/flow-monitor-helper.h"
+#include "ns3/flow-monitor-helper.h"
 #include <iomanip>
 #include <string>
 
