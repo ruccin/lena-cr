@@ -11,15 +11,9 @@
 #include "ns3/config-store.h"
 #include "ns3/flow-monitor-module.h"
 #include <ns3/flow-monitor-helper.h>
-//#include "ns3/gtk-config-store.h"
 
 using namespace ns3;
 
-/**
- * Sample simulation script for LTE+EPC. It instantiates several eNodeB,
- * attaches one UE per eNodeB starts a flow for each UE to  and from a remote host.
- * It also  starts yet another flow between each UE pair.
- */
 NS_LOG_COMPONENT_DEFINE ("EpcFirstExample");
 int
 main (int argc, char *argv[])
@@ -27,7 +21,7 @@ main (int argc, char *argv[])
 
   uint16_t numberOfNodes = 1;
   uint8_t radius = 50;
-  double simTime = 1.1;
+  double simTime = 10;
   double distance = 60.0;
   double interPacketInterval = 100;
 
@@ -95,20 +89,6 @@ main (int argc, char *argv[])
                                     "rho", DoubleValue (radius));
   ue1mobility.SetMobilityModel ("ns3::ConstantPositionMobilityModel");
   ue1mobility.Install (ueNodes);
-
-  /*
-  // Install Mobility Model
-  Ptr<ListPositionAllocator> positionAlloc = CreateObject<ListPositionAllocator> ();
-  for (uint16_t i = 0; i < numberOfNodes; i++)
-    {
-      positionAlloc->Add (Vector(distance * i, 0, 0));
-    }
-  MobilityHelper mobility;
-  mobility.SetMobilityModel("ns3::ConstantPositionMobilityModel");
-  mobility.SetPositionAllocator(positionAlloc);
-  mobility.Install(enbNodes);
-  mobility.Install(ueNodes);
-  */
 
   // Install LTE Devices to the nodes
   NetDeviceContainer enbLteDevs = lteHelper->InstallEnbDevice (enbNodes);

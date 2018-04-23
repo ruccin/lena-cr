@@ -45,7 +45,7 @@ int main (int argc, char *argv[])
   uint8_t numberOfNodes = 1;
   uint8_t radius = 50;
   double interPacketInterval = 100;
-  double simTime = 1.1;
+  double simTime = 5;
 
   Ptr<LteHelper> lteHelper = CreateObject<LteHelper> ();
   Ptr<PointToPointEpcHelper>  epcHelper = CreateObject<PointToPointEpcHelper> ();
