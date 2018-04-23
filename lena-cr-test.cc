@@ -26,7 +26,7 @@
 #include "ns3/lte-module.h"
 #include "ns3/config-store.h"
 #include "ns3/radio-bearer-stats-calculator.h"
-
+#include "ns3/flow-monitor-helper.h"
 #include <iomanip>
 #include <string>
 
@@ -35,46 +35,15 @@ using namespace ns3;
 int main (int argc, char *argv[])
 {
 
-  uint8_t bandwidth = 25;
+  uint8_t numberOfNodes = 1;
   uint8_t radius = 50;
   double simTime = 3.0;
 
+  Ptr<FlowMonitor> flowMonitor;
+  FlowMonitorHelper flowHelper;
+  flowMonitor = flowHelper.InstallAll();
+
   Ptr<LteHelper> lteHelper = CreateObject<LteHelper> ();
-
-  // Create Nodes: eNodeB and UE
-  NodeContainer enbNodes;
-  NodeContainer ueNodes;
-  enbNodes.Create (2);
-  ueNodes.Create (1);
-
-  // Position of eNBs
-  Ptr<ListPositionAllocator> positionAlloc = CreateObject<ListPositionAllocator> ();
-  positionAlloc->Add (Vector (0.866, 0.1, 0.0));
-  positionAlloc->Add (Vector (0.5, 0.4, 0.0));
-  MobilityHelper enbMobility;
-  enbMobility.SetMobilityModel ("ns3::ConstantPositionMobilityModel");
-  enbMobility.SetPositionAllocator (positionAlloc);
-  enbMobility.Install (enbNodes);
-
-  // Position of UEs attached to eNB
-  MobilityHelper ue1mobility;
-  ue1mobility.SetPositionAllocator ("ns3::UniformDiscPositionAllocator",
-                                    "X", DoubleValue (0.0),
-                                    "Y", DoubleValue (0.0),
-                                    "rho", DoubleValue (radius));
-  ue1mobility.SetMobilityModel ("ns3::ConstantPositionMobilityModel");
-  ue1mobility.Install (ueNodes);
-
-  // Create Devices and install them in the Nodes (eNB and UE)
-  NetDeviceContainer enbDevs;
-  NetDeviceContainer ueDevs;
-
-  lteHelper->SetEnbDeviceAttribute ("DlBandwidth", UintegerValue (bandwidth));
-  lteHelper->SetEnbDeviceAttribute ("UlBandwidth", UintegerValue (bandwidth));
-
-  enbDevs = lteHelper->InstallEnbDevice (enbNodes);
-  ueDevs = lteHelper->InstallUeDevice (ueNodes);
-
   Ptr<Node> pgw = epcHelper->GetPgwNode ();
 
   // Create a single RemoteHost
@@ -100,55 +69,108 @@ int main (int argc, char *argv[])
   Ptr<Ipv4StaticRouting> remoteHostStaticRouting = ipv4RoutingHelper.GetStaticRouting (remoteHost->GetObject<Ipv4> ());
   remoteHostStaticRouting->AddNetworkRouteTo (Ipv4Address ("7.0.0.0"), Ipv4Mask ("255.0.0.0"), 1);
 
+  // Create Nodes: eNodeB and UE
+  NodeContainer enbNodes;
+  NodeContainer ueNodes;
+  enbNodes.Create (numberOfNodes);
+  ueNodes.Create (numberOfNodes);
+
+  // Position of eNBs
+  Ptr<ListPositionAllocator> positionAlloc = CreateObject<ListPositionAllocator> ();
+  positionAlloc->Add (Vector (0.866, 0.1, 0.0));
+  //positionAlloc->Add (Vector (0.5, 0.4, 0.0));
+  MobilityHelper enbMobility;
+  enbMobility.SetMobilityModel ("ns3::ConstantPositionMobilityModel");
+  enbMobility.SetPositionAllocator (positionAlloc);
+  enbMobility.Install (enbNodes);
+
+  // Position of UEs attached to eNB
+  MobilityHelper ue1mobility;
+  ue1mobility.SetPositionAllocator ("ns3::UniformDiscPositionAllocator",
+                                    "X", DoubleValue (0.0),
+                                    "Y", DoubleValue (0.0),
+                                    "rho", DoubleValue (radius));
+  ue1mobility.SetMobilityModel ("ns3::ConstantPositionMobilityModel");
+  ue1mobility.Install (ueNodes);
+
+  // Create Devices and install them in the Nodes (eNB and UE)
+  NetDeviceContainer enbLteDevs;
+  NetDeviceContainer ueLteDevs;
+
+  enbLteDevs = lteHelper->InstallEnbDevice (enbNodes);
+  ueLteDevs = lteHelper->InstallUeDevice (ueNodes);
+
   // Install the IP stack on the UEs
   internet.Install (ueNodes);
   Ipv4InterfaceContainer ueIpIface;
-  ueIpIface = epcHelper->AssignUeIpv4Address (NetDeviceContainer (ueDevs));
+  ueIpIface = epcHelper->AssignUeIpv4Address (NetDeviceContainer (ueLteDevs));
   // Assign IP address to UEs, and install applications
-  Ptr<Node> ueNode = ueNodes;
-  // Set the default gateway for the UE
-  Ptr<Ipv4StaticRouting> ueStaticRouting = ipv4RoutingHelper.GetStaticRouting (ueNode->GetObject<Ipv4> ());
-  ueStaticRouting->SetDefaultRoute (epcHelper->GetUeDefaultGatewayAddress (), 1);
+  for (uint32_t u = 0; u < ueNodes.GetN (); ++u)
+    {
+      Ptr<Node> ueNode = ueNodes.Get (u);
+      // Set the default gateway for the UE
+      Ptr<Ipv4StaticRouting> ueStaticRouting = ipv4RoutingHelper.GetStaticRouting (ueNode->GetObject<Ipv4> ());
+      ueStaticRouting->SetDefaultRoute (epcHelper->GetUeDefaultGatewayAddress (), 1);
+    }
+
+  // Attach one UE per eNodeB
+  for (uint16_t i = 0; i < numberOfNodes; i++)
+      {
+        lteHelper->Attach (ueLteDevs.Get(i), enbLteDevs.Get(i));
+        // side effect: the default EPS bearer will be activated
+      }
 
   // Install and start applications on UEs and remote host
   uint16_t dlPort = 1234;
   uint16_t ulPort = 2000;
-
-  ++ulPort;
+  uint16_t otherPort = 3000;
   ApplicationContainer clientApps;
   ApplicationContainer serverApps;
+  for (uint32_t u = 0; u < ueNodes.GetN (); ++u)
+    {
+      ++ulPort;
+      ++otherPort;
+      PacketSinkHelper dlPacketSinkHelper ("ns3::UdpSocketFactory", InetSocketAddress (Ipv4Address::GetAny (), dlPort));
+      PacketSinkHelper ulPacketSinkHelper ("ns3::UdpSocketFactory", InetSocketAddress (Ipv4Address::GetAny (), ulPort));
+      PacketSinkHelper packetSinkHelper ("ns3::UdpSocketFactory", InetSocketAddress (Ipv4Address::GetAny (), otherPort));
+      serverApps.Add (dlPacketSinkHelper.Install (ueNodes.Get(u)));
+      serverApps.Add (ulPacketSinkHelper.Install (remoteHost));
+      serverApps.Add (packetSinkHelper.Install (ueNodes.Get(u)));
 
+      UdpClientHelper dlClient (ueIpIface.GetAddress (u), dlPort);
+      dlClient.SetAttribute ("Interval", TimeValue (MilliSeconds(interPacketInterval)));
+      dlClient.SetAttribute ("MaxPackets", UintegerValue(1000000));
 
-  PacketSinkHelper dlPacketSinkHelper ("ns3::UdpSocketFactory", InetSocketAddress (Ipv4Address::GetAny (), dlPort));
-  PacketSinkHelper ulPacketSinkHelper ("ns3::UdpSocketFactory", InetSocketAddress (Ipv4Address::GetAny (), ulPort));
-  serverApps.Add (dlPacketSinkHelper.Install (ueNodes));
-  serverApps.Add (ulPacketSinkHelper.Install (remoteHost));
+      UdpClientHelper ulClient (remoteHostAddr, ulPort);
+      ulClient.SetAttribute ("Interval", TimeValue (MilliSeconds(interPacketInterval)));
+      ulClient.SetAttribute ("MaxPackets", UintegerValue(1000000));
 
-  UdpClientHelper dlClient (ueIpIface.GetAddress (0), dlPort);
-  dlClient.SetAttribute ("Interval", TimeValue (MilliSeconds(interPacketInterval)));
-  dlClient.SetAttribute ("MaxPackets", UintegerValue(1000000));
+      UdpClientHelper client (ueIpIface.GetAddress (u), otherPort);
+      client.SetAttribute ("Interval", TimeValue (MilliSeconds(interPacketInterval)));
+      client.SetAttribute ("MaxPackets", UintegerValue(1000000));
 
-  UdpClientHelper ulClient (remoteHostAddr, ulPort);
-  ulClient.SetAttribute ("Interval", TimeValue (MilliSeconds(interPacketInterval)));
-  ulClient.SetAttribute ("MaxPackets", UintegerValue(1000000));
-
-  clientApps.Add (dlClient.Install (remoteHost));
-  clientApps.Add (ulClient.Install (ueNodes);
-
-  serverApps.Start (Seconds (startTimeSeconds->GetValue ()));
-  clientApps.Start (Seconds (startTimeSeconds->GetValue ())); 
-
-  // Attach UEs to a eNB
-  lteHelper->Attach (ueDevs, enbDevs.Get (0));
-
-  // Activate a data radio bearer each UE
-  enum EpsBearer::Qci q = EpsBearer::GBR_CONV_VOICE;
-  EpsBearer bearer (q);
-  lteHelper->ActivateDataRadioBearer (ueDevs, bearer);
+      clientApps.Add (dlClient.Install (remoteHost));
+      clientApps.Add (ulClient.Install (ueNodes.Get(u)));
+      if (u+1 < ueNodes.GetN ())
+        {
+          clientApps.Add (client.Install (ueNodes.Get(u+1)));
+        }
+      else
+        {
+          clientApps.Add (client.Install (ueNodes.Get(0)));
+        }
+    }
+  serverApps.Start (Seconds (0.01));
+  clientApps.Start (Seconds (0.01));
+  lteHelper->EnableTraces ();
+  // Uncomment to enable PCAP tracing
+  //p2ph.EnablePcapAll("lena-epc-first");
 
   Simulator::Stop (Seconds (simTime));
-
   Simulator::Run ();
   Simulator::Destroy ();
+
+  flowMonitor->SerializeToXmlFile("lena-cr-test.xml", true, true);
+
   return 0;
 }
