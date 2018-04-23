@@ -45,7 +45,7 @@ int main (int argc, char *argv[])
   uint8_t numberOfNodes = 1;
   uint8_t radius = 50;
   double interPacketInterval = 100;
-  double simTime = 3.0;
+  double simTime = 1.1;
 
   FlowMonitorHelper flowHelper;
   Ptr<FlowMonitor> flowMonitor = flowHelper.InstallAll();
