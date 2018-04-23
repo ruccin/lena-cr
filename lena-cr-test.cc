@@ -39,9 +39,8 @@ int main (int argc, char *argv[])
   uint8_t radius = 50;
   double simTime = 3.0;
 
-  Ptr<FlowMonitor> flowMonitor;
   FlowMonitorHelper flowHelper;
-  flowMonitor = flowHelper.InstallAll();
+  Ptr<FlowMonitor> flowMonitor = flowHelper.InstallAll();
 
   Ptr<LteHelper> lteHelper = CreateObject<LteHelper> ();
   Ptr<Node> pgw = epcHelper->GetPgwNode ();
