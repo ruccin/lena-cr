@@ -1,61 +1,51 @@
-/* -*-  Mode: C++; c-file-style: "gnu"; indent-tabs-mode:nil; -*- */
-/*
- * Copyright (c) 2011 Centre Tecnologic de Telecomunicacions de Catalunya (CTTC)
- *
- * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License version 2 as
- * published by the Free Software Foundation;
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
- *
- * Author: Manuel Requena <manuel.requena@cttc.es>
- *         Nicola Baldo <nbaldo@cttc.es>
- */
 
-
+#include "ns3/lte-helper.h"
+#include "ns3/epc-helper.h"
 #include "ns3/core-module.h"
 #include "ns3/network-module.h"
-#include "ns3/mobility-module.h"
-#include "ns3/lte-module.h"
-#include "ns3/config-store.h"
-#include "ns3/epc-helper.h"
-#include "ns3/lte-helper.h"
+#include "ns3/ipv4-global-routing-helper.h"
 #include "ns3/internet-module.h"
 #include "ns3/mobility-module.h"
-#include "ns3/ipv4-global-routing-helper.h"
+#include "ns3/lte-module.h"
 #include "ns3/applications-module.h"
 #include "ns3/point-to-point-helper.h"
-#include "ns3/radio-bearer-stats-calculator.h"
+#include "ns3/config-store.h"
 #include "ns3/flow-monitor-helper.h"
-#include <iomanip>
-#include <string>
 
 using namespace ns3;
 
-int main (int argc, char *argv[])
+NS_LOG_COMPONENT_DEFINE ("EpcFirstExample");
+
+int
+main (int argc, char *argv[])
 {
 
-  uint8_t numberOfNodes = 1;
-  uint8_t radius = 50;
-  double interPacketInterval = 100;
+  uint16_t numberOfNodes = 1;
   double simTime = 1.1;
+  double distance = 60.0;
+  double interPacketInterval = 100;
+
+  // Command line arguments
+  CommandLine cmd;
+  cmd.AddValue("numberOfNodes", "Number of eNodeBs + UE pairs", numberOfNodes);
+  cmd.AddValue("simTime", "Total duration of the simulation [s])", simTime);
+  cmd.AddValue("distance", "Distance between eNB and UE [m]", distance);
+  cmd.AddValue("interPacketInterval", "Inter packet interval [ms])", interPacketInterval);
+  cmd.Parse(argc, argv);
 
   Ptr<LteHelper> lteHelper = CreateObject<LteHelper> ();
   Ptr<PointToPointEpcHelper>  epcHelper = CreateObject<PointToPointEpcHelper> ();
   lteHelper->SetEpcHelper (epcHelper);
-  Ptr<Node> pgw = epcHelper->GetPgwNode ();
 
   ConfigStore inputConfig;
   inputConfig.ConfigureDefaults();
 
-  // Create a single RemoteHost
+  // parse again so you can override default values from the command line
+  cmd.Parse(argc, argv);
+
+  Ptr<Node> pgw = epcHelper->GetPgwNode ();
+
+   // Create a single RemoteHost
   NodeContainer remoteHostContainer;
   remoteHostContainer.Create (1);
   Ptr<Node> remoteHost = remoteHostContainer.Get (0);
@@ -78,22 +68,21 @@ int main (int argc, char *argv[])
   Ptr<Ipv4StaticRouting> remoteHostStaticRouting = ipv4RoutingHelper.GetStaticRouting (remoteHost->GetObject<Ipv4> ());
   remoteHostStaticRouting->AddNetworkRouteTo (Ipv4Address ("7.0.0.0"), Ipv4Mask ("255.0.0.0"), 1);
 
-  // Create Nodes: eNodeB and UE
-  NodeContainer enbNodes;
   NodeContainer ueNodes;
-  enbNodes.Create (numberOfNodes);
-  ueNodes.Create (numberOfNodes);
+  NodeContainer enbNodes;
+  enbNodes.Create(numberOfNodes);
+  ueNodes.Create(numberOfNodes);
 
-  // Position of eNBs
+// Position of eNB
   Ptr<ListPositionAllocator> positionAlloc = CreateObject<ListPositionAllocator> ();
+
   positionAlloc->Add (Vector (0.866, 0.1, 0.0));
-  //positionAlloc->Add (Vector (0.5, 0.4, 0.0));
   MobilityHelper enbMobility;
   enbMobility.SetMobilityModel ("ns3::ConstantPositionMobilityModel");
   enbMobility.SetPositionAllocator (positionAlloc);
   enbMobility.Install (enbNodes);
 
-  // Position of UEs attached to eNB
+  // Position of UE
   MobilityHelper ue1mobility;
   ue1mobility.SetPositionAllocator ("ns3::UniformDiscPositionAllocator",
                                     "X", DoubleValue (0.0),
@@ -102,12 +91,9 @@ int main (int argc, char *argv[])
   ue1mobility.SetMobilityModel ("ns3::ConstantPositionMobilityModel");
   ue1mobility.Install (ueNodes);
 
-  // Create Devices and install them in the Nodes (eNB and UE)
-  NetDeviceContainer enbLteDevs;
-  NetDeviceContainer ueLteDevs;
-
-  enbLteDevs = lteHelper->InstallEnbDevice (enbNodes);
-  ueLteDevs = lteHelper->InstallUeDevice (ueNodes);
+  // Install LTE Devices to the nodes
+  NetDeviceContainer enbLteDevs = lteHelper->InstallEnbDevice (enbNodes);
+  NetDeviceContainer ueLteDevs = lteHelper->InstallUeDevice (ueNodes);
 
   // Install the IP stack on the UEs
   internet.Install (ueNodes);
@@ -126,7 +112,6 @@ int main (int argc, char *argv[])
   for (uint16_t i = 0; i < numberOfNodes; i++)
       {
         lteHelper->Attach (ueLteDevs.Get(i), enbLteDevs.Get(i));
-        // side effect: the default EPS bearer will be activated
       }
 
   // Install and start applications on UEs and remote host
@@ -173,10 +158,30 @@ int main (int argc, char *argv[])
   clientApps.Start (Seconds (0.01));
   lteHelper->EnableTraces ();
 
-  Simulator::Stop (Seconds(simTime));
-  Simulator::Run ();
+  FlowMonitorHelper flowmonHelper;
+  Ptr<FlowMonitor> flowmon = flowmonHelper.InstallAll ();
 
-  Simulator::Destroy ();
+  Simulator::Stop(Seconds(simTime));
+  Simulator::Run();
+  Simulator::Destroy();
+
+  flowmon->CheckForLostPackets ();
+  Ptr<Ipv4FlowClassifier> classifier = DynamicCast<Ipv4FlowClassifier> (flowmonHelper.GetClassifier ());
+  std::map<FlowId, FlowMonitor::FlowStats> status = flowmon->GetFlowStats ();
+
+  for (std::map<FlowId, FlowMonitor::FlowStats>::const_iterator iter = status.begin (); iter != status.enb (); ++iter)
+  {
+    Ipv4AddressClassifier::FiveTuple t = Classifier->FindFlow (iter->first);
+
+    NS_LOG_UNCOND("Flow ID:" << iter->first << "Src Addr" << t.sourceAddress << "Dst Addr" << t.destinationAddress );
+    NS_LOG_UNCOND("Tx Packet =" << iter->second.txPackets);
+    NS_LOG_UNCOND("Rx Packet =" << iter->second.rxPackets);
+    NS_LOG_UNCOND("Throughput :" << iter->second.rxBytes * 8.0/(iter->second.timeLastRxPacket.GetSeconds() - iter->second.timeFirstTxPacket.GetSeconds()) / 1024 << "Kbps");
+  }
+
+  flowmon->SerializeToXmlFile("test-result.xml", true, true);
 
   return 0;
+
 }
+
