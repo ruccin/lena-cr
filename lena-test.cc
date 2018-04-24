@@ -16,9 +16,9 @@
 #include "ns3/propagation-loss-model.h"
 #include "ns3/ff-mac-scheduler.h"
 #include "ns3/pf-ff-mac-scheduler.h"
-#include "ns3/random-variable.h"
+//#include "ns3/random-variable.h"
 #include "ns3/lte-enb-net-device.h"
-#include "ns3/radio-bearer-status-calculator.h"
+//#include "ns3/radio-bearer-status-calculator.h"
 
 using namespace ns3;
 
