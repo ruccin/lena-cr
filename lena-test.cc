@@ -9,11 +9,11 @@
 #include "ns3/applications-module.h"
 #include "ns3/point-to-point-helper.h"
 #include "ns3/config-store.h"
-#include <ns3/flow-monitor-helper.h>
+#include "ns3/flow-monitor-helper.h"
 
 using namespace ns3;
 
-NS_LOG_COMPONENT_DEFINE ("EpcFirstExample");
+NS_LOG_COMPONENT_DEFINE ("lena-cr-test");
 int
 main (int argc, char *argv[])
 {
