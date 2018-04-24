@@ -9,7 +9,6 @@
 #include "ns3/applications-module.h"
 #include "ns3/point-to-point-helper.h"
 #include "ns3/config-store.h"
-#include "ns3/flow-monitor-module.h"
 #include <ns3/flow-monitor-helper.h>
 
 using namespace ns3;
@@ -50,7 +49,7 @@ main (int argc, char *argv[])
   remoteHostContainer.Create (1);
   Ptr<Node> remoteHost = remoteHostContainer.Get (0);
   InternetStackHelper internet;
-  internet.Install (remoteHostContainer);
+  internet.Install (remoteHostContainer);                                                                                                  
 
   // Create the Internet
   PointToPointHelper p2ph;
@@ -75,7 +74,7 @@ main (int argc, char *argv[])
 
   // Position of eNB
   Ptr<ListPositionAllocator> positionAlloc = CreateObject<ListPositionAllocator> ();
-  positionAlloc->Add (Vector (0.866, 0.1, 0.0));
+  positionAlloc->Add (Vector (0.866, 0.2, 0.0));
   MobilityHelper enbMobility;
   enbMobility.SetMobilityModel ("ns3::ConstantPositionMobilityModel");
   enbMobility.SetPositionAllocator (positionAlloc);
@@ -112,7 +111,6 @@ main (int argc, char *argv[])
       {
         lteHelper->Attach (ueLteDevs.Get(i), enbLteDevs.Get(i));
       }
-
 
   // Install and start applications on UEs and remote host
   uint16_t dlPort = 1234;
