@@ -10,7 +10,15 @@
 #include "ns3/point-to-point-helper.h"
 #include "ns3/config-store.h"
 #include "ns3/flow-monitor-helper.h"
-#include "ipv4-flow-classifier.h"
+#include "ns3/ipv4-flow-classifier.h"
+#include "ns3/propagation-loss-model.h"
+#include "ns3/lte-enb-phy.h"
+#include "ns3/propagation-loss-model.h"
+#include "ns3/ff-mac-scheduler.h"
+#include "ns3/pf-ff-mac-scheduler.h"
+#include "ns3/random-variable.h"
+#include "ns3/lte-enb-net-device.h"
+#include "ns3/radio-bearer-status-calculator.h"
 
 using namespace ns3;
 
@@ -21,9 +29,11 @@ main (int argc, char *argv[])
 
   uint16_t numberOfNodes = 1;
   uint8_t radius = 50;
-  double simTime = 10;
+  double simTime = 100;
   double distance = 60.0;
   double interPacketInterval = 100;
+  double PoweNB = 35;
+  double Powue = 20;
 
   // Command line arguments
   CommandLine cmd;
@@ -51,6 +61,11 @@ main (int argc, char *argv[])
   Ptr<Node> remoteHost = remoteHostContainer.Get (0);
   InternetStackHelper internet;
   internet.Install (remoteHostContainer);                                                                                                  
+  // Set of Antenna and Bandwidth
+  lteHelper->SetEnbAntennaModelType("ns3::IsotropicAntennaModel");
+  lteHelper->SetEnbDeviceAttribute("DlBandwidth", UintegerValue(50));
+  lteHelper->SetEnbDeviceAttribute("UlBandwidth", UintegerValue(50));
+  lteHelper->SetUeAntennaModelType("ns3::IsotropicAntennaModel");
 
   // Create the Internet
   PointToPointHelper p2ph;
@@ -94,6 +109,21 @@ main (int argc, char *argv[])
   NetDeviceContainer enbLteDevs = lteHelper->InstallEnbDevice (enbNodes);
   NetDeviceContainer ueLteDevs = lteHelper->InstallUeDevice (ueNodes);
 
+  // Set of Tx Power
+  Ptr<LteEnbPhy> enbPhy = enbLteDevs.Get(0)->GetObject<LteEnbNetDevice>()->GetPhy();
+  enbPhy->SetTxPower(PoweNB);
+  enbPhy->SetAttribute("NoiseFigure", DoubleValue(5.0));
+
+  Ptr<LteUePhy> uePhy = ueLteDevs.Get(0)->GetObject<LteUeNetDevice>()->GetPhy();
+  uePhy->SetTxPower(Powue);
+  uePhy->SetAttribute("NoiseFigure", DoubleValue(9.0));
+
+  // Set of Scheduler
+  lteHelper->SetSchedulerType("ns3::PfFfMacScheduler");
+  
+  // Set of Pathloss Model
+  lteHelper->SetPathlossModelType("ns3::FriisPropagationLossModel");
+
   // Install the IP stack on the UEs
   internet.Install (ueNodes);
   Ipv4InterfaceContainer ueIpIface;
@@ -113,6 +143,25 @@ main (int argc, char *argv[])
         lteHelper->Attach (ueLteDevs.Get(i), enbLteDevs.Get(i));
       }
 
+   // Activate an EPS bearer on all UEs
+
+  for (uint32_t u = 0; u < ueNodes.GetN (); ++u)
+    {
+      Ptr<NetDevice> ueDevice = ueLteDevs.Get (u);
+      GbrQosInformation qos;
+      qos.gbrDl = 132;  // bit/s, considering IP, UDP, RLC, PDCP header size
+      qos.gbrUl = 132;
+      qos.mbrDl = qos.gbrDl;
+      qos.mbrUl = qos.gbrUl;
+
+      enum EpsBearer::Qci q = EpsBearer::GBR_CONV_VIDEO;
+      EpsBearer bearer (q, qos);
+      bearer.arp.priorityLevel = 15 - (u + 1);
+      bearer.arp.preemptionCapability = true;
+      bearer.arp.preemptionVulnerability = true;
+      lteHelper->ActivateDedicatedEpsBearer (ueDevice, bearer, EpcTft::Default ());
+    }
+
   // Install and start applications on UEs and remote host
   uint16_t dlPort = 1234;
   uint16_t ulPort = 2000;
@@ -124,26 +173,30 @@ main (int argc, char *argv[])
       ++ulPort;
       ++otherPort;
       PacketSinkHelper dlPacketSinkHelper ("ns3::UdpSocketFactory", InetSocketAddress (Ipv4Address::GetAny (), dlPort));
-      PacketSinkHelper ulPacketSinkHelper ("ns3::UdpSocketFactory", InetSocketAddress (Ipv4Address::GetAny (), ulPort));
-      PacketSinkHelper packetSinkHelper ("ns3::UdpSocketFactory", InetSocketAddress (Ipv4Address::GetAny (), otherPort));
+      PacketSinkHelper ulPacketSinkHelper ("ns3::udpSocketFactory", InetSocketAddress (Ipv4Address::GetAny (), ulPort));
+      //PacketSinkHelper packetSinkHelper ("ns3::udpSocketFactory", InetSocketAddress (Ipv4Address::GetAny (), otherPort));
       serverApps.Add (dlPacketSinkHelper.Install (ueNodes.Get(u)));
       serverApps.Add (ulPacketSinkHelper.Install (remoteHost));
-      serverApps.Add (packetSinkHelper.Install (ueNodes.Get(u)));
-
+      //serverApps.Add (packetSinkHelper.Install (ueNodes.Get(u)));
+      
       UdpClientHelper dlClient (ueIpIface.GetAddress (u), dlPort);
       dlClient.SetAttribute ("Interval", TimeValue (MilliSeconds(interPacketInterval)));
       dlClient.SetAttribute ("MaxPackets", UintegerValue(1000000));
-
+      
       UdpClientHelper ulClient (remoteHostAddr, ulPort);
       ulClient.SetAttribute ("Interval", TimeValue (MilliSeconds(interPacketInterval)));
       ulClient.SetAttribute ("MaxPackets", UintegerValue(1000000));
+      
 
+      /*
       UdpClientHelper client (ueIpIface.GetAddress (u), otherPort);
       client.SetAttribute ("Interval", TimeValue (MilliSeconds(interPacketInterval)));
       client.SetAttribute ("MaxPackets", UintegerValue(1000000));
+      */
 
       clientApps.Add (dlClient.Install (remoteHost));
       clientApps.Add (ulClient.Install (ueNodes.Get(u)));
+      /*
       if (u+1 < ueNodes.GetN ())
         {
           clientApps.Add (client.Install (ueNodes.Get(u+1)));
@@ -152,6 +205,7 @@ main (int argc, char *argv[])
         {
           clientApps.Add (client.Install (ueNodes.Get(0)));
         }
+      */
     }
   serverApps.Start (Seconds (0.01));
   clientApps.Start (Seconds (0.01));
