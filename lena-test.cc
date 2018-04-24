@@ -10,6 +10,7 @@
 #include "ns3/point-to-point-helper.h"
 #include "ns3/config-store.h"
 #include "ns3/flow-monitor-helper.h"
+#include "ipv4-flow-classifier.h"
 
 using namespace ns3;
 
