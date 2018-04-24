@@ -24,6 +24,7 @@
 using namespace ns3;
 
 NS_LOG_COMPONENT_DEFINE ("lena-cr-test");
+
 int
 main (int argc, char *argv[])
 {
@@ -61,13 +62,14 @@ main (int argc, char *argv[])
   remoteHostContainer.Create (1);
   Ptr<Node> remoteHost = remoteHostContainer.Get (0);
   InternetStackHelper internet;
-  internet.Install (remoteHostContainer);                                                                                                  
+  internet.Install (remoteHostContainer);
+/*                        
   // Set of Antenna and Bandwidth
   lteHelper->SetEnbAntennaModelType("ns3::IsotropicAntennaModel");
   lteHelper->SetEnbDeviceAttribute("DlBandwidth", UintegerValue(50));
   lteHelper->SetEnbDeviceAttribute("UlBandwidth", UintegerValue(50));
   lteHelper->SetUeAntennaModelType("ns3::IsotropicAntennaModel");
-
+*/
   // Create the Internet
   PointToPointHelper p2ph;
   p2ph.SetDeviceAttribute ("DataRate", DataRateValue (DataRate ("100Gb/s")));
