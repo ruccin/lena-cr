@@ -34,8 +34,8 @@ main (int argc, char *argv[])
   double simTime = 100;
   double distance = 60.0;
   double interPacketInterval = 100;
-  double PoweNB = 35;
-  double Powue = 20;
+//  double PoweNB = 35;
+//  double Powue = 20;
 
   // Command line arguments
   CommandLine cmd;
@@ -54,7 +54,13 @@ main (int argc, char *argv[])
 
   // parse again so you can override default values from the command line
   cmd.Parse(argc, argv);
-
+/*                        
+  // Set of Antenna and Bandwidth
+  lteHelper->SetEnbAntennaModelType("ns3::IsotropicAntennaModel");
+  lteHelper->SetEnbDeviceAttribute("DlBandwidth", UintegerValue(50));
+  lteHelper->SetEnbDeviceAttribute("UlBandwidth", UintegerValue(50));
+  lteHelper->SetUeAntennaModelType("ns3::IsotropicAntennaModel");
+*/
   Ptr<Node> pgw = epcHelper->GetPgwNode ();
 
    // Create a single RemoteHost
@@ -63,13 +69,7 @@ main (int argc, char *argv[])
   Ptr<Node> remoteHost = remoteHostContainer.Get (0);
   InternetStackHelper internet;
   internet.Install (remoteHostContainer);
-/*                        
-  // Set of Antenna and Bandwidth
-  lteHelper->SetEnbAntennaModelType("ns3::IsotropicAntennaModel");
-  lteHelper->SetEnbDeviceAttribute("DlBandwidth", UintegerValue(50));
-  lteHelper->SetEnbDeviceAttribute("UlBandwidth", UintegerValue(50));
-  lteHelper->SetUeAntennaModelType("ns3::IsotropicAntennaModel");
-*/
+
   // Create the Internet
   PointToPointHelper p2ph;
   p2ph.SetDeviceAttribute ("DataRate", DataRateValue (DataRate ("100Gb/s")));
@@ -102,8 +102,8 @@ main (int argc, char *argv[])
   // Position of UE
   MobilityHelper ue1mobility;
   ue1mobility.SetPositionAllocator ("ns3::UniformDiscPositionAllocator",
-                                    "X", DoubleValue (0.0),
-                                    "Y", DoubleValue (0.0),
+                                    "X", DoubleValue (0.01),
+                                    "Y", DoubleValue (0.1),
                                     "rho", DoubleValue (radius));
   ue1mobility.SetMobilityModel ("ns3::ConstantPositionMobilityModel");
   ue1mobility.Install (ueNodes);
@@ -111,7 +111,7 @@ main (int argc, char *argv[])
   // Install LTE Devices to the nodes
   NetDeviceContainer enbLteDevs = lteHelper->InstallEnbDevice (enbNodes);
   NetDeviceContainer ueLteDevs = lteHelper->InstallUeDevice (ueNodes);
-
+/*
   // Set of Tx Power
   Ptr<LteEnbPhy> enbPhy = enbLteDevs.Get(0)->GetObject<LteEnbNetDevice>()->GetPhy();
   enbPhy->SetTxPower(PoweNB);
@@ -126,7 +126,7 @@ main (int argc, char *argv[])
   
   // Set of Pathloss Model
   lteHelper->SetPathlossModelType("ns3::FriisPropagationLossModel");
-
+*/
   // Install the IP stack on the UEs
   internet.Install (ueNodes);
   Ipv4InterfaceContainer ueIpIface;
@@ -145,7 +145,7 @@ main (int argc, char *argv[])
       {
         lteHelper->Attach (ueLteDevs.Get(i), enbLteDevs.Get(i));
       }
-
+/*
    // Activate an EPS bearer on all UEs
 
   for (uint32_t u = 0; u < ueNodes.GetN (); ++u)
@@ -164,7 +164,7 @@ main (int argc, char *argv[])
       bearer.arp.preemptionVulnerability = true;
       lteHelper->ActivateDedicatedEpsBearer (ueDevice, bearer, EpcTft::Default ());
     }
-
+*/
   // Install and start applications on UEs and remote host
   uint16_t dlPort = 1234;
   uint16_t ulPort = 2000;
