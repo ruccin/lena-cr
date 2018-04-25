@@ -160,7 +160,7 @@ main (int argc, char *argv[])
       enum EpsBearer::Qci q = EpsBearer::GBR_CONV_VIDEO;
       EpsBearer bearer (q, qos);
       bearer.arp.priorityLevel = 15 - (u + 1);
-      bearer.arp.preemptionCapability = true;`
+      bearer.arp.preemptionCapability = true;
       bearer.arp.preemptionVulnerability = true;
       lteHelper->ActivateDedicatedEpsBearer (ueDevice, bearer, EpcTft::Default ());
     }
@@ -174,18 +174,18 @@ main (int argc, char *argv[])
   for (uint32_t u = 0; u < ueNodes.GetN (); ++u)
     {
       ++ulPort;
-      //++otherPort;
-      PacketSinkHelper dlPacketSinkHelper ("ns3::udpSocketFactory", InetSocketAddress (Ipv4Address::GetAny (), dlPort));
-      PacketSinkHelper ulPacketSinkHelper ("ns3::udpSocketFactory", InetSocketAddress (Ipv4Address::GetAny (), ulPort));
-      //PacketSinkHelper packetSinkHelper ("ns3::udpSocketFactory", InetSocketAddress (Ipv4Address::GetAny (), otherPort));
+      ++otherPort;
+      PacketSinkHelper dlPacketSinkHelper ("ns3::UdpSocketFactory", InetSocketAddress (Ipv4Address::GetAny (), dlPort));
+      PacketSinkHelper ulPacketSinkHelper ("ns3::UdpSocketFactory", InetSocketAddress (Ipv4Address::GetAny (), ulPort));
+      //PacketSinkHelper packetSinkHelper ("ns3::UdpSocketFactory", InetSocketAddress (Ipv4Address::GetAny (), otherPort));
       serverApps.Add (dlPacketSinkHelper.Install (ueNodes.Get(u)));
       serverApps.Add (ulPacketSinkHelper.Install (remoteHost));
       //serverApps.Add (packetSinkHelper.Install (ueNodes.Get(u)));
-      
+
       UdpClientHelper dlClient (ueIpIface.GetAddress (u), dlPort);
       dlClient.SetAttribute ("Interval", TimeValue (MilliSeconds(interPacketInterval)));
       dlClient.SetAttribute ("MaxPackets", UintegerValue(1000000));
-      
+
       UdpClientHelper ulClient (remoteHostAddr, ulPort);
       ulClient.SetAttribute ("Interval", TimeValue (MilliSeconds(interPacketInterval)));
       ulClient.SetAttribute ("MaxPackets", UintegerValue(1000000));
@@ -204,7 +204,8 @@ main (int argc, char *argv[])
       else
         {
           clientApps.Add (client.Install (ueNodes.Get(0)));
-        }*/
+        }
+      */
     }
   serverApps.Start (Seconds (0.01));
   clientApps.Start (Seconds (0.01));
