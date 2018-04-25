@@ -24,7 +24,7 @@
 #include "ns3/lte-common.h"
 #include "ns3/trace-helper.h"
 #include "ns3/lte-enb-net-device.h"
-#include "ns3/lte-amc.h"
+#include "ns3/packet-sink-helper.h"
 
 using namespace ns3;
 using namespace std;
@@ -61,7 +61,7 @@ main (int argc, char *argv[])
 
   // parse again so you can override default values from the command line
   cmd.Parse(argc, argv);
-                      
+
   // Set of Antenna and Bandwidth
   lteHelper->SetEnbAntennaModelType("ns3::IsotropicAntennaModel");
   lteHelper->SetEnbDeviceAttribute("DlBandwidth", UintegerValue(50));
