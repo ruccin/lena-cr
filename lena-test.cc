@@ -24,7 +24,7 @@
 #include "ns3/lte-common.h"
 #include "ns3/trace-helper.h"
 #include "ns3/lte-enb-net-device.h"
-
+#include "ns3/lte-amc.h"
 
 using namespace ns3;
 using namespace std;
