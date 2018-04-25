@@ -31,7 +31,7 @@ main (int argc, char *argv[])
 
   uint16_t numberOfNodes = 1;
   uint8_t radius = 50;
-  double simTime = 10;
+  double simTime = 100;
   double distance = 60.0;
   double interPacketInterval = 100;
   double PoweNB = 35;
@@ -61,6 +61,7 @@ main (int argc, char *argv[])
   lteHelper->SetEnbDeviceAttribute("UlBandwidth", UintegerValue(50));
   lteHelper->SetUeAntennaModelType("ns3::IsotropicAntennaModel");
 
+  // Create a P-GW
   Ptr<Node> pgw = epcHelper->GetPgwNode ();
 
    // Create a single RemoteHost
@@ -91,9 +92,11 @@ main (int argc, char *argv[])
   enbNodes.Create(numberOfNodes);
   ueNodes.Create(numberOfNodes);
 
+  std::cout << "Create the Internet" << std::endl;
+
   // Position of eNB
   Ptr<ListPositionAllocator> positionAlloc = CreateObject<ListPositionAllocator> ();
-  positionAlloc->Add (Vector (0.866, 0.2, 0.0));
+  positionAlloc->Add (Vector (8.0, 2.0, 0.0));
   MobilityHelper enbMobility;
   enbMobility.SetMobilityModel ("ns3::ConstantPositionMobilityModel");
   enbMobility.SetPositionAllocator (positionAlloc);
@@ -102,11 +105,13 @@ main (int argc, char *argv[])
   // Position of UE
   MobilityHelper ue1mobility;
   ue1mobility.SetPositionAllocator ("ns3::UniformDiscPositionAllocator",
-                                    "X", DoubleValue (0.01),
-                                    "Y", DoubleValue (0.1),
+                                    "X", DoubleValue (1.0),
+                                    "Y", DoubleValue (10.0),
                                     "rho", DoubleValue (radius));
   ue1mobility.SetMobilityModel ("ns3::ConstantPositionMobilityModel");
   ue1mobility.Install (ueNodes);
+
+  std::cout << "Set of Position" << std::endl;
 
   // Install LTE Devices to the nodes
   NetDeviceContainer enbLteDevs = lteHelper->InstallEnbDevice (enbNodes);
@@ -121,11 +126,17 @@ main (int argc, char *argv[])
   uePhy->SetTxPower(Powue);
   uePhy->SetAttribute("NoiseFigure", DoubleValue(9.0));
 
+  std::cout << "Set of Tx Power" << std::endl;
+
   // Set of Scheduler
   lteHelper->SetSchedulerType("ns3::PfFfMacScheduler");
   
+  std::cout << "Set of Scheduler" << std::endl;
+
   // Set of Pathloss Model
   lteHelper->SetPathlossModelType("ns3::FriisPropagationLossModel");
+
+  std::cout << "Set of Pathloss Model" << std::endl;
 
   // Install the IP stack on the UEs
   internet.Install (ueNodes);
@@ -145,7 +156,7 @@ main (int argc, char *argv[])
       {
         lteHelper->Attach (ueLteDevs.Get(i), enbLteDevs.Get(i));
       }
-
+  /*
    // Activate an EPS bearer on all UEs
 
   for (uint32_t u = 0; u < ueNodes.GetN (); ++u)
@@ -164,8 +175,9 @@ main (int argc, char *argv[])
       bearer.arp.preemptionVulnerability = true;
       lteHelper->ActivateDedicatedEpsBearer (ueDevice, bearer, EpcTft::Default ());
     }
+  */
 
-  // Install and start applications on UEs and remote host
+  // Install and start applications on UE and remote host
   uint16_t dlPort = 1234;
   uint16_t ulPort = 2000;
   //uint16_t otherPort = 3000;
@@ -174,7 +186,7 @@ main (int argc, char *argv[])
   for (uint32_t u = 0; u < ueNodes.GetN (); ++u)
     {
       ++ulPort;
-      ++otherPort;
+      //++otherPort;
       PacketSinkHelper dlPacketSinkHelper ("ns3::UdpSocketFactory", InetSocketAddress (Ipv4Address::GetAny (), dlPort));
       PacketSinkHelper ulPacketSinkHelper ("ns3::UdpSocketFactory", InetSocketAddress (Ipv4Address::GetAny (), ulPort));
       //PacketSinkHelper packetSinkHelper ("ns3::UdpSocketFactory", InetSocketAddress (Ipv4Address::GetAny (), otherPort));
@@ -184,11 +196,11 @@ main (int argc, char *argv[])
 
       UdpClientHelper dlClient (ueIpIface.GetAddress (u), dlPort);
       dlClient.SetAttribute ("Interval", TimeValue (MilliSeconds(interPacketInterval)));
-      dlClient.SetAttribute ("MaxPackets", UintegerValue(1000000));
+      dlClient.SetAttribute ("PacketSize", UintegerValue(1250));
 
       UdpClientHelper ulClient (remoteHostAddr, ulPort);
       ulClient.SetAttribute ("Interval", TimeValue (MilliSeconds(interPacketInterval)));
-      ulClient.SetAttribute ("MaxPackets", UintegerValue(1000000));
+      ulClient.SetAttribute ("PacketSize", UintegerValue(1250));
       /*
       UdpClientHelper client (ueIpIface.GetAddress (u), otherPort);
       client.SetAttribute ("Interval", TimeValue (MilliSeconds(interPacketInterval)));
@@ -209,13 +221,20 @@ main (int argc, char *argv[])
     }
   serverApps.Start (Seconds (0.01));
   clientApps.Start (Seconds (0.01));
+  
+  std::cout << "Install and start applications on UE and remote host" << std::endl;
+
+  // Tracing
   lteHelper->EnableTraces ();
 
   FlowMonitorHelper flowmon;
   Ptr<FlowMonitor> monitor = flowmon.InstallAll();
 
+  // Simulation Start
+  std::cout << "Simulation running" << std::endl;
 
   Simulator::Stop(Seconds(simTime));
+
   Simulator::Run();
 
   monitor->CheckForLostPackets ();
