@@ -18,11 +18,13 @@
 #include "ns3/pf-ff-mac-scheduler.h"
 //#include "ns3/random-variable.h"
 #include "ns3/lte-enb-net-device.h"
-//#include "ns3/radio-bearer-status-calculator.h"
+#include "ns3/radio-bearer-status-calculator.h"
 #include "ns3/friis-spectrum-propagation-loss.h"
 #include "ns3/lte-enb-rrc.h"
 #include "ns3/lte-common.h"
 #include "ns3/trace-helper.h"
+#include "ns3/lte-enb-net-device.h"
+
 
 using namespace ns3;
 using namespace std;
@@ -202,8 +204,10 @@ main (int argc, char *argv[])
   ApplicationContainer serverApps;
   for (uint32_t u = 0; u < ueNodes.GetN (); ++u)
     {
-      ++ulPort;
+      //++ulPort;
       //++otherPort;
+      ++dlPort;
+
       BulkSendHelper dlClientHelper ("ns3::TcpSocketFactory", InetSocketAddress (ueIpIface.GetAddress (u), dlPort));
       PacketSinkHelper dlPacketSinkHelper ("ns3::TcpSocketFactory", InetSocketAddress (Ipv4Address::GetAny (), dlPort));
       //PacketSinkHelper ulPacketSinkHelper ("ns3::UdpSocketFactory", InetSocketAddress (Ipv4Address::GetAny (), ulPort));
