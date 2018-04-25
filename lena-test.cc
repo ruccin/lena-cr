@@ -18,7 +18,7 @@
 #include "ns3/pf-ff-mac-scheduler.h"
 //#include "ns3/random-variable.h"
 #include "ns3/lte-enb-net-device.h"
-#include "ns3/radio-bearer-status-calculator.h"
+//#include "ns3/radio-bearer-status-calculator.h"
 #include "ns3/friis-spectrum-propagation-loss.h"
 #include "ns3/lte-enb-rrc.h"
 #include "ns3/lte-common.h"
@@ -42,6 +42,7 @@ main (int argc, char *argv[])
   double interPacketInterval = 100;
   double PoweNB = 35;
   double Powue = 20;
+  uint8_t mimo = 2;
 
   // Command line arguments
   CommandLine cmd;
@@ -71,7 +72,7 @@ main (int argc, char *argv[])
 
   // Configuration MIMO
   Config::SetDefault("ns3::LteEnbRrc::DefaultTransmissionMode", UintegerValue(mimo));
-  Config::SetDefault("ns3::LteAmc::AmcModel", EnumValue(LteAme::PiroEW2010));
+  Config::SetDefault("ns3::LteAmc::AmcModel", EnumValue(LteAmc::PiroEW2010));
   Config::SetDefault("ns3::LteAmc::Ber", DoubleValue(0.00005));
 
   std::cout << "Configuration MIMO" << std::endl;
@@ -197,19 +198,20 @@ main (int argc, char *argv[])
 //    }
 
   // Install and start applications on UE and remote host
-  uint16_t dlPort = 1234;
+  uint16_t dlPort = 20;
   //uint16_t ulPort = 2000;
   //uint16_t otherPort = 3000;
   ApplicationContainer clientApps;
   ApplicationContainer serverApps;
+  serverApps.Start (Seconds (0.01));
+  clientApps.Start (Seconds (0.01));
+
   for (uint32_t u = 0; u < ueNodes.GetN (); ++u)
     {
       //++ulPort;
       //++otherPort;
       ++dlPort;
 
-      BulkSendHelper dlClientHelper ("ns3::TcpSocketFactory", InetSocketAddress (ueIpIface.GetAddress (u), dlPort));
-      PacketSinkHelper dlPacketSinkHelper ("ns3::TcpSocketFactory", InetSocketAddress (Ipv4Address::GetAny (), dlPort));
       //PacketSinkHelper ulPacketSinkHelper ("ns3::UdpSocketFactory", InetSocketAddress (Ipv4Address::GetAny (), ulPort));
       //PacketSinkHelper packetSinkHelper ("ns3::UdpSocketFactory", InetSocketAddress (Ipv4Address::GetAny (), otherPort));
       
@@ -242,21 +244,23 @@ main (int argc, char *argv[])
           clientApps.Add (client.Install (ueNodes.Get(0)));
         }
       */
+     BulkSendHelper dlClientHelper ("ns3::TcpSocketFactory", InetSocketAddress (ueIpIface.GetAddress (u), dlPort));
      dlClientHelper.SetAttribute ("MaxBytes", UintegerValue (10000000000));
      dlClientHelper.SetAttribute ("SendSize", UintegerValue (2000));
 
      clientApps.Add (dlClientHelper.Install (remoteHost));
      
+     PacketSinkHelper dlPacketSinkHelper ("ns3::TcpSocketFactory", InetSocketAddress (Ipv4Address::GetAny (), dlPort));
      serverApp.Add (dlPacketSinkHelper.Install (ueNodes.Get(u)));
      
     }
-  serverApps.Start (Seconds (0.01));
-  clientApps.Start (Seconds (0.01));
   
   std::cout << "Install and start applications on UE and remote host" << std::endl;
 
   // Tracing
-  lteHelper->EnableTraces ();
+  lteHelper->EnableMacTraces ();
+  lteHelper->EnableRlcTraces ();
+  lteHelper->EnablePdcpTraces ();
 
   FlowMonitorHelper flowmon;
   Ptr<FlowMonitor> monitor = flowmon.InstallAll();
