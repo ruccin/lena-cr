@@ -89,7 +89,7 @@ main (int argc, char *argv[])
 
   // Position of eNB
   Ptr<ListPositionAllocator> positionAlloc = CreateObject<ListPositionAllocator> ();
-  positionAlloc->Add (Vector (8.0, 2.0, 0.0));
+  positionAlloc->Add (Vector (distance, 2.0, 0.0));
   MobilityHelper enbMobility;
   enbMobility.SetMobilityModel ("ns3::ConstantPositionMobilityModel");
   enbMobility.SetPositionAllocator (positionAlloc);
@@ -98,7 +98,7 @@ main (int argc, char *argv[])
   // Position of UE
   MobilityHelper ue1mobility;
   ue1mobility.SetPositionAllocator ("ns3::UniformDiscPositionAllocator",
-                                    "X", DoubleValue (1.0),
+                                    "X", DoubleValue (distance + 100),
                                     "Y", DoubleValue (10.0),
                                     "rho", DoubleValue (radius));
   ue1mobility.SetMobilityModel ("ns3::ConstantPositionMobilityModel");
