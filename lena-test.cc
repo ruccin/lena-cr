@@ -170,12 +170,16 @@ main (int argc, char *argv[])
       ueStaticRouting->SetDefaultRoute (epcHelper->GetUeDefaultGatewayAddress (), 1);
     }
 
+  std::cout << "Install the IP stack" << std::endl;
+
   // Attach one UE per eNodeB
   for (uint16_t i = 0; i < numberOfNodes; i++)
       {
         lteHelper->Attach (ueLteDevs.Get(i), enbLteDevs.Get(0));
       }
-  
+
+  std::cout << "Attach UE per eNB" << std::endl;
+
    // Activate an EPS bearer on all UEs
 /*
   for (uint32_t u = 0; u < ueNodes.GetN (); ++u)
@@ -187,7 +191,7 @@ main (int argc, char *argv[])
       qos.mbrDl = qos.gbrDl;
       qos.mbrUl = qos.gbrUl;
 */
-      enum EpsBearer::Qci q = EpsBearer::NGBR_VIDEO_TCP_OPERATOR;
+      enum EpsBearer::Qci q = EpsBearer::NGBR_VIDEO_TCP_DEFAULT;
       //EpsBearer bearer (q, qos);
       EpsBearer bearer (q);
       //bearer.arp.priorityLevel = 15 - (u + 1);
