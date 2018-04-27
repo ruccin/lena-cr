@@ -191,7 +191,7 @@ main (int argc, char *argv[])
       qos.mbrDl = qos.gbrDl;
       qos.mbrUl = qos.gbrUl;
 */
-      enum EpsBearer::Qci q = EpsBearer::NGBR_VIDEO_TCP_DEFAULT;
+      enum EpsBearer::Qci q = EpsBearer::NGBR_VIDEO_TCP_OPERATOR;
       //EpsBearer bearer (q, qos);
       EpsBearer bearer (q);
       //bearer.arp.priorityLevel = 15 - (u + 1);
