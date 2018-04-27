@@ -187,14 +187,17 @@ main (int argc, char *argv[])
       qos.mbrDl = qos.gbrDl;
       qos.mbrUl = qos.gbrUl;
 */
-      enum EpsBearer::Qci q = EpsBearer::NGBR_VIDEO_TCP_OPERATOR;
+      //enum EpsBearer::Qci q = EpsBearer::NGBR_VIDEO_TCP_OPERATOR;
       //EpsBearer bearer (q, qos);
-      EpsBearer bearer (q);
+      //EpsBearer bearer (q);
       //bearer.arp.priorityLevel = 15 - (u + 1);
       //bearer.arp.preemptionCapability = true;
       //bearer.arp.preemptionVulnerability = true;
-      lteHelper->ActivateDataRadioBearer (ueLteDevs, bearer);
+      //lteHelper->ActivateDataRadioBearer (ueLteDevs, bearer);
+      lteHelper->ActivateEpsBearer (ueLteDevs, EpsBearer (EpsBearer::NGBR_VIDEO_TCP_OPERATOR),EpcTft::Default());
 //    }
+
+  std::cout << "ActivateEpsBearer" << std::endl;
 
   // Install and start applications on UE and remote host
   uint16_t dlPort = 20;
