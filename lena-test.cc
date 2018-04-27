@@ -137,7 +137,8 @@ main (int argc, char *argv[])
   std::cout << "Set of Tx Power" << std::endl;
 
   // Set of Scheduler
-  lteHelper->SetSchedulerType("ns3::PfFfMacScheduler");
+  //lteHelper->SetSchedulerType("ns3::PfFfMacScheduler");
+  lteHelper->SetSchedulerAttribute ("UlCqiFilter", EnumValue (FfMacScheduler::PUSCH_UL_CQI));
   
   std::cout << "Set of Scheduler" << std::endl;
 
