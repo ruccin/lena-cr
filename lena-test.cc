@@ -146,15 +146,6 @@ main (int argc, char *argv[])
 
   std::cout << "Set of Pathloss Model" << std::endl;
 
-  // Attach one UE per eNodeB
-  for (uint16_t i = 0; i < numberOfNodes; i++)
-      {
-        lteHelper->Attach (ueLteDevs.Get(i), enbLteDevs.Get(0));
-      }
-
-  // Activate EpsBearer
-  lteHelper->ActivateDedicatedEpsBearer (ueLteDevs, EpsBearer::NGBR_VIDEO_TCP_OPERATOR, EpcTft::Default());
-
   // Install the IP stack on the UEs
   internet.Install (ueNodes);
   Ipv4InterfaceContainer ueIpIface;
@@ -167,6 +158,15 @@ main (int argc, char *argv[])
       Ptr<Ipv4StaticRouting> ueStaticRouting = ipv4RoutingHelper.GetStaticRouting (ueNode->GetObject<Ipv4> ());
       ueStaticRouting->SetDefaultRoute (epcHelper->GetUeDefaultGatewayAddress (), 1);
     }
+
+  // Attach one UE per eNodeB
+  for (uint16_t i = 0; i < numberOfNodes; i++)
+      {
+        lteHelper->Attach (ueLteDevs.Get(i), enbLteDevs.Get(0));
+      }
+
+  // Activate EpsBearer
+  lteHelper->ActivateDedicatedEpsBearer (ueLteDevs, EpsBearer::NGBR_VIDEO_TCP_OPERATOR, EpcTft::Default());
 
   // Install and start applications on UE and remote host
   uint16_t dlPort = 20;
