@@ -133,9 +133,7 @@ main (int argc, char *argv[])
       }
 
   // Activate EpsBearer
-  enum EpsBearer::Qci q = EpsBearer::NGBR_VIDEO_TCP_OPERATOR;
-  EpsBearer bearer (q);
-  lteHelper->ActivateEpsBearer (bearer, EpcTft::Default());
+  lteHelper->ActivateEpsBearer (ueLteDevs, EpsBearer::NGBR_VIDEO_TCP_OPERATOR, EpcTft::Default());
 
    // Create a single RemoteHost
   NodeContainer remoteHostContainer;
