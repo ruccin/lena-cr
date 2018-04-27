@@ -82,25 +82,6 @@ main (int argc, char *argv[])
 
   std::cout << "Configuration MIMO" << std::endl;
 
-  // Position of eNB
-  Ptr<ListPositionAllocator> positionAlloc = CreateObject<ListPositionAllocator> ();
-  positionAlloc->Add (Vector (8.0, 2.0, 0.0));
-  MobilityHelper enbMobility;
-  enbMobility.SetMobilityModel ("ns3::ConstantPositionMobilityModel");
-  enbMobility.SetPositionAllocator (positionAlloc);
-  enbMobility.Install (enbNodes);
-
-  // Position of UE
-  MobilityHelper ue1mobility;
-  ue1mobility.SetPositionAllocator ("ns3::UniformDiscPositionAllocator",
-                                    "X", DoubleValue (1.0),
-                                    "Y", DoubleValue (10.0),
-                                    "rho", DoubleValue (radius));
-  ue1mobility.SetMobilityModel ("ns3::ConstantPositionMobilityModel");
-  ue1mobility.Install (ueNodes);
-
-  std::cout << "Set of Position" << std::endl;
-
   // Install LTE Devices to the nodes
   NetDeviceContainer enbLteDevs = lteHelper->InstallEnbDevice (enbNodes);
   NetDeviceContainer ueLteDevs = lteHelper->InstallUeDevice (ueNodes);
@@ -125,6 +106,25 @@ main (int argc, char *argv[])
   lteHelper->SetAttribute ("PathlossModel", StringValue ("ns3::FriisPropagationLossModel"));
 
   std::cout << "Set of Pathloss Model" << std::endl;
+
+  // Position of eNB
+  Ptr<ListPositionAllocator> positionAlloc = CreateObject<ListPositionAllocator> ();
+  positionAlloc->Add (Vector (8.0, 2.0, 0.0));
+  MobilityHelper enbMobility;
+  enbMobility.SetMobilityModel ("ns3::ConstantPositionMobilityModel");
+  enbMobility.SetPositionAllocator (positionAlloc);
+  enbMobility.Install (enbNodes);
+
+  // Position of UE
+  MobilityHelper ue1mobility;
+  ue1mobility.SetPositionAllocator ("ns3::UniformDiscPositionAllocator",
+                                    "X", DoubleValue (1.0),
+                                    "Y", DoubleValue (10.0),
+                                    "rho", DoubleValue (radius));
+  ue1mobility.SetMobilityModel ("ns3::ConstantPositionMobilityModel");
+  ue1mobility.Install (ueNodes);
+
+  std::cout << "Set of Position" << std::endl;
 
   // Attach one UE per eNodeB
   for (uint16_t i = 0; i < numberOfNodes; i++)
