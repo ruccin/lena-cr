@@ -13,7 +13,6 @@
 #include "ns3/ipv4-flow-classifier.h"
 #include "ns3/propagation-loss-model.h"
 #include "ns3/lte-enb-phy.h"
-#include "ns3/propagation-loss-model.h"
 #include "ns3/ff-mac-scheduler.h"
 #include "ns3/pf-ff-mac-scheduler.h"
 //#include "ns3/random-variable.h"
@@ -194,7 +193,7 @@ main (int argc, char *argv[])
       //bearer.arp.priorityLevel = 15 - (u + 1);
       //bearer.arp.preemptionCapability = true;
       //bearer.arp.preemptionVulnerability = true;
-      lteHelper->ActivateEpsBearer (ueLteDevs, bearer, EpcTft::Default());
+      lteHelper->ActivateDataRadioBearer (ueLteDevs, bearer);
 //    }
 
   // Install and start applications on UE and remote host
@@ -251,7 +250,7 @@ main (int argc, char *argv[])
      clientApps.Add (dlClientHelper.Install (remoteHost));
      
      PacketSinkHelper dlPacketSinkHelper ("ns3::TcpSocketFactory", InetSocketAddress (Ipv4Address::GetAny (), dlPort));
-     serverApp.Add (dlPacketSinkHelper.Install (ueNodes.Get(u)));
+     serverApps.Add (dlPacketSinkHelper.Install (ueNodes.Get(u)));
      
     }
   
