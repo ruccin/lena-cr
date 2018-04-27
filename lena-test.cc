@@ -197,8 +197,8 @@ main (int argc, char *argv[])
       //bearer.arp.priorityLevel = 15 - (u + 1);
       //bearer.arp.preemptionCapability = true;
       //bearer.arp.preemptionVulnerability = true;
-      lteHelper->ActivateDataRadioBearer (ueNodes, bearer);
-      //lteHelper->ActivateEpsBearer (bearer, EpcTft::Default());
+      //lteHelper->ActivateDataRadioBearer (ueLteDevs, bearer);
+      lteHelper->ActivateEpsBearer (ueLteDevs, imsi, bearer, EpcTft::Default());
 //    }
   
   std::cout << "ActivateEpsBearer" << std::endl;
