@@ -51,15 +51,25 @@ main (int argc, char *argv[])
   cmd.AddValue("interPacketInterval", "Inter packet interval [ms])", interPacketInterval);
   cmd.Parse(argc, argv);
 
+  // parse again so you can override default values from the command line
+  cmd.Parse(argc, argv);
+
   Ptr<LteHelper> lteHelper = CreateObject<LteHelper> ();
   Ptr<PointToPointEpcHelper> epcHelper = CreateObject<PointToPointEpcHelper> ();
   lteHelper->SetEpcHelper (epcHelper);
+  Ptr<Node> pgw = epcHelper->GetPgwNode ();
+
+  NodeContainer ueNodes;
+  NodeContainer enbNodes;
+  enbNodes.Create(numberOfNodes);
+  ueNodes.Create(numberOfNodes);
 
   ConfigStore inputConfig;
   inputConfig.ConfigureDefaults();
 
-  // parse again so you can override default values from the command line
-  cmd.Parse(argc, argv);
+  // Install LTE Devices to the nodes
+  NetDeviceContainer enbLteDevs = lteHelper->InstallEnbDevice (enbNodes);
+  NetDeviceContainer ueLteDevs = lteHelper->InstallUeDevice (ueNodes);
 
   // Set of Antenna and Bandwidth
   lteHelper->SetEnbAntennaModelType("ns3::IsotropicAntennaModel");
@@ -75,43 +85,6 @@ main (int argc, char *argv[])
   Config::SetDefault("ns3::LteAmc::Ber", DoubleValue(0.00005));
 
   std::cout << "Configuration MIMO" << std::endl;
-
-  // Create a P-GW
-  Ptr<Node> pgw = epcHelper->GetPgwNode ();
-
-  std::cout << "Create a P-GW" << std::endl;
-
-   // Create a single RemoteHost
-  NodeContainer remoteHostContainer;
-  remoteHostContainer.Create (1);
-  Ptr<Node> remoteHost = remoteHostContainer.Get (0);
-  InternetStackHelper internet;
-  internet.Install (remoteHostContainer);
-
-  std::cout << "Create a Single RemoteHost" << std::endl;
-
-  // Create the Internet
-  PointToPointHelper p2ph;
-  p2ph.SetDeviceAttribute ("DataRate", DataRateValue (DataRate ("100Gb/s")));
-  p2ph.SetDeviceAttribute ("Mtu", UintegerValue (1500));
-  p2ph.SetChannelAttribute ("Delay", TimeValue (Seconds (0.010)));
-  NetDeviceContainer internetDevices = p2ph.Install (pgw, remoteHost);
-  Ipv4AddressHelper ipv4h;
-  ipv4h.SetBase ("1.0.0.0", "255.0.0.0");
-  // Ipv4InterfaceContainer internetIpIfaces = ipv4h.Assign (internetDevices);
-  // interface 0 is localhost, 1 is the p2p device
-  // Ipv4Address remoteHostAddr = internetIpIfaces.GetAddress (1);
-
-  Ipv4StaticRoutingHelper ipv4RoutingHelper;
-  Ptr<Ipv4StaticRouting> remoteHostStaticRouting = ipv4RoutingHelper.GetStaticRouting (remoteHost->GetObject<Ipv4> ());
-  remoteHostStaticRouting->AddNetworkRouteTo (Ipv4Address ("7.0.0.0"), Ipv4Mask ("255.0.0.0"), 1);
-
-  NodeContainer ueNodes;
-  NodeContainer enbNodes;
-  enbNodes.Create(numberOfNodes);
-  ueNodes.Create(numberOfNodes);
-
-  std::cout << "Create the Internet" << std::endl;
 
   // Position of eNB
   Ptr<ListPositionAllocator> positionAlloc = CreateObject<ListPositionAllocator> ();
@@ -131,10 +104,6 @@ main (int argc, char *argv[])
   ue1mobility.Install (ueNodes);
 
   std::cout << "Set of Position" << std::endl;
-
-  // Install LTE Devices to the nodes
-  NetDeviceContainer enbLteDevs = lteHelper->InstallEnbDevice (enbNodes);
-  NetDeviceContainer ueLteDevs = lteHelper->InstallUeDevice (ueNodes);
 
   // Set of Tx Power
   Ptr<LteEnbPhy> enbPhy = enbLteDevs.Get(0)->GetObject<LteEnbNetDevice>()->GetPhy();
@@ -157,6 +126,37 @@ main (int argc, char *argv[])
 
   std::cout << "Set of Pathloss Model" << std::endl;
 
+  // Attach one UE per eNodeB
+  for (uint16_t i = 0; i < numberOfNodes; i++)
+      {
+        lteHelper->Attach (ueLteDevs.Get(i), enbLteDevs.Get(0));
+      }
+
+  // Activate EpsBearer
+  enum EpsBearer::Qci q = EpsBearer::NGBR_VIDEO_TCP_OPERATOR;
+  EpsBearer bearer (q);
+  lteHelper->ActivateEpsBearer (bearer, EpcTft::Default());
+
+   // Create a single RemoteHost
+  NodeContainer remoteHostContainer;
+  remoteHostContainer.Create (1);
+  Ptr<Node> remoteHost = remoteHostContainer.Get (0);
+  InternetStackHelper internet;
+  internet.Install (remoteHostContainer);
+
+  // Create the Internet
+  PointToPointHelper p2ph;
+  p2ph.SetDeviceAttribute ("DataRate", DataRateValue (DataRate ("100Gb/s")));
+  p2ph.SetDeviceAttribute ("Mtu", UintegerValue (1500));
+  NetDeviceContainer internetDevices = p2ph.Install (pgw, remoteHost);
+  Ipv4AddressHelper ipv4h;
+  ipv4h.SetBase ("1.0.0.0", "255.0.0.0");
+  Ipv4InterfaceContainer internetIpIfaces = ipv4h.Assign(internetDevices);
+
+  Ipv4StaticRoutingHelper ipv4RoutingHelper;
+  Ptr<Ipv4StaticRouting> remoteHostStaticRouting = ipv4RoutingHelper.GetStaticRouting (remoteHost->GetObject<Ipv4> ());
+  remoteHostStaticRouting->AddNetworkRouteTo (Ipv4Address ("7.0.0.0"), Ipv4Mask ("255.0.0.0"), 1);
+
   // Install the IP stack on the UEs
   internet.Install (ueNodes);
   Ipv4InterfaceContainer ueIpIface;
@@ -170,43 +170,8 @@ main (int argc, char *argv[])
       ueStaticRouting->SetDefaultRoute (epcHelper->GetUeDefaultGatewayAddress (), 1);
     }
 
-  std::cout << "Install the IP stack" << std::endl;
-
-  // Attach one UE per eNodeB
-  for (uint16_t i = 0; i < numberOfNodes; i++)
-      {
-        lteHelper->Attach (ueLteDevs.Get(i), enbLteDevs.Get(0));
-      }
-
-  std::cout << "Attach UE per eNB" << std::endl;
-
-   // Activate an EPS bearer on all UEs
-/*
-  for (uint32_t u = 0; u < ueNodes.GetN (); ++u)
-    {
-      Ptr<NetDevice> ueDevice = ueLteDevs.Get (u);
-      GbrQosInformation qos;
-      qos.gbrDl = 132;  // bit/s, considering IP, UDP, RLC, PDCP header size
-      qos.gbrUl = 132;
-      qos.mbrDl = qos.gbrDl;
-      qos.mbrUl = qos.gbrUl;
-*/
-      enum EpsBearer::Qci q = EpsBearer::NGBR_VIDEO_TCP_OPERATOR;
-      //EpsBearer bearer (q, qos);
-      EpsBearer bearer (q);
-      //bearer.arp.priorityLevel = 15 - (u + 1);
-      //bearer.arp.preemptionCapability = true;
-      //bearer.arp.preemptionVulnerability = true;
-      //lteHelper->ActivateDataRadioBearer (ueLteDevs, bearer);
-      lteHelper->ActivateEpsBearer (ueLteDevs, imsi, EpcTft::Default(), bearer);
-//    }
-  
-  std::cout << "ActivateEpsBearer" << std::endl;
-
   // Install and start applications on UE and remote host
   uint16_t dlPort = 20;
-  //uint16_t ulPort = 2000;
-  //uint16_t otherPort = 3000;
   ApplicationContainer clientApps;
   ApplicationContainer serverApps;
   serverApps.Start (Seconds (0.01));
@@ -214,42 +179,8 @@ main (int argc, char *argv[])
 
   for (uint32_t u = 0; u < ueNodes.GetN (); ++u)
     {
-      //++ulPort;
-      //++otherPort;
       ++dlPort;
 
-      //PacketSinkHelper ulPacketSinkHelper ("ns3::UdpSocketFactory", InetSocketAddress (Ipv4Address::GetAny (), ulPort));
-      //PacketSinkHelper packetSinkHelper ("ns3::UdpSocketFactory", InetSocketAddress (Ipv4Address::GetAny (), otherPort));
-      
-      //serverApps.Add (dlPacketSinkHelper.Install (ueNodes.Get(u)));
-      //serverApps.Add (ulPacketSinkHelper.Install (remoteHost));
-      //serverApps.Add (packetSinkHelper.Install (ueNodes.Get(u)));
-/*
-      UdpClientHelper dlClient (ueIpIface.GetAddress (u), dlPort);
-      dlClient.SetAttribute ("Interval", TimeValue (MilliSeconds(interPacketInterval)));
-      dlClient.SetAttribute ("PacketSize", UintegerValue(1250));
-
-      UdpClientHelper ulClient (remoteHostAddr, ulPort);
-      ulClient.SetAttribute ("Interval", TimeValue (MilliSeconds(interPacketInterval)));
-      ulClient.SetAttribute ("PacketSize", UintegerValue(1250));
-*/ 
-      /*
-      UdpClientHelper client (ueIpIface.GetAddress (u), otherPort);
-      client.SetAttribute ("Interval", TimeValue (MilliSeconds(interPacketInterval)));
-      client.SetAttribute ("MaxPackets", UintegerValue(1000000));
-      */
-      //clientApps.Add (dlClient.Install (remoteHost));
-      //clientApps.Add (ulClient.Install (ueNodes.Get(u)));
-      /*
-      if (u+1 < ueNodes.GetN ())
-        {
-          clientApps.Add (client.Install (ueNodes.Get(u+1)));
-        }
-      else
-        {
-          clientApps.Add (client.Install (ueNodes.Get(0)));
-        }
-      */
      BulkSendHelper dlClientHelper ("ns3::TcpSocketFactory", InetSocketAddress (ueIpIface.GetAddress (u), dlPort));
      dlClientHelper.SetAttribute ("MaxBytes", UintegerValue (10000000000));
      dlClientHelper.SetAttribute ("SendSize", UintegerValue (2000));
