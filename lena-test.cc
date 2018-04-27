@@ -194,9 +194,8 @@ main (int argc, char *argv[])
       //bearer.arp.preemptionCapability = true;
       //bearer.arp.preemptionVulnerability = true;
       //lteHelper->ActivateDataRadioBearer (ueLteDevs, bearer);
-      lteHelper->ActivateEpsBearer (ueLteDevs, EpsBearer (EpsBearer::NGBR_VIDEO_TCP_OPERATOR),EpcTft::Default());
 //    }
-
+  lteHelper->ActivateEpsBearer (ueLteDevs, EpsBearer (EpsBearer::NGBR_VIDEO_TCP_DEFAULT), EpcTft::Default ());
   std::cout << "ActivateEpsBearer" << std::endl;
 
   // Install and start applications on UE and remote host
