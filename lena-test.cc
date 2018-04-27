@@ -133,7 +133,7 @@ main (int argc, char *argv[])
       }
 
   // Activate EpsBearer
-  lteHelper->ActivateEpsBearer (ueLteDevs, EpsBearer::NGBR_VIDEO_TCP_OPERATOR, EpcTft::Default());
+  lteHelper->ActivateDedicatedEpsBearer (ueLteDevs, EpsBearer::NGBR_VIDEO_TCP_OPERATOR, EpcTft::Default());
 
    // Create a single RemoteHost
   NodeContainer remoteHostContainer;
