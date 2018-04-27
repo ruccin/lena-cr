@@ -62,10 +62,49 @@ main (int argc, char *argv[])
   lteHelper->SetEpcHelper (epcHelper);
   Ptr<Node> pgw = epcHelper->GetPgwNode ();
 
+  // Create a single RemoteHost
+  NodeContainer remoteHostContainer;
+  remoteHostContainer.Create (1);
+  Ptr<Node> remoteHost = remoteHostContainer.Get (0);
+  InternetStackHelper internet;
+  internet.Install (remoteHostContainer);
+
+  // Create the Internet
+  PointToPointHelper p2ph;
+  p2ph.SetDeviceAttribute ("DataRate", DataRateValue (DataRate ("100Gb/s")));
+  p2ph.SetDeviceAttribute ("Mtu", UintegerValue (1500));
+  NetDeviceContainer internetDevices = p2ph.Install (pgw, remoteHost);
+  Ipv4AddressHelper ipv4h;
+  ipv4h.SetBase ("1.0.0.0", "255.0.0.0");
+  Ipv4InterfaceContainer internetIpIfaces = ipv4h.Assign(internetDevices);
+
+  Ipv4StaticRoutingHelper ipv4RoutingHelper;
+  Ptr<Ipv4StaticRouting> remoteHostStaticRouting = ipv4RoutingHelper.GetStaticRouting (remoteHost->GetObject<Ipv4> ());
+  remoteHostStaticRouting->AddNetworkRouteTo (Ipv4Address ("7.0.0.0"), Ipv4Mask ("255.0.0.0"), 1);
+
   NodeContainer ueNodes;
   NodeContainer enbNodes;
   enbNodes.Create(numberOfNodes);
   ueNodes.Create(numberOfNodes);
+
+  // Position of eNB
+  Ptr<ListPositionAllocator> positionAlloc = CreateObject<ListPositionAllocator> ();
+  positionAlloc->Add (Vector (8.0, 2.0, 0.0));
+  MobilityHelper enbMobility;
+  enbMobility.SetMobilityModel ("ns3::ConstantPositionMobilityModel");
+  enbMobility.SetPositionAllocator (positionAlloc);
+  enbMobility.Install (enbNodes);
+
+  // Position of UE
+  MobilityHelper ue1mobility;
+  ue1mobility.SetPositionAllocator ("ns3::UniformDiscPositionAllocator",
+                                    "X", DoubleValue (1.0),
+                                    "Y", DoubleValue (10.0),
+                                    "rho", DoubleValue (radius));
+  ue1mobility.SetMobilityModel ("ns3::ConstantPositionMobilityModel");
+  ue1mobility.Install (ueNodes);
+
+  std::cout << "Set of Position" << std::endl;
 
   // Set of Antenna and Bandwidth
   lteHelper->SetEnbAntennaModelType("ns3::IsotropicAntennaModel");
@@ -107,25 +146,6 @@ main (int argc, char *argv[])
 
   std::cout << "Set of Pathloss Model" << std::endl;
 
-  // Position of eNB
-  Ptr<ListPositionAllocator> positionAlloc = CreateObject<ListPositionAllocator> ();
-  positionAlloc->Add (Vector (8.0, 2.0, 0.0));
-  MobilityHelper enbMobility;
-  enbMobility.SetMobilityModel ("ns3::ConstantPositionMobilityModel");
-  enbMobility.SetPositionAllocator (positionAlloc);
-  enbMobility.Install (enbNodes);
-
-  // Position of UE
-  MobilityHelper ue1mobility;
-  ue1mobility.SetPositionAllocator ("ns3::UniformDiscPositionAllocator",
-                                    "X", DoubleValue (1.0),
-                                    "Y", DoubleValue (10.0),
-                                    "rho", DoubleValue (radius));
-  ue1mobility.SetMobilityModel ("ns3::ConstantPositionMobilityModel");
-  ue1mobility.Install (ueNodes);
-
-  std::cout << "Set of Position" << std::endl;
-
   // Attach one UE per eNodeB
   for (uint16_t i = 0; i < numberOfNodes; i++)
       {
@@ -134,26 +154,6 @@ main (int argc, char *argv[])
 
   // Activate EpsBearer
   lteHelper->ActivateDedicatedEpsBearer (ueLteDevs, EpsBearer::NGBR_VIDEO_TCP_OPERATOR, EpcTft::Default());
-
-   // Create a single RemoteHost
-  NodeContainer remoteHostContainer;
-  remoteHostContainer.Create (1);
-  Ptr<Node> remoteHost = remoteHostContainer.Get (0);
-  InternetStackHelper internet;
-  internet.Install (remoteHostContainer);
-
-  // Create the Internet
-  PointToPointHelper p2ph;
-  p2ph.SetDeviceAttribute ("DataRate", DataRateValue (DataRate ("100Gb/s")));
-  p2ph.SetDeviceAttribute ("Mtu", UintegerValue (1500));
-  NetDeviceContainer internetDevices = p2ph.Install (pgw, remoteHost);
-  Ipv4AddressHelper ipv4h;
-  ipv4h.SetBase ("1.0.0.0", "255.0.0.0");
-  Ipv4InterfaceContainer internetIpIfaces = ipv4h.Assign(internetDevices);
-
-  Ipv4StaticRoutingHelper ipv4RoutingHelper;
-  Ptr<Ipv4StaticRouting> remoteHostStaticRouting = ipv4RoutingHelper.GetStaticRouting (remoteHost->GetObject<Ipv4> ());
-  remoteHostStaticRouting->AddNetworkRouteTo (Ipv4Address ("7.0.0.0"), Ipv4Mask ("255.0.0.0"), 1);
 
   // Install the IP stack on the UEs
   internet.Install (ueNodes);
