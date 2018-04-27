@@ -153,7 +153,7 @@ main (int argc, char *argv[])
   std::cout << "Set of Scheduler" << std::endl;
 
   // Set of Pathloss Model
-  lteHelper->SetAttribute ("PathlossModel", StringValue ("FriisPropagationLossModel"));
+  lteHelper->SetAttribute ("PathlossModel", StringValue ("ns3::FriisPropagationLossModel"));
 
   std::cout << "Set of Pathloss Model" << std::endl;
 
