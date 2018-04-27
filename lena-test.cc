@@ -51,6 +51,9 @@ main (int argc, char *argv[])
   cmd.AddValue("interPacketInterval", "Inter packet interval [ms])", interPacketInterval);
   cmd.Parse(argc, argv);
 
+  ConfigStore inputConfig;
+  inputConfig.ConfigureDefaults();
+
   // parse again so you can override default values from the command line
   cmd.Parse(argc, argv);
 
@@ -63,13 +66,6 @@ main (int argc, char *argv[])
   NodeContainer enbNodes;
   enbNodes.Create(numberOfNodes);
   ueNodes.Create(numberOfNodes);
-
-  ConfigStore inputConfig;
-  inputConfig.ConfigureDefaults();
-
-  // Install LTE Devices to the nodes
-  NetDeviceContainer enbLteDevs = lteHelper->InstallEnbDevice (enbNodes);
-  NetDeviceContainer ueLteDevs = lteHelper->InstallUeDevice (ueNodes);
 
   // Set of Antenna and Bandwidth
   lteHelper->SetEnbAntennaModelType("ns3::IsotropicAntennaModel");
@@ -104,6 +100,10 @@ main (int argc, char *argv[])
   ue1mobility.Install (ueNodes);
 
   std::cout << "Set of Position" << std::endl;
+
+  // Install LTE Devices to the nodes
+  NetDeviceContainer enbLteDevs = lteHelper->InstallEnbDevice (enbNodes);
+  NetDeviceContainer ueLteDevs = lteHelper->InstallUeDevice (ueNodes);
 
   // Set of Tx Power
   Ptr<LteEnbPhy> enbPhy = enbLteDevs.Get(0)->GetObject<LteEnbNetDevice>()->GetPhy();
