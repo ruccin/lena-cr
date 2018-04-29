@@ -37,7 +37,7 @@ main (int argc, char *argv[])
   uint16_t numberOfNodes = 1;
   uint8_t radius = 50;
   double simTime = 100;
-  double distance = 60.0;
+  double distance = 4000;
   double interPacketInterval = 100;
   double PoweNB = 35;
   double Powue = 20;
@@ -89,7 +89,7 @@ main (int argc, char *argv[])
 
   // Position of eNB
   Ptr<ListPositionAllocator> positionAlloc = CreateObject<ListPositionAllocator> ();
-  positionAlloc->Add (Vector (distance, 2.0, 0.0));
+  positionAlloc->Add (Vector (0.0, 2.0, 0.0));
   MobilityHelper enbMobility;
   enbMobility.SetMobilityModel ("ns3::ConstantPositionMobilityModel");
   enbMobility.SetPositionAllocator (positionAlloc);
@@ -98,7 +98,7 @@ main (int argc, char *argv[])
   // Position of UE
   MobilityHelper ue1mobility;
   ue1mobility.SetPositionAllocator ("ns3::UniformDiscPositionAllocator",
-                                    "X", DoubleValue (distance + 100),
+                                    "X", DoubleValue (distance),
                                     "Y", DoubleValue (10.0),
                                     "rho", DoubleValue (radius));
   ue1mobility.SetMobilityModel ("ns3::ConstantPositionMobilityModel");
@@ -137,13 +137,14 @@ main (int argc, char *argv[])
   std::cout << "Set of Tx Power" << std::endl;
 
   // Set of Scheduler
-  //lteHelper->SetSchedulerType("ns3::PfFfMacScheduler");
   lteHelper->SetSchedulerAttribute ("UlCqiFilter", EnumValue (FfMacScheduler::PUSCH_UL_CQI));
   
   std::cout << "Set of Scheduler" << std::endl;
 
   // Set of Pathloss Model
-  lteHelper->SetAttribute ("PathlossModel", StringValue ("ns3::FriisPropagationLossModel"));
+  //lteHelper->SetAttribute ("PathlossModel", StringValue ("ns3::FriisPropagationLossModel"));
+  //Config::SetDefault ("ns3::LteHelper::PathlossModel", StringValue ("ns3::LogDistancePropagationLossModel"));
+  lteHelper->SetAttribute ("PathlossModel", StringValue ("ns3::LogDistancePropagationLossModel"));
 
   std::cout << "Set of Pathloss Model" << std::endl;
 
@@ -220,6 +221,7 @@ main (int argc, char *argv[])
           NS_LOG_UNCOND("Tx Packets = " << iter->second.txPackets);
           NS_LOG_UNCOND("Rx Packets = " << iter->second.rxPackets);
           NS_LOG_UNCOND("Throughput: " << iter->second.rxBytes * 8.0 / (iter->second.timeLastRxPacket.GetSeconds()-iter->second.timeFirstTxPacket.GetSeconds()) / 1024  << " Kbps");
+          NS_LOG_UNCOND("Log Distance Propagation Path loss = " << PropagationLossModel::DoCalcRxPower(PoweNB, enbNodes, ueNodes));
   }
 
   monitor->SerializeToXmlFile ("result-test.xml" , true, true );
