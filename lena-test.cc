@@ -34,8 +34,9 @@ int
 main (int argc, char *argv[])
 {
 
-  uint16_t numberOfNodes = 1;
-  //uint8_t radius = 50;
+  uint16_t numberOfUENodes = 1;
+  uint16_t numberOfeNBNodes = 1;
+  uint8_t radius = 50;
   double simTime = 100;
   double distance = 4000;
   double interPacketInterval = 100;
@@ -84,43 +85,39 @@ main (int argc, char *argv[])
 
   NodeContainer ueNodes;
   NodeContainer enbNodes;
-  enbNodes.Create(1);
-  ueNodes.Create(numberOfNodes);
+  enbNodes.Create(numberOfeNBNodes);
+  ueNodes.Create(numberOfUENodes);
 
   // Position of eNB
   Ptr<ListPositionAllocator> positionAlloc = CreateObject<ListPositionAllocator> ();
-
-  for (uint16_t i = 0; i < numberOfNodes; i++)
+  
+  for (i = 0; i < numberOfeNBNodes; i++)
   {
-    positionAlloc->Add (Vector (distance * i, 0.0, 0.0));
+    positionAlloc->Add (Vector (distance, 0.0, 0.0));
   }
-
-  MobilityHelper Mobility;
-  Mobility.SetMobilityModel ("ns3::ConstantPositionMobilityModel");
-  Mobility.Install (enbNodes);
-  Mobility.SetPositionAllocator (positionAlloc);
-  Mobility.Install (ueNodes);
-
-  std::cout << "Set of Position" << std::endl;
-
-/*
-  positionAlloc->Add (Vector (0.0, 2.0, 0.0));
+  
   MobilityHelper enbMobility;
   enbMobility.SetMobilityModel ("ns3::ConstantPositionMobilityModel");
   enbMobility.SetPositionAllocator (positionAlloc);
   enbMobility.Install (enbNodes);
 
-  // Position of UE
-  MobilityHelper ue1mobility;
-  ue1mobility.SetPositionAllocator ("ns3::UniformDiscPositionAllocator",
-                                    "X", DoubleValue (distance),
-                                    "Y", DoubleValue (10.0),
-                                    "rho", DoubleValue (radius));
-  ue1mobility.SetMobilityModel ("ns3::ConstantPositionMobilityModel");
-  ue1mobility.Install (ueNodes);
+  std::cout << "Set of eNB Position" << std::endl;
 
-  std::cout << "Set of Position" << std::endl;
-*/
+  // Position of UE
+  Ptr<ListPositionAllocator> positionAlloc = CreateObject<ListPositionAllocator> ();
+
+  for (i = 0; i < numberOfUENodes; i++ )
+  {
+    positionAlloc->Add (Vector (distance * 0.334, 0.0, 0.0));
+  }
+
+  MobilityHelper uemobility;
+  uemobility.SetMobilityModel ("ns3::ConstantPositionMobilityModel");
+  uemobility.SetPositionAllocator (positionAlloc);
+  uemobility.Install (ueNodes);
+
+  std::cout << "Set of UE Position" << std::endl;
+
   // Set of Antenna and Bandwidth
   lteHelper->SetEnbAntennaModelType("ns3::IsotropicAntennaModel");
   lteHelper->SetEnbDeviceAttribute("DlBandwidth", UintegerValue(50));
