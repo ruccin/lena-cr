@@ -35,7 +35,7 @@ main (int argc, char *argv[])
 {
 
   uint16_t numberOfNodes = 1;
-  uint8_t radius = 50;
+  //uint8_t radius = 50;
   double simTime = 100;
   double distance = 4000;
   double interPacketInterval = 100;
@@ -94,6 +94,7 @@ main (int argc, char *argv[])
   {
     positionAlloc->Add (Vector (distance * i, 0.0, 0.0));
   }
+
   MobilityHelper Mobility;
   Mobility.SetMobilityModel ("ns3::ConstantPositionMobilityModel");
   Mobility.SetPositionAllocator (positionAlloc);
@@ -223,7 +224,7 @@ main (int argc, char *argv[])
 
   Simulator::Run();
   
-  PropagationLossModel::DoCalcRxPower(PoweNB, enbNodes, ueNodes);
+  PropagationLossModel::DoCalcRxPower(PoweNB, enbLteDevs, ueLteDevs);
 
   monitor->CheckForLostPackets ();
   Ptr<Ipv4FlowClassifier> classifier = DynamicCast<Ipv4FlowClassifier> (flowmon.GetClassifier ());
