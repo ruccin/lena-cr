@@ -84,11 +84,25 @@ main (int argc, char *argv[])
 
   NodeContainer ueNodes;
   NodeContainer enbNodes;
-  enbNodes.Create(numberOfNodes);
+  enbNodes.Create(1);
   ueNodes.Create(numberOfNodes);
 
   // Position of eNB
   Ptr<ListPositionAllocator> positionAlloc = CreateObject<ListPositionAllocator> ();
+
+  for (uint16_t i = 0; i < numberOfNodes; i++)
+  {
+    positionAlloc->Add (Vector (distance * i, 0.0, 0.0));
+  }
+  MobilityHelper Mobility;
+  Mobility.SetMobilityModel ("ns3::ConstantPositionMobilityModel");
+  Mobility.SetPositionAllocator (positionAlloc);
+  Mobility.Install (enbNodes);
+  Mobility.Install (ueNodes);
+
+  std::cout << "Set of Position" << std::enbl;
+
+/*
   positionAlloc->Add (Vector (0.0, 2.0, 0.0));
   MobilityHelper enbMobility;
   enbMobility.SetMobilityModel ("ns3::ConstantPositionMobilityModel");
@@ -105,7 +119,7 @@ main (int argc, char *argv[])
   ue1mobility.Install (ueNodes);
 
   std::cout << "Set of Position" << std::endl;
-
+*/
   // Set of Antenna and Bandwidth
   lteHelper->SetEnbAntennaModelType("ns3::IsotropicAntennaModel");
   lteHelper->SetEnbDeviceAttribute("DlBandwidth", UintegerValue(50));
@@ -209,7 +223,7 @@ main (int argc, char *argv[])
 
   Simulator::Run();
   
-  PropagationLossModel::DoCalcRxPower(PoweNB, enbLteDevs, ueLteDevs);
+  PropagationLossModel::DoCalcRxPower(PoweNB, enbNodes, ueNodes);
 
   monitor->CheckForLostPackets ();
   Ptr<Ipv4FlowClassifier> classifier = DynamicCast<Ipv4FlowClassifier> (flowmon.GetClassifier ());
