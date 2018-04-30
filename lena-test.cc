@@ -209,7 +209,7 @@ main (int argc, char *argv[])
 
   Simulator::Run();
   
-  PropagationLossModel::DoCalcRxPower(PoweNB, enbNodes, ueNodes);
+  PropagationLossModel::DoCalcRxPower(PoweNB, enbMobility, ue1mobility);
 
   monitor->CheckForLostPackets ();
   Ptr<Ipv4FlowClassifier> classifier = DynamicCast<Ipv4FlowClassifier> (flowmon.GetClassifier ());
