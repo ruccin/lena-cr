@@ -36,7 +36,6 @@ main (int argc, char *argv[])
 
   uint16_t numberOfUENodes = 1;
   uint16_t numberOfeNBNodes = 1;
-  uint8_t radius = 50;
   double simTime = 100;
   double distance = 4000;
   double interPacketInterval = 100;
@@ -46,7 +45,8 @@ main (int argc, char *argv[])
 
   // Command line arguments
   CommandLine cmd;
-  cmd.AddValue("numberOfNodes", "Number of eNodeBs + UE pairs", numberOfNodes);
+  cmd.AddValue("numberOfUENodes", "Number of UE Nodes", numberOfUENodes);
+  cmd.AddValue("numberOfeNBNodes", "Number of eNB Nodes", numberOfeNBNodes);
   cmd.AddValue("simTime", "Total duration of the simulation [s])", simTime);
   cmd.AddValue("distance", "Distance between eNB and UE [m]", distance);
   cmd.AddValue("interPacketInterval", "Inter packet interval [ms])", interPacketInterval);
@@ -89,31 +89,31 @@ main (int argc, char *argv[])
   ueNodes.Create(numberOfUENodes);
 
   // Position of eNB
-  Ptr<ListPositionAllocator> positionAlloc = CreateObject<ListPositionAllocator> ();
+  Ptr<ListPositionAllocator> enbpositionAlloc = CreateObject<ListPositionAllocator> ();
   
   for (i = 0; i < numberOfeNBNodes; i++)
   {
-    positionAlloc->Add (Vector (distance, 0.0, 0.0));
+    enbpositionAlloc->Add (Vector (distance, 0.0, 0.0));
   }
   
   MobilityHelper enbMobility;
   enbMobility.SetMobilityModel ("ns3::ConstantPositionMobilityModel");
-  enbMobility.SetPositionAllocator (positionAlloc);
+  enbMobility.SetPositionAllocator (enbpositionAlloc);
   enbMobility.Install (enbNodes);
 
   std::cout << "Set of eNB Position" << std::endl;
 
   // Position of UE
-  Ptr<ListPositionAllocator> positionAlloc = CreateObject<ListPositionAllocator> ();
+  Ptr<ListPositionAllocator> uepositionAlloc = CreateObject<ListPositionAllocator> ();
 
-  for (i = 0; i < numberOfUENodes; i++ )
+  for (j = 0; j < numberOfUENodes; j++)
   {
-    positionAlloc->Add (Vector (distance * 0.334, 0.0, 0.0));
+    uepositionAlloc->Add (Vector (distance * 0.334, 0.0, 0.0));
   }
 
   MobilityHelper uemobility;
   uemobility.SetMobilityModel ("ns3::ConstantPositionMobilityModel");
-  uemobility.SetPositionAllocator (positionAlloc);
+  uemobility.SetPositionAllocator (uepositionAlloc);
   uemobility.Install (ueNodes);
 
   std::cout << "Set of UE Position" << std::endl;
