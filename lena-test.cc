@@ -100,7 +100,7 @@ main (int argc, char *argv[])
   Mobility.Install (enbNodes);
   Mobility.Install (ueNodes);
 
-  std::cout << "Set of Position" << std::enbl;
+  std::cout << "Set of Position" << std::endl;
 
 /*
   positionAlloc->Add (Vector (0.0, 2.0, 0.0));
