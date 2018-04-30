@@ -208,6 +208,8 @@ main (int argc, char *argv[])
   Simulator::Stop(Seconds(simTime));
 
   Simulator::Run();
+  
+  PropagationLossModel::DoCalcRxPower(PoweNB, enbNodes, ueNodes);
 
   monitor->CheckForLostPackets ();
   Ptr<Ipv4FlowClassifier> classifier = DynamicCast<Ipv4FlowClassifier> (flowmon.GetClassifier ());
@@ -221,7 +223,6 @@ main (int argc, char *argv[])
           NS_LOG_UNCOND("Tx Packets = " << iter->second.txPackets);
           NS_LOG_UNCOND("Rx Packets = " << iter->second.rxPackets);
           NS_LOG_UNCOND("Throughput: " << iter->second.rxBytes * 8.0 / (iter->second.timeLastRxPacket.GetSeconds()-iter->second.timeFirstTxPacket.GetSeconds()) / 1024  << " Kbps");
-          NS_LOG_UNCOND("Log Distance Propagation Path loss = " << PropagationLossModel::DoCalcRxPower(PoweNB, enbNodes, ueNodes));
   }
 
   monitor->SerializeToXmlFile ("result-test.xml" , true, true );
