@@ -91,7 +91,7 @@ main (int argc, char *argv[])
   // Position of eNB
   Ptr<ListPositionAllocator> enbpositionAlloc = CreateObject<ListPositionAllocator> ();
   
-  for (i = 0; i < numberOfeNBNodes; i++)
+  for (uint8_t i = 0; i < numberOfeNBNodes; i++)
   {
     enbpositionAlloc->Add (Vector (distance, 0.0, 0.0));
   }
@@ -106,7 +106,7 @@ main (int argc, char *argv[])
   // Position of UE
   Ptr<ListPositionAllocator> uepositionAlloc = CreateObject<ListPositionAllocator> ();
 
-  for (j = 0; j < numberOfUENodes; j++)
+  for (uint8_t j = 0; j < numberOfUENodes; j++)
   {
     uepositionAlloc->Add (Vector (distance * 0.334, 0.0, 0.0));
   }
@@ -174,7 +174,7 @@ main (int argc, char *argv[])
     }
 
   // Attach one UE per eNodeB
-  for (uint16_t i = 0; i < numberOfNodes; i++)
+  for (uint16_t i = 0; i < numberOfUENodes; i++)
       {
         lteHelper->Attach (ueLteDevs.Get(i), enbLteDevs.Get(0));
       }
