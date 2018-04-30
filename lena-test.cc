@@ -97,8 +97,8 @@ main (int argc, char *argv[])
 
   MobilityHelper Mobility;
   Mobility.SetMobilityModel ("ns3::ConstantPositionMobilityModel");
-  Mobility.SetPositionAllocator (positionAlloc);
   Mobility.Install (enbNodes);
+  Mobility.SetPositionAllocator (positionAlloc);
   Mobility.Install (ueNodes);
 
   std::cout << "Set of Position" << std::endl;
@@ -224,7 +224,7 @@ main (int argc, char *argv[])
 
   Simulator::Run();
   
-  PropagationLossModel::DoCalcRxPower(PoweNB, enbLteDevs, ueLteDevs);
+  PropagationLossModel::DoCalcRxPower(PoweNB, enbNodes, ueNodes);
 
   monitor->CheckForLostPackets ();
   Ptr<Ipv4FlowClassifier> classifier = DynamicCast<Ipv4FlowClassifier> (flowmon.GetClassifier ());
