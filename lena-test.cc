@@ -220,7 +220,7 @@ main (int argc, char *argv[])
   std::cout << "Simulation running" << std::endl;
 
   Simulator::Stop(Seconds(simTime));
-
+  /*
   //Animation Interface
   AnimationInterface::UpdateNodeColor (ueNodes, 200, 225, 200);
   AnimationInterface::UpdateNodeColor (enbNodes, 125, 200, 225);
@@ -228,14 +228,14 @@ main (int argc, char *argv[])
   AnimationInterface anim ("try1.xml");
   anim.EnablePacketMetadata(true);
   anim.EnableIpv4RouteTracking ("try1_routing.xml", Seconds(0), Seconds(2.0), Seconds(0.25));
-  
+  */
   Simulator::Run();
 
-  monitor->SerializeToXmlFile ("try1_flowmon.xml", true, true);
+  //monitor->SerializeToXmlFile ("try1_flowmon.xml", true, true);
 
   
   //PropagationLossModel::DoCalcRxPower(PoweNB, enbNodes, ueNodes);
-/*
+
   monitor->CheckForLostPackets ();
   Ptr<Ipv4FlowClassifier> classifier = DynamicCast<Ipv4FlowClassifier> (flowmon.GetClassifier ());
   std::map<FlowId, FlowMonitor::FlowStats> stats = monitor->GetFlowStats ();
@@ -251,7 +251,7 @@ main (int argc, char *argv[])
   }
 
   monitor->SerializeToXmlFile ("result-test.xml" , true, true );
-*/  
+  
   Simulator::Destroy();
   return 0;
 
