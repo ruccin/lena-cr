@@ -37,7 +37,7 @@ main (int argc, char *argv[])
 
   uint16_t numberOfUENodes = 1;
   uint16_t numberOfeNBNodes = 1;
-  double simTime = 100;
+  double simTime = 60;
   double distance = 4000;
   double PoweNB = 35;
   double Powue = 20;
@@ -75,12 +75,12 @@ main (int argc, char *argv[])
   p2ph.SetDeviceAttribute ("Mtu", UintegerValue (1500));
   NetDeviceContainer internetDevices = p2ph.Install (pgw, remoteHost);
   Ipv4AddressHelper ipv4h;
-  ipv4h.SetBase ("3.0.0.0", "255.0.0.0");
+  ipv4h.SetBase ("1.0.0.0", "255.0.0.0");
   Ipv4InterfaceContainer internetIpIfaces = ipv4h.Assign(internetDevices);
 
   Ipv4StaticRoutingHelper ipv4RoutingHelper;
   Ptr<Ipv4StaticRouting> remoteHostStaticRouting = ipv4RoutingHelper.GetStaticRouting (remoteHost->GetObject<Ipv4> ());
-  remoteHostStaticRouting->AddNetworkRouteTo (Ipv4Address ("8.0.0.0"), Ipv4Mask ("255.0.0.0"), 1);
+  remoteHostStaticRouting->AddNetworkRouteTo (Ipv4Address ("7.0.0.0"), Ipv4Mask ("255.0.0.0"), 1);
 
   NodeContainer ueNodes;
   NodeContainer enbNodes;
