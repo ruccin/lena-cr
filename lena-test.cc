@@ -24,6 +24,7 @@
 #include "ns3/packet-sink-helper.h"
 #include "ns3/netanim-module.h"
 #include "ns3/wifi-module.h"
+#include "animation-interface.h"
 
 using namespace ns3;
 using namespace std;
@@ -221,8 +222,8 @@ main (int argc, char *argv[])
   Simulator::Stop(Seconds(simTime));
 
   //Animation Interface
-  AnimationInterface::SetNodeColor (ueNodes, 200, 225, 200);
-  AnimationInterface::SetNodeColor (enbNodes, 125, 200, 225);
+  AnimationInterface::UpdateNodeColor (ueNodes, 200, 225, 200);
+  AnimationInterface::UpdateNodeColor (enbNodes, 125, 200, 225);
   //AnimationInterface::SetNodeColor( wifiApNode.Get(0), 0, 0, 0);
   AnimationInterface anim ("try1.xml");
   anim.EnablePacketMetadata(true);
