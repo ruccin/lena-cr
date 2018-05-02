@@ -221,8 +221,8 @@ main (int argc, char *argv[])
   Simulator::Stop(Seconds(simTime));
 
   //Animation Interface
-  AnimationInterface::SetNodeColor( ueNodes, 200, 225, 200);
-  AnimationInterface::SetNodeColor( enbNodes, 125, 200, 225);
+  AnimationInterface::SetNodeColor (ueNodes, 200, 225, 200);
+  AnimationInterface::SetNodeColor (enbNodes, 125, 200, 225);
   //AnimationInterface::SetNodeColor( wifiApNode.Get(0), 0, 0, 0);
   AnimationInterface anim ("try1.xml");
   anim.EnablePacketMetadata(true);
