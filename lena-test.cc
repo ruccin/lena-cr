@@ -72,12 +72,12 @@ main (int argc, char *argv[])
   p2ph.SetDeviceAttribute ("Mtu", UintegerValue (1500));
   NetDeviceContainer internetDevices = p2ph.Install (pgw, remoteHost);
   Ipv4AddressHelper ipv4h;
-  ipv4h.SetBase ("1.0.0.0", "255.0.0.0");
+  ipv4h.SetBase ("3.0.0.0", "255.0.0.0");
   Ipv4InterfaceContainer internetIpIfaces = ipv4h.Assign(internetDevices);
 
   Ipv4StaticRoutingHelper ipv4RoutingHelper;
   Ptr<Ipv4StaticRouting> remoteHostStaticRouting = ipv4RoutingHelper.GetStaticRouting (remoteHost->GetObject<Ipv4> ());
-  remoteHostStaticRouting->AddNetworkRouteTo (Ipv4Address ("7.0.0.0"), Ipv4Mask ("255.0.0.0"), 1);
+  remoteHostStaticRouting->AddNetworkRouteTo (Ipv4Address ("8.0.0.0"), Ipv4Mask ("255.0.0.0"), 1);
 
   NodeContainer ueNodes;
   NodeContainer enbNodes;
@@ -150,8 +150,6 @@ main (int argc, char *argv[])
   std::cout << "Set of Scheduler" << std::endl;
 
   // Set of Pathloss Model
-  //lteHelper->SetAttribute ("PathlossModel", StringValue ("ns3::FriisPropagationLossModel"));
-  //Config::SetDefault ("ns3::LteHelper::PathlossModel", StringValue ("ns3::LogDistancePropagationLossModel"));
   lteHelper->SetAttribute ("PathlossModel", StringValue ("ns3::LogDistancePropagationLossModel"));
 
   std::cout << "Set of Pathloss Model" << std::endl;
@@ -220,10 +218,21 @@ main (int argc, char *argv[])
 
   Simulator::Stop(Seconds(simTime));
 
+  //Animation Interface
+  AnimationInterface::SetNodeColor( ueNodes, 200, 225, 200);
+  AnimationInterface::SetNodeColor( enbNodes, 125, 200, 225);
+  //AnimationInterface::SetNodeColor( wifiApNode.Get(0), 0, 0, 0);
+  AnimationInterface anim ("try1.xml");
+  anim.EnablePacketMetadata(true);
+  anim.EnableIpv4RouteTracking ("try1_routing.xml", Seconds(0), Seconds(2.0), Seconds(0.25));
+  
   Simulator::Run();
+
+  monitor->SerializeToXmlFile ("try1_flowmon.xml", true, true);
+
   
   //PropagationLossModel::DoCalcRxPower(PoweNB, enbNodes, ueNodes);
-
+/*
   monitor->CheckForLostPackets ();
   Ptr<Ipv4FlowClassifier> classifier = DynamicCast<Ipv4FlowClassifier> (flowmon.GetClassifier ());
   std::map<FlowId, FlowMonitor::FlowStats> stats = monitor->GetFlowStats ();
@@ -239,7 +248,7 @@ main (int argc, char *argv[])
   }
 
   monitor->SerializeToXmlFile ("result-test.xml" , true, true );
-  
+*/  
   Simulator::Destroy();
   return 0;
 
