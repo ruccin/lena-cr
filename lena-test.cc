@@ -15,9 +15,7 @@
 #include "ns3/lte-enb-phy.h"
 #include "ns3/ff-mac-scheduler.h"
 #include "ns3/pf-ff-mac-scheduler.h"
-//#include "ns3/random-variable.h"
 #include "ns3/lte-enb-net-device.h"
-//#include "ns3/radio-bearer-status-calculator.h"
 #include "ns3/friis-spectrum-propagation-loss.h"
 #include "ns3/lte-enb-rrc.h"
 #include "ns3/lte-common.h"
@@ -38,7 +36,6 @@ main (int argc, char *argv[])
   uint16_t numberOfeNBNodes = 1;
   double simTime = 100;
   double distance = 4000;
-  double interPacketInterval = 100;
   double PoweNB = 35;
   double Powue = 20;
   uint8_t mimo = 2;
@@ -49,7 +46,6 @@ main (int argc, char *argv[])
   cmd.AddValue("numberOfeNBNodes", "Number of eNB Nodes", numberOfeNBNodes);
   cmd.AddValue("simTime", "Total duration of the simulation [s])", simTime);
   cmd.AddValue("distance", "Distance between eNB and UE [m]", distance);
-  cmd.AddValue("interPacketInterval", "Inter packet interval [ms])", interPacketInterval);
   cmd.Parse(argc, argv);
 
   ConfigStore inputConfig;
@@ -164,6 +160,7 @@ main (int argc, char *argv[])
   internet.Install (ueNodes);
   Ipv4InterfaceContainer ueIpIface;
   ueIpIface = epcHelper->AssignUeIpv4Address (NetDeviceContainer (ueLteDevs));
+
   // Assign IP address to UEs, and install applications
   for (uint32_t u = 0; u < ueNodes.GetN (); ++u)
     {
@@ -173,6 +170,8 @@ main (int argc, char *argv[])
       ueStaticRouting->SetDefaultRoute (epcHelper->GetUeDefaultGatewayAddress (), 1);
     }
 
+  std::cout << "Install the IP Stack and Assign IP address to UEs" << std::endl;
+
   // Attach one UE per eNodeB
   for (uint16_t i = 0; i < numberOfUENodes; i++)
       {
@@ -181,6 +180,8 @@ main (int argc, char *argv[])
 
   // Activate EpsBearer
   lteHelper->ActivateDedicatedEpsBearer (ueLteDevs, EpsBearer::NGBR_VIDEO_TCP_OPERATOR, EpcTft::Default());
+
+  std::cout << "Attach UE per eNB and Activate EpsBearer" << std::endl;
 
   // Install and start applications on UE and remote host
   uint16_t dlPort = 20;
@@ -221,7 +222,7 @@ main (int argc, char *argv[])
 
   Simulator::Run();
   
-  PropagationLossModel::DoCalcRxPower(PoweNB, enbNodes, ueNodes);
+  //PropagationLossModel::DoCalcRxPower(PoweNB, enbNodes, ueNodes);
 
   monitor->CheckForLostPackets ();
   Ptr<Ipv4FlowClassifier> classifier = DynamicCast<Ipv4FlowClassifier> (flowmon.GetClassifier ());
