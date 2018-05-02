@@ -22,6 +22,8 @@
 #include "ns3/trace-helper.h"
 #include "ns3/lte-enb-net-device.h"
 #include "ns3/packet-sink-helper.h"
+#include "ns3/netanim-module.h"
+#include "ns3/wifi-module.h"
 
 using namespace ns3;
 using namespace std;
