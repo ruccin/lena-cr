@@ -196,7 +196,8 @@ main (int argc, char *argv[])
  
   // Assign IP address to UEs, and install applications
 
-  Ptr<Ipv4StaticRouting> ueStaticRouting = ipv4RoutingHelper.GetStaticRouting (ueNodes->GetObject<Ipv4> ());
+  Ptr<Node> ueNode = ueNodes.Get (0);
+  Ptr<Ipv4StaticRouting> ueStaticRouting = ipv4RoutingHelper.GetStaticRouting (ueNode->GetObject<Ipv4>());
   ueStaticRouting->SetDefaultRoute (epcHelper->GetUeDefaultGatewayAddress (), 1);
 
   std::cout << "Install the IP Stack and Assign IP address to UEs" << std::endl;
@@ -220,14 +221,14 @@ main (int argc, char *argv[])
     //{
       //++dlPort;
 
-  BulkSendHelper dlClientHelper ("ns3::TcpSocketFactory", InetSocketAddress (ueIpIface.GetAddress (u), dlPort));
+  BulkSendHelper dlClientHelper ("ns3::TcpSocketFactory", InetSocketAddress (ueIpIface.GetAddress (), dlPort));
   dlClientHelper.SetAttribute ("MaxBytes", UintegerValue (10000000000));
   dlClientHelper.SetAttribute ("SendSize", UintegerValue (2000));
 
   clientApps.Add (dlClientHelper.Install (remoteHost));
      
   PacketSinkHelper dlPacketSinkHelper ("ns3::TcpSocketFactory", InetSocketAddress (Ipv4Address::GetAny (), dlPort));
-  serverApps.Add (dlPacketSinkHelper.Install (ueNodes);
+  serverApps.Add (dlPacketSinkHelper.Install (ueNodes));
      
     //}
   
