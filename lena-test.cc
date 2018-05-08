@@ -77,12 +77,12 @@ main (int argc, char *argv[])
   NetDeviceContainer internetDevices = p2ph.Install (pgw, remoteHost);
 
   Ipv4AddressHelper ipv4h;
-  ipv4h.SetBase ("10.0.0.1", "255.255.255.0");
+  ipv4h.SetBase ("1.0.0.0", "255.0.0.0");
   Ipv4InterfaceContainer internetIpIfaces = ipv4h.Assign(internetDevices);
 
   Ipv4StaticRoutingHelper ipv4RoutingHelper;
   Ptr<Ipv4StaticRouting> remoteHostStaticRouting = ipv4RoutingHelper.GetStaticRouting (remoteHost->GetObject<Ipv4> ());
-  remoteHostStaticRouting->AddNetworkRouteTo (Ipv4Address ("10.0.0.2"), Ipv4Mask ("255.255.255.0"), 1);
+  remoteHostStaticRouting->AddNetworkRouteTo (Ipv4Address ("7.0.0.0"), Ipv4Mask ("255.0.0.0"), 1);
 
   NodeContainer ueNodes;
   NodeContainer enbNodes;
@@ -217,11 +217,7 @@ main (int argc, char *argv[])
   serverApps.Start (Seconds (0.01));
   clientApps.Start (Seconds (0.01));
 
-  //for (uint32_t u = 0; u < ueNodes.GetN (); ++u)
-    //{
-      //++dlPort;
-
-  BulkSendHelper dlClientHelper ("ns3::TcpSocketFactory", InetSocketAddress (ueIpIface.GetAddress (), dlPort));
+  BulkSendHelper dlClientHelper ("ns3::TcpSocketFactory", InetSocketAddress (ueIpIface.GetAddress (0), dlPort));
   dlClientHelper.SetAttribute ("MaxBytes", UintegerValue (10000000000));
   dlClientHelper.SetAttribute ("SendSize", UintegerValue (2000));
 
@@ -229,8 +225,6 @@ main (int argc, char *argv[])
      
   PacketSinkHelper dlPacketSinkHelper ("ns3::TcpSocketFactory", InetSocketAddress (Ipv4Address::GetAny (), dlPort));
   serverApps.Add (dlPacketSinkHelper.Install (ueNodes));
-     
-    //}
   
   std::cout << "Install and start applications on UE and remote host" << std::endl;
 
