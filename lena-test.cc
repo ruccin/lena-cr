@@ -22,9 +22,7 @@
 #include "ns3/trace-helper.h"
 #include "ns3/lte-enb-net-device.h"
 #include "ns3/packet-sink-helper.h"
-#include "ns3/netanim-module.h"
 #include "ns3/wifi-module.h"
-#include "ns3/animation-interface.h"
 
 using namespace ns3;
 using namespace std;
@@ -37,9 +35,12 @@ main (int argc, char *argv[])
 
   uint16_t numberOfUENodes = 1;
   uint16_t numberOfeNBNodes = 1;
+  //uint16_t wifi_ap = 1;
+  //uint16_t wifi_sta = 1;
   double simTime = 60;
   double distance = 4000;
   double PoweNB = 35;
+  //double Powuav = 25;
   double Powue = 20;
   uint8_t mimo = 2;
 
@@ -74,26 +75,41 @@ main (int argc, char *argv[])
   p2ph.SetDeviceAttribute ("DataRate", DataRateValue (DataRate ("100Gb/s")));
   p2ph.SetDeviceAttribute ("Mtu", UintegerValue (1500));
   NetDeviceContainer internetDevices = p2ph.Install (pgw, remoteHost);
+
   Ipv4AddressHelper ipv4h;
-  ipv4h.SetBase ("1.0.0.0", "255.0.0.0");
+  ipv4h.SetBase ("10.0.0.1", "255.255.255.0");
   Ipv4InterfaceContainer internetIpIfaces = ipv4h.Assign(internetDevices);
 
   Ipv4StaticRoutingHelper ipv4RoutingHelper;
   Ptr<Ipv4StaticRouting> remoteHostStaticRouting = ipv4RoutingHelper.GetStaticRouting (remoteHost->GetObject<Ipv4> ());
-  remoteHostStaticRouting->AddNetworkRouteTo (Ipv4Address ("7.0.0.0"), Ipv4Mask ("255.0.0.0"), 1);
+  remoteHostStaticRouting->AddNetworkRouteTo (Ipv4Address ("10.0.0.2"), Ipv4Mask ("255.255.255.0"), 1);
 
   NodeContainer ueNodes;
   NodeContainer enbNodes;
   enbNodes.Create(numberOfeNBNodes);
   ueNodes.Create(numberOfUENodes);
+/*
+  // Set of WiFi
+  NodeContainer wifiApNode;
+  wifiApNode.Create (wifi_sta);
 
+  YansWifiChannelHelper channel = YansWifiChannelHelper::Default ();
+  YansWifiPhyHelper phy = YansWifiPhyHelper::Default ();
+  phy.SetChannel (channel.Create());
+
+  WifiHelper wifi = WifiHelper::Default ();
+  wifi.SetRemoteStationManager ("ns3::AarfWifiManager");
+
+  NqosWaveMacHelper mac = NqosWaveMacHelper::Default ();
+
+  Ssid ssid = Ssid ("ns-3-ssid");
+  mac.SetType ("ns3::StaWifiMac",
+              "Ssid", SsidValue (ssid),
+              "ActiveProbing", BooleanValue (false));
+*/
   // Position of eNB
   Ptr<ListPositionAllocator> enbpositionAlloc = CreateObject<ListPositionAllocator> ();
-  
-  for (uint16_t i = 0; i < numberOfeNBNodes; i++)
-  {
-    enbpositionAlloc->Add (Vector (distance, 0.0, 0.0));
-  }
+  enbpositionAlloc->Add (Vector (distance, 0.0, 0.0));
   
   MobilityHelper enbMobility;
   enbMobility.SetMobilityModel ("ns3::ConstantPositionMobilityModel");
@@ -104,11 +120,7 @@ main (int argc, char *argv[])
 
   // Position of UE
   Ptr<ListPositionAllocator> uepositionAlloc = CreateObject<ListPositionAllocator> ();
-
-  for (uint16_t j = 0; j < numberOfUENodes; j++)
-  {
-    uepositionAlloc->Add (Vector (distance * 0.334, 0.0, 0.0));
-  }
+  uepositionAlloc->Add (Vector (distance * 0.161, 0.0, 0.0));
 
   MobilityHelper uemobility;
   uemobility.SetMobilityModel ("ns3::ConstantPositionMobilityModel");
@@ -116,7 +128,22 @@ main (int argc, char *argv[])
   uemobility.Install (ueNodes);
 
   std::cout << "Set of UE Position" << std::endl;
+/*
+  // Position of WiFi
+  Ptr<ListPositionAllocator> uavpositionAlloc = CreateObject<ListPositionAllocator> ();
 
+  for (uint16_t j = 0; j < numberOfUAVNodes; j++)
+  {
+    uavpositionAlloc->Add (Vector (distance * 0.334, 0.0, 0.0));
+  }
+
+  MobilityHelper apmobility;
+  apmobility.SetMobilityModel ("ns3::ConstantPositionMobilityModel");
+  apmobility.SetPositionAllocator (uavpositionAlloc);
+  apmobility.Install (wifi_sta);
+
+  std::cout << "Set of UE Position" << std::endl;
+*/
   // Set of Antenna and Bandwidth
   lteHelper->SetEnbAntennaModelType("ns3::IsotropicAntennaModel");
   lteHelper->SetEnbDeviceAttribute("DlBandwidth", UintegerValue(50));
@@ -135,7 +162,12 @@ main (int argc, char *argv[])
   // Install LTE Devices to the nodes
   NetDeviceContainer enbLteDevs = lteHelper->InstallEnbDevice (enbNodes);
   NetDeviceContainer ueLteDevs = lteHelper->InstallUeDevice (ueNodes);
+/*
+  // Install WiFi Devices to the nodes
+  NetDeviceContainer wifiApDevs;
 
+  wifiApDevs = wifi.Install (phy, mac, wifi_sta);
+ */ 
   // Set of Tx Power
   Ptr<LteEnbPhy> enbPhy = enbLteDevs.Get(0)->GetObject<LteEnbNetDevice>()->GetPhy();
   enbPhy->SetTxPower(PoweNB);
@@ -161,23 +193,16 @@ main (int argc, char *argv[])
   internet.Install (ueNodes);
   Ipv4InterfaceContainer ueIpIface;
   ueIpIface = epcHelper->AssignUeIpv4Address (NetDeviceContainer (ueLteDevs));
-
+ 
   // Assign IP address to UEs, and install applications
-  for (uint32_t u = 0; u < ueNodes.GetN (); ++u)
-    {
-      Ptr<Node> ueNode = ueNodes.Get (u);
-      // Set the default gateway for the UE
-      Ptr<Ipv4StaticRouting> ueStaticRouting = ipv4RoutingHelper.GetStaticRouting (ueNode->GetObject<Ipv4> ());
-      ueStaticRouting->SetDefaultRoute (epcHelper->GetUeDefaultGatewayAddress (), 1);
-    }
+
+  Ptr<Ipv4StaticRouting> ueStaticRouting = ipv4RoutingHelper.GetStaticRouting (ueNodes->GetObject<Ipv4> ());
+  ueStaticRouting->SetDefaultRoute (epcHelper->GetUeDefaultGatewayAddress (), 1);
 
   std::cout << "Install the IP Stack and Assign IP address to UEs" << std::endl;
 
   // Attach one UE per eNodeB
-  for (uint16_t i = 0; i < numberOfUENodes; i++)
-      {
-        lteHelper->Attach (ueLteDevs.Get(i), enbLteDevs.Get(0));
-      }
+  lteHelper->Attach (ueLteDevs.Get(0), enbLteDevs.Get(0));
 
   // Activate EpsBearer
   lteHelper->ActivateDedicatedEpsBearer (ueLteDevs, EpsBearer::NGBR_VIDEO_TCP_OPERATOR, EpcTft::Default());
@@ -191,20 +216,20 @@ main (int argc, char *argv[])
   serverApps.Start (Seconds (0.01));
   clientApps.Start (Seconds (0.01));
 
-  for (uint32_t u = 0; u < ueNodes.GetN (); ++u)
-    {
-      ++dlPort;
+  //for (uint32_t u = 0; u < ueNodes.GetN (); ++u)
+    //{
+      //++dlPort;
 
-     BulkSendHelper dlClientHelper ("ns3::TcpSocketFactory", InetSocketAddress (ueIpIface.GetAddress (u), dlPort));
-     dlClientHelper.SetAttribute ("MaxBytes", UintegerValue (10000000000));
-     dlClientHelper.SetAttribute ("SendSize", UintegerValue (2000));
+  BulkSendHelper dlClientHelper ("ns3::TcpSocketFactory", InetSocketAddress (ueIpIface.GetAddress (u), dlPort));
+  dlClientHelper.SetAttribute ("MaxBytes", UintegerValue (10000000000));
+  dlClientHelper.SetAttribute ("SendSize", UintegerValue (2000));
 
-     clientApps.Add (dlClientHelper.Install (remoteHost));
+  clientApps.Add (dlClientHelper.Install (remoteHost));
      
-     PacketSinkHelper dlPacketSinkHelper ("ns3::TcpSocketFactory", InetSocketAddress (Ipv4Address::GetAny (), dlPort));
-     serverApps.Add (dlPacketSinkHelper.Install (ueNodes.Get(u)));
+  PacketSinkHelper dlPacketSinkHelper ("ns3::TcpSocketFactory", InetSocketAddress (Ipv4Address::GetAny (), dlPort));
+  serverApps.Add (dlPacketSinkHelper.Install (ueNodes);
      
-    }
+    //}
   
   std::cout << "Install and start applications on UE and remote host" << std::endl;
 
@@ -220,21 +245,8 @@ main (int argc, char *argv[])
   std::cout << "Simulation running" << std::endl;
 
   Simulator::Stop(Seconds(simTime));
-  /*
-  //Animation Interface
-  AnimationInterface::UpdateNodeColor (ueNodes, 200, 225, 200);
-  AnimationInterface::UpdateNodeColor (enbNodes, 125, 200, 225);
-  //AnimationInterface::SetNodeColor( wifiApNode.Get(0), 0, 0, 0);
-  AnimationInterface anim ("try1.xml");
-  anim.EnablePacketMetadata(true);
-  anim.EnableIpv4RouteTracking ("try1_routing.xml", Seconds(0), Seconds(2.0), Seconds(0.25));
-  */
+
   Simulator::Run();
-
-  //monitor->SerializeToXmlFile ("try1_flowmon.xml", true, true);
-
-  
-  //PropagationLossModel::DoCalcRxPower(PoweNB, enbNodes, ueNodes);
 
   monitor->CheckForLostPackets ();
   Ptr<Ipv4FlowClassifier> classifier = DynamicCast<Ipv4FlowClassifier> (flowmon.GetClassifier ());
