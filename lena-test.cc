@@ -23,6 +23,13 @@
 #include "ns3/lte-enb-net-device.h"
 #include "ns3/packet-sink-helper.h"
 #include "ns3/wifi-module.h"
+#include "ns3/spectrum-helper.h"
+#include "ns3/lte-spectrum-phy.h"
+#include "ns3/enb-lte-spctrum-phy.h"
+#include "ns3/ue-lte-spectrum-phy.h"
+#include "ns3/single-model-spectrum-channel.h"
+#include "ns3/spectrum-propagation-loss-model.h"
+#include "ns3/lte-propagation-loss-model.h"
 
 using namespace ns3;
 using namespace std;
@@ -107,6 +114,12 @@ main (int argc, char *argv[])
               "Ssid", SsidValue (ssid),
               "ActiveProbing", BooleanValue (false));
 */
+
+  // Create phy layer for both ue and enb
+
+  Ptr<EnbLtePhy> phyEnb = CreateObject<EnbLtePhy> ();
+  Ptr<EnbLteSpectrum> dlEnb = CreateObject<EnbLteSpectrumPhy> ();
+
   // Position of eNB
   Ptr<ListPositionAllocator> enbpositionAlloc = CreateObject<ListPositionAllocator> ();
   enbpositionAlloc->Add (Vector (distance, 0.0, 0.0));
