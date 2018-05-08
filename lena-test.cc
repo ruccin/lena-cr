@@ -244,6 +244,7 @@ main (int argc, char *argv[])
   Simulator::Run();
 
   monitor->CheckForLostPackets ();
+  
   Ptr<Ipv4FlowClassifier> classifier = DynamicCast<Ipv4FlowClassifier> (flowmon.GetClassifier ());
   std::map<FlowId, FlowMonitor::FlowStats> stats = monitor->GetFlowStats ();
 
