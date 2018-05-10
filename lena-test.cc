@@ -27,7 +27,6 @@
 #include "ns3/trace-helper.h"
 #include "ns3/packet-sink-helper.h"
 #include "ns3/wifi-module.h"
-#include "ns3/scenario-helper.h"
 
 using namespace ns3;
 using namespace std;
@@ -44,9 +43,9 @@ main (int argc, char *argv[])
   //uint16_t wifi_sta = 1;
   double simTime = 60;
   double distance = 4000;
-  double PoweNB = 35;
+  //double PoweNB = 35;
   //double Powuav = 25;
-  double Powue = 20;
+  //double Powue = 20;
   uint8_t mimo = 2;
 
   // Command line arguments
@@ -112,7 +111,7 @@ main (int argc, char *argv[])
               "Ssid", SsidValue (ssid),
               "ActiveProbing", BooleanValue (false));
 */
-/*
+
   // Position of eNB
   Ptr<ListPositionAllocator> enbpositionAlloc = CreateObject<ListPositionAllocator> ();
   enbpositionAlloc->Add (Vector (distance, 0.0, 0.0));
@@ -122,8 +121,6 @@ main (int argc, char *argv[])
   enbMobility.SetPositionAllocator (enbpositionAlloc);
   enbMobility.Install (enbNodes);
 
-  std::cout << "Set of eNB Position" << std::endl;
-
   // Position of UE
   Ptr<ListPositionAllocator> uepositionAlloc = CreateObject<ListPositionAllocator> ();
   uepositionAlloc->Add (Vector (distance * 0.161, 0.0, 0.0));
@@ -132,26 +129,8 @@ main (int argc, char *argv[])
   uemobility.SetMobilityModel ("ns3::ConstantPositionMobilityModel");
   uemobility.SetPositionAllocator (uepositionAlloc);
   uemobility.Install (ueNodes);
-*/
-  MobilityHeelper mobilityBs;
 
-  mobilityBs.SetPositionAllocator ("ns3::GridPositionAllocator",
-                                   "MinX", DoubleValue (20),
-                                   "MinY", DoubleValue (5),
-                                   "DeltaX", DoubleValue (25),
-                                   "LayoutType", StringValue ("RowFirst"));
-  mobilityBs.SetMobilityModel ("ns3::ConstantPositionMobilityModel");
-  mobilityBs.Install (enbNodes);
-
-  mobilityBs.SetPositionAllocator ("ns3::GridPositionAllocator",
-                                   "MinX", DoubleValue (100),
-                                   "MinY", DoubleValue (10),
-                                   "DeltaX", DoubleValue (25),
-                                   "LayoutType", StringValue ("RowFirst"));
-  mobilityBs.SetMobilityModel ("ns3::ConstantPositionMobilityModel");
-  mobilityBs.Install (ueNodes);
-
-  std::cout << "Set of UE Position" << std::endl;
+  std::cout << "Set of eNB and UE Position" << std::endl;
 /*
   // Position of WiFi
   Ptr<ListPositionAllocator> uavpositionAlloc = CreateObject<ListPositionAllocator> ();
@@ -217,12 +196,12 @@ main (int argc, char *argv[])
   std::cout << "Install the IP Stack and Assign IP address to UEs" << std::endl;
 
   // Attach one UE per eNodeB
-  lteHelper->Attach (ueLteDevs.Get(0), enbLteDevs.Get(0));
+  //lteHelper->Attach (ueLteDevs.Get(0), enbLteDevs.Get(0));
 
   // Activate EpsBearer
-  lteHelper->ActivateDedicatedEpsBearer (ueLteDevs, EpsBearer::NGBR_VIDEO_TCP_OPERATOR, EpcTft::Default());
-
-  std::cout << "Attach UE per eNB and Activate EpsBearer" << std::endl;
+  //lteHelper->ActivateDedicatedEpsBearer (ueLteDevs, EpsBearer::NGBR_VIDEO_TCP_OPERATOR, EpcTft::Default());
+  
+  //std::cout << "Attach UE per eNB and Activate EpsBearer" << std::endl;
 
   // Install and start applications on UE and remote host
   uint16_t dlPort = 20;
@@ -242,16 +221,6 @@ main (int argc, char *argv[])
   
   std::cout << "Install and start applications on UE and remote host" << std::endl;
 
-  // REM settings tuned to get a nice figure for this specific scenario
-  Config::SetDefault ("ns3::RadioEnvironmentMapHelper::OutputFile", StringValue ("laa-wifi-indoor.rem"));
-  Config::SetDefault ("ns3::RadioEnvironmentMapHelper::XMin", DoubleValue (0));
-  Config::SetDefault ("ns3::RadioEnvironmentMapHelper::XMax", DoubleValue (120));
-  Config::SetDefault ("ns3::RadioEnvironmentMapHelper::YMin", DoubleValue (0));
-  Config::SetDefault ("ns3::RadioEnvironmentMapHelper::YMax", DoubleValue (50));
-  Config::SetDefault ("ns3::RadioEnvironmentMapHelper::XRes", UintegerValue (1200));
-  Config::SetDefault ("ns3::RadioEnvironmentMapHelper::YRes", UintegerValue (500));
-  Config::SetDefault ("ns3::RadioEnvironmentMapHelper::Z", DoubleValue (1.5));
-
   // Tracing
   lteHelper->EnableMacTraces ();
   lteHelper->EnableRlcTraces ();
@@ -269,6 +238,7 @@ main (int argc, char *argv[])
 
   monitor->CheckForLostPackets ();
 
+/*
   Ptr<Ipv4FlowClassifier> classifier = DynamicCast<Ipv4FlowClassifier> (flowmon.GetClassifier ());
   std::map<FlowId, FlowMonitor::FlowStats> stats = monitor->GetFlowStats ();
 
@@ -281,8 +251,8 @@ main (int argc, char *argv[])
           NS_LOG_UNCOND("Rx Packets = " << iter->second.rxPackets);
           NS_LOG_UNCOND("Throughput: " << iter->second.rxBytes * 8.0 / (iter->second.timeLastRxPacket.GetSeconds()-iter->second.timeFirstTxPacket.GetSeconds()) / 1024  << " Kbps");
   }
-
-  monitor->SerializeToXmlFile ("result-test.xml" , true, true );
+*/
+  monitor->SerializeToXmlFile ("lena-cr-result.xml" , true, true );
   
   Simulator::Destroy();
   return 0;
