@@ -13,14 +13,18 @@
 #include "ns3/ipv4-flow-classifier.h"
 #include "ns3/propagation-loss-model.h"
 #include "ns3/lte-enb-phy.h"
+#include "ns3/lte-enb-mac.h"
+#include "ns3/lte-ue-phy.h"
+#include "ns3/lte-ue-mac.h"
 #include "ns3/ff-mac-scheduler.h"
 #include "ns3/pf-ff-mac-scheduler.h"
 #include "ns3/lte-enb-net-device.h"
+#include "ns3/lte-ue-net-device.h"
 #include "ns3/friis-spectrum-propagation-loss.h"
 #include "ns3/lte-enb-rrc.h"
+#include "ns3/lte-ue-rrc.h"
 #include "ns3/lte-common.h"
 #include "ns3/trace-helper.h"
-#include "ns3/lte-enb-net-device.h"
 #include "ns3/packet-sink-helper.h"
 #include "ns3/wifi-module.h"
 
@@ -62,7 +66,7 @@ main (int argc, char *argv[])
   Ptr<PointToPointEpcHelper> epcHelper = CreateObject<PointToPointEpcHelper> ();
   lteHelper->SetEpcHelper (epcHelper);
   Ptr<Node> pgw = epcHelper->GetPgwNode ();
-
+  
   // Create a single RemoteHost
   NodeContainer remoteHostContainer;
   remoteHostContainer.Create (1);
@@ -83,7 +87,7 @@ main (int argc, char *argv[])
   Ipv4StaticRoutingHelper ipv4RoutingHelper;
   Ptr<Ipv4StaticRouting> remoteHostStaticRouting = ipv4RoutingHelper.GetStaticRouting (remoteHost->GetObject<Ipv4> ());
   remoteHostStaticRouting->AddNetworkRouteTo (Ipv4Address ("7.0.0.0"), Ipv4Mask ("255.0.0.0"), 1);
-
+ 
   NodeContainer ueNodes;
   NodeContainer enbNodes;
   enbNodes.Create(numberOfeNBNodes);
@@ -107,6 +111,7 @@ main (int argc, char *argv[])
               "Ssid", SsidValue (ssid),
               "ActiveProbing", BooleanValue (false));
 */
+/*
   // Position of eNB
   Ptr<ListPositionAllocator> enbpositionAlloc = CreateObject<ListPositionAllocator> ();
   enbpositionAlloc->Add (Vector (distance, 0.0, 0.0));
@@ -126,6 +131,24 @@ main (int argc, char *argv[])
   uemobility.SetMobilityModel ("ns3::ConstantPositionMobilityModel");
   uemobility.SetPositionAllocator (uepositionAlloc);
   uemobility.Install (ueNodes);
+*/
+  MobilityHeelper mobilityBs;
+
+  mobilityBs.SetPositionAllocator ("ns3::GridPositionAllocator",
+                                   "MinX", DoubleValue (20),
+                                   "MinY", DoubleValue (5),
+                                   "DeltaX", DoubleValue (25),
+                                   "LayoutType", StringValue ("RowFirst"));
+  mobilityBs.SetMobilityModel ("ns3::ConstantPositionMobilityModel");
+  mobilityBs.Install (enbNodes);
+
+  mobilityBs.SetPositionAllocator ("ns3::GridPositionAllocator",
+                                   "MinX", DoubleValue (100),
+                                   "MinY", DoubleValue (10),
+                                   "DeltaX", DoubleValue (25),
+                                   "LayoutType", StringValue ("RowFirst"));
+  mobilityBs.SetMobilityModel ("ns3::ConstantPositionMobilityModel");
+  mobilityBs.Install (ueNodes);
 
   std::cout << "Set of UE Position" << std::endl;
 /*
@@ -168,17 +191,8 @@ main (int argc, char *argv[])
 
   wifiApDevs = wifi.Install (phy, mac, wifi_sta);
  */ 
-  // Set of Tx Power
-  Ptr<LteEnbPhy> enbPhy = enbLteDevs.Get(0)->GetObject<LteEnbNetDevice>()->GetPhy();
-  enbPhy->SetTxPower(PoweNB);
-  enbPhy->SetAttribute("NoiseFigure", DoubleValue(5.0));
 
-  Ptr<LteUePhy> uePhy = ueLteDevs.Get(0)->GetObject<LteUeNetDevice>()->GetPhy();
-  uePhy->SetTxPower(Powue);
-  uePhy->SetAttribute("NoiseFigure", DoubleValue(9.0));
-
-  std::cout << "Set of Tx Power" << std::endl;
-
+/*  
   // Set of Scheduler
   lteHelper->SetSchedulerAttribute ("UlCqiFilter", EnumValue (FfMacScheduler::PUSCH_UL_CQI));
   
@@ -188,7 +202,7 @@ main (int argc, char *argv[])
   lteHelper->SetAttribute ("PathlossModel", StringValue ("ns3::LogDistancePropagationLossModel"));
 
   std::cout << "Set of Pathloss Model" << std::endl;
-
+*/
   // Install the IP stack on the UEs
   internet.Install (ueNodes);
   Ipv4InterfaceContainer ueIpIface;
@@ -228,6 +242,16 @@ main (int argc, char *argv[])
   
   std::cout << "Install and start applications on UE and remote host" << std::endl;
 
+  // REM settings tuned to get a nice figure for this specific scenario
+  Config::SetDefault ("ns3::RadioEnvironmentMapHelper::OutputFile", StringValue ("laa-wifi-indoor.rem"));
+  Config::SetDefault ("ns3::RadioEnvironmentMapHelper::XMin", DoubleValue (0));
+  Config::SetDefault ("ns3::RadioEnvironmentMapHelper::XMax", DoubleValue (120));
+  Config::SetDefault ("ns3::RadioEnvironmentMapHelper::YMin", DoubleValue (0));
+  Config::SetDefault ("ns3::RadioEnvironmentMapHelper::YMax", DoubleValue (50));
+  Config::SetDefault ("ns3::RadioEnvironmentMapHelper::XRes", UintegerValue (1200));
+  Config::SetDefault ("ns3::RadioEnvironmentMapHelper::YRes", UintegerValue (500));
+  Config::SetDefault ("ns3::RadioEnvironmentMapHelper::Z", DoubleValue (1.5));
+
   // Tracing
   lteHelper->EnableMacTraces ();
   lteHelper->EnableRlcTraces ();
@@ -244,7 +268,7 @@ main (int argc, char *argv[])
   Simulator::Run();
 
   monitor->CheckForLostPackets ();
-  
+
   Ptr<Ipv4FlowClassifier> classifier = DynamicCast<Ipv4FlowClassifier> (flowmon.GetClassifier ());
   std::map<FlowId, FlowMonitor::FlowStats> stats = monitor->GetFlowStats ();
 
