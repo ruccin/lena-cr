@@ -27,6 +27,7 @@
 #include "ns3/trace-helper.h"
 #include "ns3/packet-sink-helper.h"
 #include "ns3/wifi-module.h"
+#include "ns3/scenario-helper.h"
 
 using namespace ns3;
 using namespace std;
@@ -190,7 +191,7 @@ main (int argc, char *argv[])
   NetDeviceContainer wifiApDevs;
 
   wifiApDevs = wifi.Install (phy, mac, wifi_sta);
- */ 
+*/ 
 
 /*  
   // Set of Scheduler
@@ -209,7 +210,6 @@ main (int argc, char *argv[])
   ueIpIface = epcHelper->AssignUeIpv4Address (NetDeviceContainer (ueLteDevs));
  
   // Assign IP address to UEs, and install applications
-
   Ptr<Node> ueNode = ueNodes.Get (0);
   Ptr<Ipv4StaticRouting> ueStaticRouting = ipv4RoutingHelper.GetStaticRouting (ueNode->GetObject<Ipv4>());
   ueStaticRouting->SetDefaultRoute (epcHelper->GetUeDefaultGatewayAddress (), 1);
