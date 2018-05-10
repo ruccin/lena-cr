@@ -27,17 +27,7 @@
 #include "ns3/trace-helper.h"
 #include "ns3/packet-sink-helper.h"
 #include "ns3/wifi-module.h"
-<<<<<<< HEAD
 #include "ns3/scenario-helper.h"
-=======
-#include "ns3/spectrum-helper.h"
-#include "ns3/lte-spectrum-phy.h"
-#include "ns3/enb-lte-spctrum-phy.h"
-#include "ns3/ue-lte-spectrum-phy.h"
-#include "ns3/single-model-spectrum-channel.h"
-#include "ns3/spectrum-propagation-loss-model.h"
-#include "ns3/lte-propagation-loss-model.h"
->>>>>>> 98268119f4f865568793fb86ed8b50616ded82a7
 
 using namespace ns3;
 using namespace std;
@@ -122,16 +112,7 @@ main (int argc, char *argv[])
               "Ssid", SsidValue (ssid),
               "ActiveProbing", BooleanValue (false));
 */
-<<<<<<< HEAD
 /*
-=======
-
-  // Create phy layer for both ue and enb
-
-  Ptr<EnbLtePhy> phyEnb = CreateObject<EnbLtePhy> ();
-  Ptr<EnbLteSpectrum> dlEnb = CreateObject<EnbLteSpectrumPhy> ();
-
->>>>>>> 98268119f4f865568793fb86ed8b50616ded82a7
   // Position of eNB
   Ptr<ListPositionAllocator> enbpositionAlloc = CreateObject<ListPositionAllocator> ();
   enbpositionAlloc->Add (Vector (distance, 0.0, 0.0));
