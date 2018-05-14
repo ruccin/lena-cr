@@ -274,13 +274,19 @@ main (int argc, char *argv[])
                                           enbNodes.Get (0)->GetObject<MobilityModel> (),
                                           ueNodes.Get (0)->GetObject<MobilityModel> ());
 
+
+  std::ostringstream simulationParams;
+  simulationParams 
+                   << rxPowerDbmD1 << " ";
+                   
+                   
   Simulator::Stop(Seconds(simTime));
 
   Simulator::Run();
 
   //monitor->CheckForLostPackets ();
 
-  monitor->SerializeToXmlFile ("lena-cr-result.xml" , true, true );
+  //monitor->SerializeToXmlFile ("lena-cr-result.xml" , true, true );
   
   Simulator::Destroy();
   return 0;
