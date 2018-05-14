@@ -26,7 +26,9 @@
 #include "ns3/lte-common.h"
 #include "ns3/trace-helper.h"
 #include "ns3/packet-sink-helper.h"
-#include "ns3/wifi-module.h"
+#include "ns3/laa-wifi-coexistence-helper.h"
+#include "ns3/duty-cycle-access-manager.h"
+#include "ns3/scenario-helper.h"
 
 using namespace ns3;
 using namespace std;
@@ -39,14 +41,27 @@ main (int argc, char *argv[])
 
   uint16_t numberOfUENodes = 1;
   uint16_t numberOfeNBNodes = 1;
-  //uint16_t wifi_ap = 1;
-  //uint16_t wifi_sta = 1;
+  uint16_t numberOfSTANodes = 1;
+  uint16_t numberOfAPNodes = 1;
   double simTime = 60;
   double distance = 4000;
-  //double PoweNB = 35;
-  //double Powuav = 25;
-  //double Powue = 20;
-  uint8_t mimo = 2;
+
+  // Specify some physical layer parameters that will be used below and
+  // in the scenario helper.
+  PhyParams phyParams;
+  phyParams.m_bsTxGain = 5; // dB antenna gain
+  phyParams.m_bsRxGain = 5; // dB antenna gain
+  phyParams.m_bsTxPower = 18; // dBm
+  phyParams.m_bsNoiseFigure = 5; // dB
+  phyParams.m_ueTxGain = 0; // dB antenna gain
+  phyParams.m_ueRxGain = 0; // dB antenna gain
+  phyParams.m_ueTxPower = 18; // dBm
+  phyParams.m_ueNoiseFigure = 9; // dB
+
+  static ns3::GlobalValue g_laaEdThreshold ("laaEdThreshold",
+                                            "CCA-ED threshold for channel access manager (dBm)",
+                                            ns3::DoubleValue (-72.0),
+                                            ns3::MakeDoubleChecker<double> (-100.0, -50.0));
 
   // Command line arguments
   CommandLine cmd;
@@ -84,33 +99,14 @@ main (int argc, char *argv[])
   ipv4h.SetBase ("1.0.0.0", "255.0.0.0");
   Ipv4InterfaceContainer internetIpIfaces = ipv4h.Assign(internetDevices);
 
-  Ipv4StaticRoutingHelper ipv4RoutingHelper;
-  Ptr<Ipv4StaticRouting> remoteHostStaticRouting = ipv4RoutingHelper.GetStaticRouting (remoteHost->GetObject<Ipv4> ());
-  remoteHostStaticRouting->AddNetworkRouteTo (Ipv4Address ("7.0.0.0"), Ipv4Mask ("255.0.0.0"), 1);
- 
   NodeContainer ueNodes;
   NodeContainer enbNodes;
+  NodeContainer staNodes;
+  NodeContainer apNodes;
   enbNodes.Create(numberOfeNBNodes);
   ueNodes.Create(numberOfUENodes);
-/*
-  // Set of WiFi
-  NodeContainer wifiApNode;
-  wifiApNode.Create (wifi_sta);
-
-  YansWifiChannelHelper channel = YansWifiChannelHelper::Default ();
-  YansWifiPhyHelper phy = YansWifiPhyHelper::Default ();
-  phy.SetChannel (channel.Create());
-
-  WifiHelper wifi = WifiHelper::Default ();
-  wifi.SetRemoteStationManager ("ns3::AarfWifiManager");
-
-  NqosWaveMacHelper mac = NqosWaveMacHelper::Default ();
-
-  Ssid ssid = Ssid ("ns-3-ssid");
-  mac.SetType ("ns3::StaWifiMac",
-              "Ssid", SsidValue (ssid),
-              "ActiveProbing", BooleanValue (false));
-*/
+  staNodes.Create(numberOfSTANodes);
+  apNodes.Create(numberOfAPNodes);
 
   // Position of eNB
   Ptr<ListPositionAllocator> enbpositionAlloc = CreateObject<ListPositionAllocator> ();
@@ -147,6 +143,7 @@ main (int argc, char *argv[])
 
   std::cout << "Set of UE Position" << std::endl;
 */
+/*
   // Set of Antenna and Bandwidth
   lteHelper->SetEnbAntennaModelType("ns3::IsotropicAntennaModel");
   lteHelper->SetEnbDeviceAttribute("DlBandwidth", UintegerValue(50));
@@ -161,48 +158,90 @@ main (int argc, char *argv[])
   Config::SetDefault("ns3::LteAmc::Ber", DoubleValue(0.00005));
 
   std::cout << "Configuration MIMO" << std::endl;
-
-  // Install LTE Devices to the nodes
-  NetDeviceContainer enbLteDevs = lteHelper->InstallEnbDevice (enbNodes);
-  NetDeviceContainer ueLteDevs = lteHelper->InstallUeDevice (ueNodes);
-/*
-  // Install WiFi Devices to the nodes
-  NetDeviceContainer wifiApDevs;
-
-  wifiApDevs = wifi.Install (phy, mac, wifi_sta);
-*/ 
-
-/*  
+  
   // Set of Scheduler
   lteHelper->SetSchedulerAttribute ("UlCqiFilter", EnumValue (FfMacScheduler::PUSCH_UL_CQI));
   
   std::cout << "Set of Scheduler" << std::endl;
-
+*/
   // Set of Pathloss Model
   lteHelper->SetAttribute ("PathlossModel", StringValue ("ns3::LogDistancePropagationLossModel"));
 
   std::cout << "Set of Pathloss Model" << std::endl;
-*/
+
+
+  // Install LTE Devices to the nodes
+  NetDeviceContainer enbLteDevs;
+  NetDeviceContainer ueLteDevs = lteHelper->InstallUeDevice (ueNodes);
+
+  Ptr<Node> eNBnode = enbNodes.Get (0);
+  Ptr<LteEnbNetDevice> lteEnbNetDevice = eNBnode->GetObject<LteEnbNetDevice> ();
+  Ptr<SpectrumChannel> downlinkSpectrumChannel = lteEnbNetDevice->GetPhy ()->GetDownlinkSpectrumPhy ()->GetChannel ();
+  SpectrumWifiPhyHelper spectrumPhy = SpectrumWifiPhyHelper::Default ();
+  spectrumPhy.SetChannel (downlinkSpectrumChannel);
+
+  WifiHelper wifi;
+  wifi.SetStandard (WIFI_PHY_STANDARD_80211n_5GHZ);
+  WifiMacHelper mac;
+  spectrumPhy.Set ("ShortGuardEnabled", BooleanValue (false));
+  spectrumPhy.Set ("ChannelWidth", UintegerValue (20));
+  spectrumPhy.Set ("TxGain", DoubleValue (phyParams.m_bsTxGain));
+  spectrumPhy.Set ("RxGain", DoubleValue (phyParams.m_bsRxGain));
+  spectrumPhy.Set ("TxPowerStart", DoubleValue (phyParams.m_bsTxPower));
+  spectrumPhy.Set ("TxPowerEnd", DoubleValue (phyParams.m_bsTxPower));
+  spectrumPhy.Set ("RxNoiseFigure", DoubleValue (phyParams.m_bsNoiseFigure));
+  spectrumPhy.Set ("Receivers", UintegerValue (2));
+  spectrumPhy.Set ("Transmitters", UintegerValue (2));
+
+  wifi.SetRemoteStationManager ("ns3::IdealWifiManager");
+  //which implements a Wi-Fi MAC that does not perform any kind of beacon generation, probing, or association
+  mac.SetType ("ns3::AdhocWifiMac");
+
+  //uint32_t channelNumber = 36 + 4 * (i%4);
+  uint32_t channelNumber = 36;
+  spectrumPhy.SetChannelNumber (channelNumber);
+
+  // wifi device that is doing monitoring
+  Ptr<NetDevice> monitor = (wifi.Install (spectrumPhy, mac, eNBnode)).Get (0);
+  Ptr<WifiPhy> wifiPhy = monitor->GetObject<WifiNetDevice> ()->GetPhy ();
+  Ptr<SpectrumWifiPhy> spectrumWifiPhy = DynamicCast<SpectrumWifiPhy> (wifiPhy);
+  Ptr<LteEnbPhy> ltePhy = eNBnode->GetObject<LteEnbNetDevice> ()->GetPhy ();
+  Ptr<LteEnbMac> lteMac = eNBnode->GetObject<LteEnbNetDevice> ()->GetMac ();
+
+  NetDeviceContainer staDevices;
+  staDevices = wifi.Install (spectrumPhy, mac, staNodes.Get(0));
+
+  NetDeviceContainer wifiDevices;
+  wifiDevices = wifi.Install (SpectrumPhy, mac, apNodes.Get(0));
+
   // Install the IP stack on the UEs
   internet.Install (ueNodes);
   Ipv4InterfaceContainer ueIpIface;
   ueIpIface = epcHelper->AssignUeIpv4Address (NetDeviceContainer (ueLteDevs));
- 
+
+  internet.Install (apNodes);
+
+  ipv4h.SetBase("3.0.0.0", "255.0.0.0");
+  ipv4h.Assign(wifiDevices);
+  ipv4h.Assign(staDevices);
+
+  // Assign IP address to AP, and install applications
+  
+  Ipv4StaticRoutingHelper ipv4RoutingHelper;
+  Ptr<Node> apNode = apNodes.Get (0);
+  Ptr<Ipv4StaticRouting> apStaticRouting = ipv4RoutingHelper.GetStaticRouting (apNode->GetObject<Ipv4>());
+  apStaticRouting->AddHostRouteTo (Ipv4Address ("1.0.0.2"), Ipv4Address ("3.0.0.2"), 1);
+
+  std::cout << "Install the IP Stack and Assign IP address to UEs" << std::endl;
+
+/* 
   // Assign IP address to UEs, and install applications
   Ptr<Node> ueNode = ueNodes.Get (0);
   Ptr<Ipv4StaticRouting> ueStaticRouting = ipv4RoutingHelper.GetStaticRouting (ueNode->GetObject<Ipv4>());
   ueStaticRouting->SetDefaultRoute (epcHelper->GetUeDefaultGatewayAddress (), 1);
 
   std::cout << "Install the IP Stack and Assign IP address to UEs" << std::endl;
-
-  // Attach one UE per eNodeB
-  //lteHelper->Attach (ueLteDevs.Get(0), enbLteDevs.Get(0));
-
-  // Activate EpsBearer
-  //lteHelper->ActivateDedicatedEpsBearer (ueLteDevs, EpsBearer::NGBR_VIDEO_TCP_OPERATOR, EpcTft::Default());
-  
-  //std::cout << "Attach UE per eNB and Activate EpsBearer" << std::endl;
-
+*/
   // Install and start applications on UE and remote host
   uint16_t dlPort = 20;
   ApplicationContainer clientApps;
@@ -221,37 +260,26 @@ main (int argc, char *argv[])
   
   std::cout << "Install and start applications on UE and remote host" << std::endl;
 
-  // Tracing
-  lteHelper->EnableMacTraces ();
-  lteHelper->EnableRlcTraces ();
-  lteHelper->EnablePdcpTraces ();
-
-  FlowMonitorHelper flowmon;
-  Ptr<FlowMonitor> monitor = flowmon.InstallAll();
-
   // Simulation Start
   std::cout << "Simulation running" << std::endl;
+
+  // simulation 
+  const uint32_t earfcn = 255444;
+  double dlFreq = LteSpectrumValueHelper::GetCarrierFrequency (earfcn);
+  Ptr<PropagationLossModel> plm = CreateObject<LogDistancePropagationLossModel> ();
+  plm->SetAttribute ("Frequency", DoubleValue (dlFreq));
+  double txPowerFactors = phyParams.m_bsTxGain + phyParams.m_ueRxGain + 
+                          phyParams.m_bsTxPower;                      
+  double rxPowerDbmD1 = plm->CalcRxPower (txPowerFactors, 
+                                          enbNodes.Get (0)->GetObject<MobilityModel> (),
+                                          ueNodes.Get (0)->GetObject<MobilityModel> ());
 
   Simulator::Stop(Seconds(simTime));
 
   Simulator::Run();
 
-  monitor->CheckForLostPackets ();
+  //monitor->CheckForLostPackets ();
 
-/*
-  Ptr<Ipv4FlowClassifier> classifier = DynamicCast<Ipv4FlowClassifier> (flowmon.GetClassifier ());
-  std::map<FlowId, FlowMonitor::FlowStats> stats = monitor->GetFlowStats ();
-
-  for (std::map<FlowId, FlowMonitor::FlowStats>::const_iterator iter = stats.begin (); iter != stats.end (); ++iter)
-  {
-  Ipv4FlowClassifier::FiveTuple t = classifier->FindFlow (iter->first);
-
-          NS_LOG_UNCOND("Flow ID: " << iter->first << " Src Addr " << t.sourceAddress << " Dst Addr " << t.destinationAddress);
-          NS_LOG_UNCOND("Tx Packets = " << iter->second.txPackets);
-          NS_LOG_UNCOND("Rx Packets = " << iter->second.rxPackets);
-          NS_LOG_UNCOND("Throughput: " << iter->second.rxBytes * 8.0 / (iter->second.timeLastRxPacket.GetSeconds()-iter->second.timeFirstTxPacket.GetSeconds()) / 1024  << " Kbps");
-  }
-*/
   monitor->SerializeToXmlFile ("lena-cr-result.xml" , true, true );
   
   Simulator::Destroy();
