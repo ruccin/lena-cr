@@ -133,7 +133,7 @@ main (int argc, char *argv[])
 */
 
   NetDeviceContainer enbLteDevs = lteHelper->InstallEnbDevice (enbNodes);
-  Ptr<LteEnbNetDevice> lteEnbNetDevice = enbLteDevs->GetObject<LteEnbNetDevice> ();
+  Ptr<LteEnbNetDevice> lteEnbNetDevice = enbLteDevs.GetObject<LteEnbNetDevice> ();
 
   Ptr<SpectrumChannel> downlinkSpectrumChannel = lteEnbNetDevice->GetPhy ()->GetDownlinkSpectrumPhy ()->GetChannel ();
 
@@ -152,12 +152,12 @@ main (int argc, char *argv[])
                "ActiveProbing", BooleanValue (false));
 
   NodeContainer UEDevices;
-  UEDevices = wifi.Install (spectrumPhy, mac, ueNodes);
+  UEDevices = wifi.Install (spectrumPhy, mac, ueNodes.Get (0));
 
   mac.SetType ("ns3::APWifiMac")
 
   NodeContainer APDevices;
-  APDevices = wifi.Install (spectrumPhy, mac, apNodes);
+  APDevices = wifi.Install (spectrumPhy, mac, apNodes.Get (0));
     
   // Install the IP stack on the UEs
   internet.Install (ueNodes);
@@ -201,7 +201,7 @@ main (int argc, char *argv[])
   ApplicationContainer wifiClientApps;
   ApplicationContainer wifiServerApps;
   PacketSinkHelper wifiPacketSinkHelper ("ns3::UdpSocketFactory", InetSocketAddress (Ipv4Address::GetAny(),wifiPort));
-  wifiServerApps.Add (wifiPacketSinkHelper.Install(remoteHost);
+  wifiServerApps.Add (wifiPacketSinkHelper.Install(remoteHost.Get (0));
   OnOffHelper wifiClient ("ns3::UdpSocketFactory",Address(InetSocketAddress(Ipv4Address("1.0.0.2"),wifiPort)));
   wifiClient.SetAttribute("OnTime",StringValue("ns3::ExponentialRandomVariable[Mean=0.352]"));
   wifiClient.SetAttribute("OffTime",StringValue("ns3::ExponentialRandomVariable[Mean=0.652]"));
