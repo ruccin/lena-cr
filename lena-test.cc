@@ -150,8 +150,9 @@ main (int argc, char *argv[])
   NetDeviceContainer ueLteDevs = lteHelper->InstallUeDevice (ueNodes);
 */
 
-  Ptr<Node> eNBnode = enbNodes.Get (0);
-  Ptr<LteEnbNetDevice> lteEnbNetDevice = enbNodes->GetObject<LteEnbNetDevice> ();
+  NetDeviceContainer enbLteDevs;
+  Ptr<Node> eNBnode = enbLteDevs.Get (0);
+  Ptr<LteEnbNetDevice> lteEnbNetDevice = enbLteDevs->GetObject<LteEnbNetDevice> ();
   Ptr<SpectrumChannel> downlinkSpectrumChannel = lteEnbNetDevice->GetPhy ()->GetDownlinkSpectrumPhy ()->GetChannel ();
   
   uint32_t channelNumber = 36;
