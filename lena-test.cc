@@ -151,6 +151,8 @@ main (int argc, char *argv[])
 */
 
   NetDeviceContainer enbLteDevs;
+  enbLteDevs.Add (lteHelper->InstallEnbDevice (enbNodes.Get (0)));
+  
   Ptr<Node> eNBnode = enbLteDevs.Get (0);
   Ptr<LteEnbNetDevice> lteEnbNetDevice = enbLteDevs->GetObject<LteEnbNetDevice> ();
   Ptr<SpectrumChannel> downlinkSpectrumChannel = lteEnbNetDevice->GetPhy ()->GetDownlinkSpectrumPhy ()->GetChannel ();
