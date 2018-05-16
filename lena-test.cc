@@ -46,18 +46,6 @@ main (int argc, char *argv[])
   double simTime = 60;
   double distance = 4000;
 
-  // Specify some physical layer parameters that will be used below and
-  // in the scenario helper.
-  PhyParams phyParams;
-  phyParams.m_bsTxGain = 5; // dB antenna gain
-  phyParams.m_bsRxGain = 5; // dB antenna gain
-  phyParams.m_bsTxPower = 18; // dBm
-  phyParams.m_bsNoiseFigure = 5; // dB
-  phyParams.m_ueTxGain = 0; // dB antenna gain
-  phyParams.m_ueRxGain = 0; // dB antenna gain
-  phyParams.m_ueTxPower = 18; // dBm
-  phyParams.m_ueNoiseFigure = 9; // dB
-
   // Command line arguments
   CommandLine cmd;
   cmd.AddValue("numberOfUENodes", "Number of UE Nodes", numberOfUENodes);
@@ -144,51 +132,40 @@ main (int argc, char *argv[])
   std::cout << "Set of Scheduler" << std::endl;
 */
 
-/*
-  // Install LTE Devices to the nodes
-  NetDeviceContainer enbLteDevs;
-  NetDeviceContainer ueLteDevs = lteHelper->InstallUeDevice (ueNodes);
-*/
-
-  NetDeviceContainer enbLteDevs;
-  enbLteDevs.Add (lteHelper->InstallEnbDevice (enbNodes.Get (0)));
-  
-  Ptr<Node> eNBnode = enbLteDevs.Get (0);
+  NetDeviceContainer enbLteDevs = lteHelper->InstallEnbDevice (enbNodes);
   Ptr<LteEnbNetDevice> lteEnbNetDevice = enbLteDevs->GetObject<LteEnbNetDevice> ();
+
   Ptr<SpectrumChannel> downlinkSpectrumChannel = lteEnbNetDevice->GetPhy ()->GetDownlinkSpectrumPhy ()->GetChannel ();
-  
+
   SpectrumWifiPhyHelper spectrumPhy = SpectrumWifiPhyHelper::Default ();
+  spectrumPhy.SetChannel (downlinkSpectrumChannel);
 
   uint32_t channelNumber = 36;
   spectrumPhy.SetChannelNumber (channelNumber);
-  spectrumPhy.SetChannel (downlinkSpectrumChannel);
 
   WifiHelper wifi;
   wifi.SetStandard (WIFI_PHY_STANDARD_80211n_5GHZ);
   WifiMacHelper mac;
-  spectrumPhy.Set ("ShortGuardEnabled", BooleanValue (false));
-  spectrumPhy.Set ("ChannelWidth", UintegerValue (20));
-  spectrumPhy.Set ("TxGain", DoubleValue (phyParams.m_bsTxGain));
-  spectrumPhy.Set ("RxGain", DoubleValue (phyParams.m_bsRxGain));
-  spectrumPhy.Set ("TxPowerStart", DoubleValue (phyParams.m_bsTxPower));
-  spectrumPhy.Set ("TxPowerEnd", DoubleValue (phyParams.m_bsTxPower));
-  spectrumPhy.Set ("RxNoiseFigure", DoubleValue (phyParams.m_bsNoiseFigure));
-  spectrumPhy.Set ("Receivers", UintegerValue (2));
-  spectrumPhy.Set ("Transmitters", UintegerValue (2));
-
   wifi.SetRemoteStationManager ("ns3::IdealWifiManager");
-  mac.SetType ("ns3::AdhocWifiMac");
 
-  Ptr<NetDevice> APDevices = (wifi.Install (spectrumPhy, mac, apNodes)).Get (0);
-  Ptr<NetDevice> UEDevices = (wifi.Install (spectrumPhy, mac, ueNodes)).Get (0);
-  
+  mac.SetType ("ns3::StaWifiMac",
+               "ActiveProbing", BooleanValue (false));
+
+  NodeContainer UEDevices;
+  UEDevices = wifi.Install (spectrumPhy, mac, ueNodes);
+
+  mac.SetType ("ns3::APWifiMac")
+
+  NodeContainer APDevices;
+  APDevices = wifi.Install (spectrumPhy, mac, apNodes);
+    
   // Install the IP stack on the UEs
   internet.Install (ueNodes);
   internet.Install (apNodes);
 
-  ipv4h.SetBase("3.0.0.2", "255.0.0.0");
-  ipv4h.Assign(APDevices);
-  ipv4h.Assign(UEDevices);
+  ipv4h.SetBase ("3.0.0.2", "255.0.0.0");
+  ipv4h.Assign (APDevices);
+  ipv4h.Assign (UEDevices);
 
   // Assign IP address to AP, and install applications
   
@@ -224,7 +201,7 @@ main (int argc, char *argv[])
   ApplicationContainer wifiClientApps;
   ApplicationContainer wifiServerApps;
   PacketSinkHelper wifiPacketSinkHelper ("ns3::UdpSocketFactory", InetSocketAddress (Ipv4Address::GetAny(),wifiPort));
-  wifiServerApps.Add (wifiPacketSinkHelper.Install(pgw.Get(0)));
+  wifiServerApps.Add (wifiPacketSinkHelper.Install(remoteHost);
   OnOffHelper wifiClient ("ns3::UdpSocketFactory",Address(InetSocketAddress(Ipv4Address("1.0.0.2"),wifiPort)));
   wifiClient.SetAttribute("OnTime",StringValue("ns3::ExponentialRandomVariable[Mean=0.352]"));
   wifiClient.SetAttribute("OffTime",StringValue("ns3::ExponentialRandomVariable[Mean=0.652]"));
