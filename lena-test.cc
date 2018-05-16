@@ -29,6 +29,7 @@
 #include "ns3/laa-wifi-coexistence-helper.h"
 #include "ns3/duty-cycle-access-manager.h"
 #include "ns3/laa-wifi-coexistence-helper.h"
+#include "ns3/scenario-helper.h"
 
 using namespace ns3;
 using namespace std;
