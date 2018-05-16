@@ -45,6 +45,18 @@ main (int argc, char *argv[])
   double simTime = 60;
   double distance = 4000;
 
+  // Specify some physical layer parameters that will be used below and
+  // in the scenario helper.
+  PhyParams phyParams;
+  phyParams.m_bsTxGain = 5; // dB antenna gain
+  phyParams.m_bsRxGain = 5; // dB antenna gain
+  phyParams.m_bsTxPower = 18; // dBm
+  phyParams.m_bsNoiseFigure = 5; // dB
+  phyParams.m_ueTxGain = 0; // dB antenna gain
+  phyParams.m_ueRxGain = 0; // dB antenna gain
+  phyParams.m_ueTxPower = 18; // dBm
+  phyParams.m_ueNoiseFigure = 9; // dB
+
   // Command line arguments
   CommandLine cmd;
   cmd.AddValue("numberOfUENodes", "Number of UE Nodes", numberOfUENodes);
@@ -138,8 +150,12 @@ main (int argc, char *argv[])
 */
 
   Ptr<Node> eNBnode = enbNodes.Get (0);
-  Ptr<LteEnbNetDevice> lteEnbNetDevice = eNBnode->GetObject<LteEnbNetDevice> ();
+  Ptr<LteEnbNetDevice> lteEnbNetDevice = enbNodes->GetObject<LteEnbNetDevice> ();
   Ptr<SpectrumChannel> downlinkSpectrumChannel = lteEnbNetDevice->GetPhy ()->GetDownlinkSpectrumPhy ()->GetChannel ();
+  
+  uint32_t channelNumber = 36;
+  spectrumPhy.SetChannelNumber (channelNumber);
+
   SpectrumWifiPhyHelper spectrumPhy = SpectrumWifiPhyHelper::Default ();
   spectrumPhy.SetChannel (downlinkSpectrumChannel);
 
@@ -159,25 +175,9 @@ main (int argc, char *argv[])
   wifi.SetRemoteStationManager ("ns3::IdealWifiManager");
   mac.SetType ("ns3::AdhocWifiMac");
 
-  //uint32_t channelNumber = 36 + 4 * (i%4);
-  uint32_t channelNumber = 36;
-  spectrumPhy.SetChannelNumber (channelNumber);
-
-  Ptr<NetDevice> UEDevices = (wifi.install (spectrumPhy, mac, ueNodes)).Get (0);
-  Ptr<NetDevice> APDevices = (wifi.install (spectrumPhy, mac, apNodes)).Get (0);
-
-  Ptr<WifiPhy> wifiPhy = APDevices->GetObject<WifiNetDevice> ()->GetPhy ();
-  Ptr<SpectrumWifiPhy> spectrumWifiPhy = DynamicCast<SpectrumWifiPhy> (wifiPhy);
-
-  Ptr<LteEnbPhy> ltePhy = enbNodes->GetObject<LteEnbNetDevice> ()->GetPhy ();
-  Ptr<LteEnbMac> lteMac = enbNodes->GetObject<LteEnbNetDevice> ()->GetMac ();
-
-  if (m_channelAccessManagerFactory.GetTypeId ().GetName () == "ns3::DutyCycleAccessManager")
-  {
-      Ptr<DutyCycleAccessManager> dutyCycleAccessManager = m_channelAccessManagerFactory.Create<DutyCycleAccessManager> ();
-      ltePhy->SetChannelAccessManager (dutyCycleAccessManager);
-  }
-
+  Ptr<NetDevice> APDevices = (wifi.Install (spectrumPhy, mac, apNodes)).Get (0);
+  Ptr<NetDevice> UEDevices = (wifi.Install (spectrumPhy, mac, ueNodes)).Get (0);
+  
   // Install the IP stack on the UEs
   internet.Install (ueNodes);
   internet.Install (apNodes);
@@ -208,7 +208,7 @@ main (int argc, char *argv[])
 
   BulkSendHelper dlClientHelper ("ns3::TcpSocketFactory", InetSocketAddress (ueIpIface.GetAddress (0), dlPort));
   dlClientHelper.SetAttribute ("MaxBytes", UintegerValue (10000000000));
-  dlClientHelper.SetAttribute ("SendSize", UintegerValue (2000));
+  dlClientHelper.SetAttribute ("PacketSize", UintegerValue (1024));
 
   clientApps.Add (dlClientHelper.Install (remoteHost));
      
@@ -219,23 +219,7 @@ main (int argc, char *argv[])
 
   // Simulation Start
   std::cout << "Simulation running" << std::endl;
-
-  // simulation 
-  const uint32_t earfcn = 255444;
-  double dlFreq = LteSpectrumValueHelper::GetCarrierFrequency (earfcn);
-  Ptr<PropagationLossModel> plm = CreateObject<LogDistancePropagationLossModel> ();
-  plm->SetAttribute ("Frequency", DoubleValue (dlFreq));
-  double txPowerFactors = phyParams.m_bsTxGain + phyParams.m_ueRxGain + 
-                          phyParams.m_bsTxPower;                      
-  double rxPowerDbmD1 = plm->CalcRxPower (txPowerFactors, 
-                                          enbNodes.Get (0)->GetObject<MobilityModel> (),
-                                          ueNodes.Get (0)->GetObject<MobilityModel> ());
-
-
-  std::ostringstream simulationParams;
-  simulationParams 
-                   << rxPowerDbmD1 << " ";
-                   
+                  
                    
   Simulator::Stop(Seconds(simTime));
 
