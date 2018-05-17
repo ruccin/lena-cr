@@ -160,13 +160,11 @@ main (int argc, char *argv[])
   mac.SetType ("ns3::StaWifiMac",
                "ActiveProbing", BooleanValue (false));
 
-  NodeContainer UEDevices;
-  UEDevices = wifi.Install (spectrumPhy, mac, ueNodes.Get (0));
+  Ptr<NetDeviceContainer> UEDevices = wifi.Install (spectrumPhy, mac, ueNodes.Get (0));
 
   mac.SetType ("ns3::APWifiMac")
 
-  NodeContainer APDevices;
-  APDevices = wifi.Install (spectrumPhy, mac, apNodes.Get (0));
+  Ptr<NetDeviceContainer> APDevices = wifi.Install (spectrumPhy, mac, apNodes.Get (0));
     
   // Install the IP stack on the UEs
   internet.Install (ueNodes);
@@ -197,7 +195,7 @@ main (int argc, char *argv[])
   serverApps.Start (Seconds (0.01));
   clientApps.Start (Seconds (0.01));
 
-  BulkSendHelper dlClientHelper ("ns3::TcpSocketFactory", InetSocketAddress (ueIpIface.GetAddress (0), dlPort));
+  BulkSendHelper dlClientHelper ("ns3::TcpSocketFactory", InetSocketAddress (Ipv4Address::GetAny (), dlPort));
   dlClientHelper.SetAttribute ("MaxBytes", UintegerValue (10000000000));
   dlClientHelper.SetAttribute ("PacketSize", UintegerValue (1024));
 
