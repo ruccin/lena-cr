@@ -45,7 +45,8 @@ main (int argc, char *argv[])
   uint16_t numberOfAPNodes = 1;
   double simTime = 60;
   double distance = 4000;
-  uint16_t bw[6, 15, 25, 50, 75, 100];
+  uint16_t bw[6] = {6, 15, 25, 50, 75, 100};
+  uint16_t maxbw = 0;
 
   // Command line arguments
   CommandLine cmd;
@@ -141,9 +142,9 @@ main (int argc, char *argv[])
       maxbw = bw[i];
   }
 
-  Ptr<LteEnbNetDevice> lteEnbNetDevice = enbLteDevs.SetDlBandwidth (maxbw);
+  Config::SetDefault ("ns3::LteEnbNetDevice::DlBandwidth", UintegerValue (maxbw));
 
-  Ptr<SpectrumChannel> downlinkSpectrumChannel = lteEnbNetDevice->GetPhy ()->GetDownlinkSpectrumPhy ()->GetChannel ();
+  Ptr<SpectrumChannel> downlinkSpectrumChannel = enbLteDevs->GetPhy ()->GetDownlinkSpectrumPhy ()->GetChannel ();
 
   SpectrumWifiPhyHelper spectrumPhy = SpectrumWifiPhyHelper::Default ();
   spectrumPhy.SetChannel (downlinkSpectrumChannel);
