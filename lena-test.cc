@@ -47,6 +47,7 @@ main (int argc, char *argv[])
   double distance = 4000;
   uint16_t bw[6] = {6, 15, 25, 50, 75, 100};
   uint16_t maxbw = 0;
+  uint16_t max = 100;
 
   // Command line arguments
   CommandLine cmd;
@@ -143,8 +144,8 @@ main (int argc, char *argv[])
   }
 
   Config::SetDefault ("ns3::LteEnbNetDevice::DlBandwidth", UintegerValue (maxbw));
-
-  Ptr<SpectrumChannel> downlinkSpectrumChannel = enbLteDevs->GetPhy ()->GetDownlinkSpectrumPhy ()->GetChannel ();
+  Ptr<LteEnbNetDevice> lteEnbNetDevice = enbLteDevs->GetObject<LteEnbNetDevice> ();
+  Ptr<SpectrumChannel> downlinkSpectrumChannel = lteEnbNetDevice->GetPhy ()->GetDownlinkSpectrumPhy ()->GetChannel ();
 
   SpectrumWifiPhyHelper spectrumPhy = SpectrumWifiPhyHelper::Default ();
   spectrumPhy.SetChannel (downlinkSpectrumChannel);
