@@ -45,6 +45,7 @@ main (int argc, char *argv[])
   uint16_t numberOfAPNodes = 1;
   double simTime = 60;
   double distance = 4000;
+  uint16_t bw[6, 15, 25, 50, 75, 100];
 
   // Command line arguments
   CommandLine cmd;
@@ -133,7 +134,14 @@ main (int argc, char *argv[])
 */
 
   NetDeviceContainer enbLteDevs = lteHelper->InstallEnbDevice (enbNodes);
-  Ptr<LteEnbNetDevice> lteEnbNetDevice = enbLteDevs.GetObject<LteEnbNetDevice> ();
+
+  for (uint16_t i = 0; i < 6; i++)
+  {
+    if (bw[i] == max)
+      maxbw = bw[i];
+  }
+
+  Ptr<LteEnbNetDevice> lteEnbNetDevice = enbLteDevs.SetDlBandwidth (maxbw);
 
   Ptr<SpectrumChannel> downlinkSpectrumChannel = lteEnbNetDevice->GetPhy ()->GetDownlinkSpectrumPhy ()->GetChannel ();
 
@@ -181,7 +189,7 @@ main (int argc, char *argv[])
   std::cout << "Install the IP Stack and Assign IP address to UEs" << std::endl;
 
   // Install and start applications on UE and remote host
-  /*
+  
   uint16_t dlPort = 20;
   ApplicationContainer clientApps;
   ApplicationContainer serverApps;
@@ -196,7 +204,8 @@ main (int argc, char *argv[])
      
   PacketSinkHelper dlPacketSinkHelper ("ns3::TcpSocketFactory", InetSocketAddress (Ipv4Address::GetAny (), dlPort));
   serverApps.Add (dlPacketSinkHelper.Install (ueNodes));
-  */
+  
+ /*
   uint16_t wifiPort=3000;
   ApplicationContainer wifiClientApps;
   ApplicationContainer wifiServerApps;
@@ -210,7 +219,7 @@ main (int argc, char *argv[])
   wifiClient.Install(ueNodes.Get(0));
   wifiServerApps.Start(Seconds(.01));
   wifiClientApps.Start(Seconds(.1));
-
+*/
   std::cout << "Install and start applications on UE and remote host" << std::endl;
 
   // Simulation Start
