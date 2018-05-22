@@ -144,14 +144,14 @@ main (int argc, char *argv[])
   }
 
   Config::SetDefault ("ns3::LteEnbNetDevice::DlBandwidth", UintegerValue (maxbw));
-  Ptr<LteEnbNetDevice> lteEnbNetDevice = enbLteDevs->GetObject<LteEnbNetDevice> ();
-  Ptr<SpectrumChannel> downlinkSpectrumChannel = lteEnbNetDevice->GetPhy ()->GetDownlinkSpectrumPhy ()->GetChannel ();
+
+  //Ptr<LteEnbNetDevice> lteEnbNetDevice = enbLteDevs->GetObject<LteEnbNetDevice> (); 
+  //Ptr<SpectrumChannel> downlinkSpectrumChannel = lteEnbNetDevice->GetPhy ()->GetDownlinkSpectrumPhy ()->GetChannel ();
+
+  downlinkSpectrumChannel = lteHelper.GetDownlinkSpectrumChannel(enbLteDevs);
 
   SpectrumWifiPhyHelper spectrumPhy = SpectrumWifiPhyHelper::Default ();
   spectrumPhy.SetChannel (downlinkSpectrumChannel);
-
-  uint32_t channelNumber = 36;
-  spectrumPhy.SetChannelNumber (channelNumber);
 
   WifiHelper wifi;
   wifi.SetStandard (WIFI_PHY_STANDARD_80211n_5GHZ);
