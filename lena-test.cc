@@ -148,7 +148,9 @@ main (int argc, char *argv[])
   //Ptr<LteEnbNetDevice> lteEnbNetDevice = enbLteDevs->GetObject<LteEnbNetDevice> (); 
   //Ptr<SpectrumChannel> downlinkSpectrumChannel = lteEnbNetDevice->GetPhy ()->GetDownlinkSpectrumPhy ()->GetChannel ();
 
-  downlinkSpectrumChannel = lteHelper.GetDownlinkSpectrumChannel(enbLteDevs);
+  NetDeviceContainer downlinkSpectrumChannel;
+
+  downlinkSpectrumChannel = lteHelper::GetDownlinkSpectrumChannel(enbLteDevs);
 
   SpectrumWifiPhyHelper spectrumPhy = SpectrumWifiPhyHelper::Default ();
   spectrumPhy.SetChannel (downlinkSpectrumChannel);
@@ -166,7 +168,7 @@ main (int argc, char *argv[])
   
   UEDevices = wifi.Install (spectrumPhy, mac, ueNodes.Get (0));
 
-  mac.SetType ("ns3::APWifiMac")
+  mac.SetType ("ns3::APWifiMac");
 
   APDevices = wifi.Install (spectrumPhy, mac, apNodes.Get (0));
     
