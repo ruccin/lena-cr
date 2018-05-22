@@ -145,6 +145,8 @@ main (int argc, char *argv[])
   }
 
   Config::SetDefault ("ns3::LteEnbNetDevice::DlBandwidth", UintegerValue (maxbw));
+  Config::SetDefault ("ns3::LteEnbNetDevice::DlEarfcn", UintegerValue (100));
+  Config::SetDefault ("ns3::LteUeNetDevice::DlEarfcn", UintegerValue (100));
 
   //Ptr<LteEnbNetDevice> lteEnbNetDevice = enbLteDevs->GetObject<LteEnbNetDevice> (); 
   //Ptr<SpectrumChannel> downlinkSpectrumChannel = lteEnbNetDevice->GetPhy ()->GetDownlinkSpectrumPhy ()->GetChannel ();
