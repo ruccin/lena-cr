@@ -161,11 +161,14 @@ main (int argc, char *argv[])
   mac.SetType ("ns3::StaWifiMac",
                "ActiveProbing", BooleanValue (false));
 
-  Ptr<NetDeviceContainer> UEDevices = wifi.Install (spectrumPhy, mac, ueNodes.Get (0));
+  NetDeviceContainer UEDevices;
+  NetDeviceContainer APDevices;
+  
+  UEDevices = wifi.Install (spectrumPhy, mac, ueNodes.Get (0));
 
   mac.SetType ("ns3::APWifiMac")
 
-  Ptr<NetDeviceContainer> APDevices = wifi.Install (spectrumPhy, mac, apNodes.Get (0));
+  APDevices = wifi.Install (spectrumPhy, mac, apNodes.Get (0));
     
   // Install the IP stack on the UEs
   internet.Install (ueNodes);
