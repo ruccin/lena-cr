@@ -135,7 +135,8 @@ main (int argc, char *argv[])
   std::cout << "Set of Scheduler" << std::endl;
 */
 
-  NetDeviceContainer enbLteDevs = lteHelper->InstallEnbDevice (enbNodes);
+  NetDeviceContainer enbLteDevs;
+  enbLteDevs = lteHelper->InstallEnbDevice (enbNodes);
 
   for (uint16_t i = 0; i < 6; i++)
   {
@@ -150,7 +151,7 @@ main (int argc, char *argv[])
 
   NetDeviceContainer downlinkSpectrumChannel;
 
-  downlinkSpectrumChannel = lteHelper::GetDownlinkSpectrumChannel(enbLteDevs);
+  downlinkSpectrumChannel = lteHelper->GetDownlinkSpectrumChannel(enbLteDevs);
 
   SpectrumWifiPhyHelper spectrumPhy = SpectrumWifiPhyHelper::Default ();
   spectrumPhy.SetChannel (downlinkSpectrumChannel);
