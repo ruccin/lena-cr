@@ -138,12 +138,12 @@ main (int argc, char *argv[])
 
   NetDeviceContainer enbLteDevs = lteHelper->InstallEnbDevice (enbNodes);
 
-  Ptr<SpectrumChannelHelper> spectrumChannelHelper = CreateObject<SpectrumChannelHelper> () ;
-  Config::SetDefault("ns3::SpectrumChannelHelper::AddSpectrumPropagationLoss", (Ptr<SpectrumPropagationLossModel> LogDistancePropagationLossModel()));
+  SpectrumChannelHelper spectrumChannelHelper;
+  Config::SetDefault("ns3::SpectrumChannelHelper::AddSpectrumPropagationLoss", Ptr<SpectrumPropagationLossModel> LogDistancePropagationLossModel());
 
   Ptr<SpectrumChannel> downlinkSpectrumChannel = spectrumChannelHelper->Create ();
-  Ptr<LtePhy> ltePhy;
-  enbLteDevs = ltePhy->SetDownlinkChannel (downlinkSpectrumChannel);
+  Ptr<LteSpectrumPhy> lteSpectrumPhy = CreateObject<LteSpectrumPhy> ();
+  lteSpectrumPhy.SetChannel (downlinkSpectrumChannel);
 
   for (uint16_t i = 0; i < 6; i++)
   {
