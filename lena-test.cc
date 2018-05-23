@@ -79,6 +79,8 @@ main (int argc, char *argv[])
   PointToPointHelper p2ph;
   p2ph.SetDeviceAttribute ("DataRate", DataRateValue (DataRate ("100Gb/s")));
   p2ph.SetDeviceAttribute ("Mtu", UintegerValue (1500));
+  p2ph.SetChannelAttribute ("Delay", StringValue ("10ms"));
+
   NetDeviceContainer internetDevices = p2ph.Install (pgw, remoteHost);
 
   Ipv4AddressHelper ipv4h;
@@ -87,7 +89,6 @@ main (int argc, char *argv[])
 
   NodeContainer ueNodes;
   NodeContainer enbNodes;
-  NodeContainer staNodes;
   NodeContainer apNodes;
   enbNodes.Create(numberOfeNBNodes);
   ueNodes.Create(numberOfUENodes);
@@ -135,8 +136,13 @@ main (int argc, char *argv[])
   std::cout << "Set of Scheduler" << std::endl;
 */
 
-  NetDeviceContainer enbLteDevs;
-  enbLteDevs = lteHelper->InstallEnbDevice (enbNodes);
+  NetDeviceContainer enbLteDevs = lteHelper->InstallEnbDevice (enbNodes);
+
+  Ptr<SpectrumChannelHelper> spectrumChannelHelper = CreateObject<SpectrumChannelHelper> () ;
+  Config::SetDefault("ns3::SpectrumChannelHelper::AddSpectrumPropagationLoss", EnumValue("ns3::LogDistancePropagationLossModel"));
+
+  Ptr<SpectrumChannel> downlinkSpectrumChannel = spectrumChannelHelper->Create ();
+  enbLteDevs.SetDownlinkChannel (downlinkSpectrumChannel);
 
   for (uint16_t i = 0; i < 6; i++)
   {
@@ -147,13 +153,6 @@ main (int argc, char *argv[])
   Config::SetDefault ("ns3::LteEnbNetDevice::DlBandwidth", UintegerValue (maxbw));
   Config::SetDefault ("ns3::LteEnbNetDevice::DlEarfcn", UintegerValue (100));
   Config::SetDefault ("ns3::LteUeNetDevice::DlEarfcn", UintegerValue (100));
-
-  //Ptr<LteEnbNetDevice> lteEnbNetDevice = enbLteDevs->GetObject<LteEnbNetDevice> (); 
-  //Ptr<SpectrumChannel> downlinkSpectrumChannel = lteEnbNetDevice->GetPhy ()->GetDownlinkSpectrumPhy ()->GetChannel ();
-
-  NetDeviceContainer downlinkSpectrumChannel;
-
-  downlinkSpectrumChannel = lteHelper->GetDownlinkSpectrumChannel(enbLteDevs);
 
   SpectrumWifiPhyHelper spectrumPhy = SpectrumWifiPhyHelper::Default ();
   spectrumPhy.SetChannel (downlinkSpectrumChannel);
@@ -174,7 +173,7 @@ main (int argc, char *argv[])
   mac.SetType ("ns3::APWifiMac");
 
   APDevices = wifi.Install (spectrumPhy, mac, apNodes.Get (0));
-    
+ 
   // Install the IP stack on the UEs
   internet.Install (ueNodes);
   internet.Install (apNodes);
