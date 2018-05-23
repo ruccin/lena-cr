@@ -143,7 +143,7 @@ main (int argc, char *argv[])
 
   Ptr<SpectrumChannel> downlinkSpectrumChannel = spectrumChannelHelper.Create ();
   Ptr<LtePhy> ltePhy = CreateObject<LtePhy> ();
-  ltePhy.SetDownlinkChannel (downlinkSpectrumChannel);
+  ltePhy->SetDownlinkChannel (downlinkSpectrumChannel);
 
   for (uint16_t i = 0; i < 6; i++)
   {
