@@ -139,8 +139,10 @@ main (int argc, char *argv[])
   //Config::SetDefault("ns3::SpectrumChannelHelper::AddSpectrumPropagationLoss", Ptr<SpectrumPropagationLossModel> LogDistancePropagationLossModel());
 
   Ptr<SpectrumChannel> downlinkSpectrumChannel = spectrumChannelHelper.Create ();
-  Ptr<LtePhy> ltePhy = CreateObject<LtePhy> ();
-  ltePhy->SetDownlinkChannel (downlinkSpectrumChannel);
+  //Ptr<LtePhy> ltePhy = CreateObject<LtePhy> ();
+  //ltePhy->SetDownlinkChannel (downlinkSpectrumChannel);
+
+  lteHelper->GetDownlinkSpectrumChannel (downlinkSpectrumChannel);
 
   for (uint16_t i = 0; i < 6; i++)
   {
@@ -151,17 +153,6 @@ main (int argc, char *argv[])
   Config::SetDefault ("ns3::LteEnbNetDevice::DlBandwidth", UintegerValue (maxbw));
   Config::SetDefault ("ns3::LteEnbNetDevice::DlEarfcn", UintegerValue (100));
   Config::SetDefault ("ns3::LteEnbPhy::TxPower", DoubleValue (35));  
-
-
-  Config::SetDefault ("ns3::LteUeNetDevice::DlEarfcn", UintegerValue (100));
-  Config::SetDefault ("ns3::LteUeNetDevice::DlEarfcn", UintegerValue (100));  
-  Config::SetDefault ("ns3::LteUePhy::TxPower", DoubleValue (20));
-  Config::SetDefault ("ns3::LteUePhy::EnableUplinkPowerControl", BooleanValue (true));
-
-  Config::SetDefault ("ns3::LteUePowerControl::ClosedLoop", BooleanValue (true));
-  Config::SetDefault ("ns3::LteUePowerControl::AccumulationEnable", BooleanValue (true));
-  Config::SetDefault ("ns3::LteUePowerControl::Alpha", DoubleValue (1.0));
-
 
   SpectrumWifiPhyHelper spectrumPhy = SpectrumWifiPhyHelper::Default ();
   spectrumPhy.SetChannel (downlinkSpectrumChannel);
