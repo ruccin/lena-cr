@@ -133,7 +133,7 @@ main (int argc, char *argv[])
   
   std::cout << "Set of Scheduler" << std::endl;
 */
-  for (uint16_t i = 0; i < 6; i++)
+  for (uint8_t i = 0; i < 6; i++)
   {
     if (bw[i] == max)
       maxbw = bw[i];
