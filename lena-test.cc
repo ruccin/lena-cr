@@ -46,8 +46,9 @@ main (int argc, char *argv[])
   double simTime = 60;
   double distance = 4000;
   uint16_t bw[6] = {6, 15, 25, 50, 75, 100};
-  uint16_t maxbw = 0;
+  uint8_t maxbw = 0;
   uint16_t max = 100;
+  uint32_t Earfcn = 100;
 
   // Command line arguments
   CommandLine cmd;
@@ -144,10 +145,10 @@ main (int argc, char *argv[])
   Ptr<SpectrumChannel> downlinkSpectrumChannel = spectrumChannelHelper.Create ();
 
   Ptr<LteEnbPhy> enbPhy = enbLteDevs.Get(0)->GetObject<LteEnbNetDevice>()->GetPhy();
-  enbPhy->SetTxPower(35);
-  enbPhy->SetAttribute("NoiseFigure", DoubleValue(5.0));
-  enbPhy->DoSetBandwidth (maxbw);
-  enbPhy->DoSetEarfcn (110,100);
+  enbPhy->SetTxPower (35);
+  enbPhy->SetAttribute ("NoiseFigure", DoubleValue(5.0));
+  enbPhy->DoSetBandwidth (maxbw, maxbw);
+  enbPhy->DoSetEarfcn (Earfcn, Earfcn+10);
 
   Ptr<LteSpectrumPhy> lteSpectrumPhy = CreateObject<LteSpectrumPhy> ();
   lteSpectrumPhy.SetDevice (enbLteDevs);
