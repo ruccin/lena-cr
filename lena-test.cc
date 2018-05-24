@@ -132,30 +132,29 @@ main (int argc, char *argv[])
   
   std::cout << "Set of Scheduler" << std::endl;
 */
-
-  NetDeviceContainer enbLteDevs = lteHelper->InstallEnbDevice (enbNodes);
-
-  SpectrumChannelHelper spectrumChannelHelper;
-  //Config::SetDefault("ns3::SpectrumChannelHelper::AddSpectrumPropagationLoss", Ptr<SpectrumPropagationLossModel> LogDistancePropagationLossModel());
-
-  Ptr<SpectrumChannel> downlinkSpectrumChannel = spectrumChannelHelper.Create ();
-  //Ptr<LtePhy> ltePhy = CreateObject<LtePhy> ();
-  //ltePhy->SetDownlinkChannel (downlinkSpectrumChannel);
-
-  lteHelper->GetDownlinkSpectrumChannel (downlinkSpectrumChannel);
-
   for (uint16_t i = 0; i < 6; i++)
   {
     if (bw[i] == max)
       maxbw = bw[i];
   }
 
-  Config::SetDefault ("ns3::LteEnbNetDevice::DlBandwidth", UintegerValue (maxbw));
-  Config::SetDefault ("ns3::LteEnbNetDevice::DlEarfcn", UintegerValue (100));
-  Config::SetDefault ("ns3::LteEnbPhy::TxPower", DoubleValue (35));  
+  NetDeviceContainer enbLteDevs = lteHelper->InstallEnbDevice (enbNodes);
+
+  SpectrumChannelHelper spectrumChannelHelper;
+  Ptr<SpectrumChannel> downlinkSpectrumChannel = spectrumChannelHelper.Create ();
+
+  Ptr<LteEnbPhy> enbPhy = enbLteDevs.Get(0)->GetObject<LteEnbNetDevice>()->GeyPhy();
+  enbPhy->SetTxPower(35);
+  enbPhy->SetAttribute("NoiseFigure", DoubleValue(5.0));
+  enbPhy->SetDlBandwidth(maxbw);
+  enbPhy->SetEarfcn(110,100);
+
+  Ptr<LteSpectrumPhy> lteSpectrumPhy = CreateObject<LteSpectrumPhy> ();
+  lteSpectrumPhy.GetDevice (enbLteDevs);
+  lteSpectrumPhy.SetChannel (downlinkSpectrumChannel);
 
   SpectrumWifiPhyHelper spectrumPhy = SpectrumWifiPhyHelper::Default ();
-  spectrumPhy.SetChannel (downlinkSpectrumChannel);
+  spectrumPhy.SetChannel (lteSpectrumPhy.GetChannel());
 
   WifiHelper wifi;
   wifi.SetStandard (WIFI_PHY_STANDARD_80211n_5GHZ);
