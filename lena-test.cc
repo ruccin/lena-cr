@@ -48,7 +48,6 @@ main (int argc, char *argv[])
   uint16_t bw[6] = {6, 15, 25, 50, 75, 100};
   uint8_t maxbw = 0;
   uint16_t max = 100;
-  uint32_t Earfcn = 100;
 
   // Command line arguments
   CommandLine cmd;
@@ -143,15 +142,11 @@ main (int argc, char *argv[])
   lteHelper->SetEnbAntennaModelType("ns3::IsotropicAntennaModel");
   lteHelper->SetUeAntennaModelType("ns3::IsotropicAntennaModel");
 
-  SpectrumChannelHelper spectrumChannelHelper;
-  Ptr<SpectrumChannel> downlinkSpectrumChannel = spectrumChannelHelper.Create ();
-
-  Ptr<LteSpectrumPhy> lteSpectrumPhy = CreateObject<LteSpectrumPhy> ();
-  lteSpectrumPhy.SetDevice (enbLteDevs);
-  lteSpectrumPhy.SetChannel (downlinkSpectrumChannel);
+  Ptr<LteEnbNetDevice> lteEnbNetDevice = enbLteDevs.Get (0)->GetObject<LteEnbNetDevice> ();
+  Ptr<SpectrumChannel> downlinkSpectrumChannel = lteEnbNetDevice->GetPhy ()->GetDownlinkSpectrumPhy ()->GetChannel ();
 
   SpectrumWifiPhyHelper spectrumPhy = SpectrumWifiPhyHelper::Default ();
-  spectrumPhy.SetChannel (lteSpectrumPhy.GetChannel());
+  spectrumPhy.SetChannel (downlinkSpectrumChannel);
 
   WifiHelper wifi;
   wifi.SetStandard (WIFI_PHY_STANDARD_80211n_5GHZ);
