@@ -143,7 +143,7 @@ main (int argc, char *argv[])
   SpectrumChannelHelper spectrumChannelHelper;
   Ptr<SpectrumChannel> downlinkSpectrumChannel = spectrumChannelHelper.Create ();
 
-  Ptr<LteEnbPhy> enbPhy = enbLteDevs.Get(0)->GetObject<LteEnbNetDevice>()->GeyPhy();
+  Ptr<LteEnbPhy> enbPhy = enbLteDevs.Get(0)->GetObject<LteEnbNetDevice>()->GetPhy();
   enbPhy->SetTxPower(35);
   enbPhy->SetAttribute("NoiseFigure", DoubleValue(5.0));
   enbPhy->SetDlBandwidth(maxbw);
