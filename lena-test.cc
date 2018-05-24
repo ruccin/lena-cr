@@ -114,15 +114,12 @@ main (int argc, char *argv[])
 
   std::cout << "Set of Pathloss Model" << std::endl;
 
-/*
   // Set of Antenna and Bandwidth
   lteHelper->SetEnbAntennaModelType("ns3::IsotropicAntennaModel");
-  lteHelper->SetEnbDeviceAttribute("DlBandwidth", UintegerValue(50));
-  lteHelper->SetEnbDeviceAttribute("UlBandwidth", UintegerValue(50));
   lteHelper->SetUeAntennaModelType("ns3::IsotropicAntennaModel");
 
   std::cout << "Set of Antenna and Bandwidth" << std::endl;
-
+/*
   // Configuration MIMO
   Config::SetDefault("ns3::LteEnbRrc::DefaultTransmissionMode", UintegerValue(mimo));
   Config::SetDefault("ns3::LteAmc::AmcModel", EnumValue(LteAmc::PiroEW2010));
@@ -153,7 +150,18 @@ main (int argc, char *argv[])
 
   Config::SetDefault ("ns3::LteEnbNetDevice::DlBandwidth", UintegerValue (maxbw));
   Config::SetDefault ("ns3::LteEnbNetDevice::DlEarfcn", UintegerValue (100));
+  Config::SetDefault ("ns3::LteEnbPhy::TxPower", DoubleValue (35));  
+
+
   Config::SetDefault ("ns3::LteUeNetDevice::DlEarfcn", UintegerValue (100));
+  Config::SetDefault ("ns3::LteUeNetDevice::DlEarfcn", UintegerValue (100));  
+  Config::SetDefault ("ns3::LteUePhy::TxPower", DoubleValue (20));
+  Config::SetDefault ("ns3::LteUePhy::EnableUplinkPowerControl", BooleanValue (true));
+
+  Config::SetDefault ("ns3::LteUePowerControl::ClosedLoop", BooleanValue (true));
+  Config::SetDefault ("ns3::LteUePowerControl::AccumulationEnable", BooleanValue (true));
+  Config::SetDefault ("ns3::LteUePowerControl::Alpha", DoubleValue (1.0));
+
 
   SpectrumWifiPhyHelper spectrumPhy = SpectrumWifiPhyHelper::Default ();
   spectrumPhy.SetChannel (downlinkSpectrumChannel);
