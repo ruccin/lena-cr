@@ -146,11 +146,11 @@ main (int argc, char *argv[])
   Ptr<LteEnbPhy> enbPhy = enbLteDevs.Get(0)->GetObject<LteEnbNetDevice>()->GetPhy();
   enbPhy->SetTxPower(35);
   enbPhy->SetAttribute("NoiseFigure", DoubleValue(5.0));
-  enbPhy->SetDlBandwidth(maxbw);
-  enbPhy->SetEarfcn(110,100);
+  enbPhy->DoSetBandwidth (maxbw);
+  enbPhy->DoSetEarfcn (110,100);
 
   Ptr<LteSpectrumPhy> lteSpectrumPhy = CreateObject<LteSpectrumPhy> ();
-  lteSpectrumPhy.GetDevice (enbLteDevs);
+  lteSpectrumPhy.SetDevice (enbLteDevs);
   lteSpectrumPhy.SetChannel (downlinkSpectrumChannel);
 
   SpectrumWifiPhyHelper spectrumPhy = SpectrumWifiPhyHelper::Default ();
