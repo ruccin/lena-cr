@@ -110,16 +110,6 @@ main (int argc, char *argv[])
   
   std::cout << "Set of Position of All" << std::endl;
 
-  // Set of Pathloss Model
-  lteHelper->SetAttribute ("PathlossModel", StringValue ("ns3::LogDistancePropagationLossModel"));
-
-  std::cout << "Set of Pathloss Model" << std::endl;
-
-  // Set of Antenna and Bandwidth
-  lteHelper->SetEnbAntennaModelType("ns3::IsotropicAntennaModel");
-  lteHelper->SetUeAntennaModelType("ns3::IsotropicAntennaModel");
-
-  std::cout << "Set of Antenna and Bandwidth" << std::endl;
 /*
   // Configuration MIMO
   Config::SetDefault("ns3::LteEnbRrc::DefaultTransmissionMode", UintegerValue(mimo));
@@ -141,14 +131,20 @@ main (int argc, char *argv[])
 
   NetDeviceContainer enbLteDevs = lteHelper->InstallEnbDevice (enbNodes);
 
+  Config::SetDefault ("ns3::LteEnbNetDevice::DlEarfcn", UintegerValue (100));
+  Config::SetDefault ("ns3::LteEnbNetDevice::UlEarfcn", UintegerValue (100 + 18000));
+  Config::SetDefault ("ns3::LteEnbNetDevice::DlBandwidth", UintegerValue (maxbw));
+  Config::SetDefault ("ns3::LteEnbNetDevice::UlBandwidth", UintegerValue (maxbw));
+  Config::SetDefault ("ns3::LteEnbPhy::TxPower", DoubleValue (35));
+  Config::SetDefault ("ns3::LteEnbPhy::NoiseFigure", DoubleValue (5.0));
+
+  lteHelper->SetAttribute ("PathlossModel", StringValue ("ns3::LogDistancePropagationLossModel"));
+
+  lteHelper->SetEnbAntennaModelType("ns3::IsotropicAntennaModel");
+  lteHelper->SetUeAntennaModelType("ns3::IsotropicAntennaModel");
+
   SpectrumChannelHelper spectrumChannelHelper;
   Ptr<SpectrumChannel> downlinkSpectrumChannel = spectrumChannelHelper.Create ();
-
-  Ptr<LteEnbPhy> enbPhy = enbLteDevs.Get(0)->GetObject<LteEnbNetDevice>()->GetPhy();
-  enbPhy->SetTxPower (35);
-  enbPhy->SetAttribute ("NoiseFigure", DoubleValue(5.0));
-  enbPhy->DoSetBandwidth (maxbw, maxbw);
-  enbPhy->DoSetEarfcn (Earfcn, Earfcn+10);
 
   Ptr<LteSpectrumPhy> lteSpectrumPhy = CreateObject<LteSpectrumPhy> ();
   lteSpectrumPhy.SetDevice (enbLteDevs);
