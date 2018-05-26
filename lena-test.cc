@@ -16,20 +16,13 @@
 #include "ns3/lte-enb-mac.h"
 #include "ns3/lte-ue-phy.h"
 #include "ns3/lte-ue-mac.h"
-#include "ns3/ff-mac-scheduler.h"
-#include "ns3/pf-ff-mac-scheduler.h"
 #include "ns3/lte-enb-net-device.h"
 #include "ns3/lte-ue-net-device.h"
-#include "ns3/friis-spectrum-propagation-loss.h"
 #include "ns3/lte-enb-rrc.h"
 #include "ns3/lte-ue-rrc.h"
 #include "ns3/lte-common.h"
 #include "ns3/trace-helper.h"
 #include "ns3/packet-sink-helper.h"
-#include "ns3/laa-wifi-coexistence-helper.h"
-#include "ns3/duty-cycle-access-manager.h"
-#include "ns3/laa-wifi-coexistence-helper.h"
-#include "ns3/scenario-helper.h"
 
 using namespace ns3;
 using namespace std;
@@ -84,7 +77,7 @@ main (int argc, char *argv[])
   NetDeviceContainer internetDevices = p2ph.Install (pgw, remoteHost);
 
   Ipv4AddressHelper ipv4h;
-  ipv4h.SetBase ("1.0.0.2", "255.0.0.0");
+  ipv4h.SetBase ("1.0.0.0", "255.0.0.0");
   Ipv4InterfaceContainer internetIpIfaces = ipv4h.Assign(internetDevices);
 
   NodeContainer ueNodes;
