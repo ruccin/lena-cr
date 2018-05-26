@@ -73,7 +73,6 @@ main (int argc, char *argv[])
   PointToPointHelper p2ph;
   p2ph.SetDeviceAttribute ("DataRate", DataRateValue (DataRate ("100Gb/s")));
   p2ph.SetDeviceAttribute ("Mtu", UintegerValue (1500));
-  p2ph.SetChannelAttribute ("Delay", StringValue ("10ms"));
 
   NetDeviceContainer internetDevices = p2ph.Install (pgw, remoteHost);
 
