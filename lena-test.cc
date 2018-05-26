@@ -23,6 +23,7 @@
 #include "ns3/lte-common.h"
 #include "ns3/trace-helper.h"
 #include "ns3/packet-sink-helper.h"
+#include "ns3/spectrum-wifi-helper.h"
 
 using namespace ns3;
 using namespace std;
@@ -154,7 +155,7 @@ main (int argc, char *argv[])
   
   UEDevices = wifi.Install (spectrumPhy, mac, ueNodes.Get (0));
 
-  mac.SetType ("ns3::APWifiMac");
+  mac.SetType ("ns3::ApWifiMac");
 
   APDevices = wifi.Install (spectrumPhy, mac, apNodes.Get (0));
  
