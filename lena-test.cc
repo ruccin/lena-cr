@@ -73,12 +73,18 @@ main (int argc, char *argv[])
   PointToPointHelper p2ph;
   p2ph.SetDeviceAttribute ("DataRate", DataRateValue (DataRate ("100Gb/s")));
   p2ph.SetDeviceAttribute ("Mtu", UintegerValue (1500));
-
+  p2ph.SetChannelAttribute ("Delay", TimeValue (Seconds (0.010)));
   NetDeviceContainer internetDevices = p2ph.Install (pgw, remoteHost);
 
   Ipv4AddressHelper ipv4h;
   ipv4h.SetBase ("1.0.0.0", "255.0.0.0");
-  Ipv4InterfaceContainer internetIpIfaces = ipv4h.Assign(internetDevices);
+  Ipv4InterfaceContainer internetIpIfaces = ipv4h.Assign (internetDevices);
+  // interface 0 is localhost, 1 is the p2p device
+  Ipv4Address remoteHostAddr = internetIpIfaces.GetAddress (1);
+
+  Ipv4StaticRoutingHelper ipv4RoutingHelper;
+  Ptr<Ipv4StaticRouting> remoteHostStaticRouting = ipv4RoutingHelper.GetStaticRouting (remoteHost->GetObject<Ipv4> ());
+  remoteHostStaticRouting->AddNetworkRouteTo (Ipv4Address ("7.0.0.0"), Ipv4Mask ("255.0.0.0"), 1);
 
   NodeContainer ueNodes;
   NodeContainer enbNodes;
@@ -162,20 +168,10 @@ main (int argc, char *argv[])
   internet.Install (ueNodes);
   internet.Install (apNodes);
 
-  ipv4h.SetBase ("3.0.0.2", "255.0.0.0");
-  ipv4h.Assign (APDevices);
-  ipv4h.Assign (UEDevices);
-
   // Assign IP address to AP, and install applications
-  
-  Ipv4StaticRoutingHelper ipv4RoutingHelper;
   Ptr<Node> ueNode = ueNodes.Get (0);
-  Ptr<Ipv4StaticRouting> ueStaticRouting = ipv4RoutingHelper.GetStaticRouting (ueNode->GetObject<Ipv4>());
-  ueStaticRouting->AddHostRouteTo (Ipv4Address ("1.0.0.2"), Ipv4Address ("3.0.0.2"), 1);
-
-  Ptr<Node> apNode = apNodes.Get (0);
-  Ptr<Ipv4StaticRouting> apStaticRouting = ipv4RoutingHelper.GetStaticRouting (apNode->GetObject<Ipv4>());
-  apStaticRouting->AddHostRouteTo (Ipv4Address ("1.0.0.2"), Ipv4Address ("1.0.0.2"), 1);
+  Ptr<Ipv4StaticRouting> ueStaticRouting = ipv4RoutingHelper.GetStaticRouting (ueNode->GetObject<Ipv4> ());
+  ueStaticRouting->SetDefaultRoute (epcHelper->GetUeDefaultGatewayAddress (), 1);
 
   std::cout << "Install the IP Stack and Assign IP address to UEs" << std::endl;
 
