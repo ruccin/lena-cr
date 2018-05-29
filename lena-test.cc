@@ -181,7 +181,7 @@ main (int argc, char *argv[])
   ApplicationContainer clientApps;
   ApplicationContainer serverApps;
 
-  BulkSendHelper dlClientHelper ("ns3::TcpSocketFactory", Address (InetSocketAddress (Ipv4Address ("1.0.0.2"), dlPort)));
+  BulkSendHelper dlClientHelper ("ns3::TcpSocketFactory", InetSocketAddress (remoteHostAddr, dlPort));
   dlClientHelper.SetAttribute ("MaxBytes", UintegerValue (1000000000));
   dlClientHelper.SetAttribute ("SendSize", UintegerValue (1024));
   clientApps.Add (dlClientHelper.Install (ueNodes.Get (0)));
