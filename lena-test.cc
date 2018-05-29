@@ -39,6 +39,7 @@ main (int argc, char *argv[])
   uint16_t numberOfAPNodes = 1;
   double simTime = 60;
   double distance = 4000;
+  double interPacketInterval = 100;
   uint16_t bw[6] = {6, 15, 25, 50, 75, 100};
   uint8_t maxbw = 0;
   uint16_t max = 100;
@@ -79,12 +80,7 @@ main (int argc, char *argv[])
   Ipv4AddressHelper ipv4h;
   ipv4h.SetBase ("1.0.0.0", "255.0.0.0");
   Ipv4InterfaceContainer internetIpIfaces = ipv4h.Assign (internetDevices);
-  // interface 0 is localhost, 1 is the p2p device
   Ipv4Address remoteHostAddr = internetIpIfaces.GetAddress (1);
-
-  Ipv4StaticRoutingHelper ipv4RoutingHelper;
-  Ptr<Ipv4StaticRouting> remoteHostStaticRouting = ipv4RoutingHelper.GetStaticRouting (remoteHost->GetObject<Ipv4> ());
-  remoteHostStaticRouting->AddNetworkRouteTo (Ipv4Address ("7.0.0.0"), Ipv4Mask ("255.0.0.0"), 1);
 
   NodeContainer ueNodes;
   NodeContainer enbNodes;
@@ -168,45 +164,32 @@ main (int argc, char *argv[])
   internet.Install (ueNodes);
   internet.Install (apNodes);
 
-  // Assign IP address to AP, and install applications
-  Ptr<Node> ueNode = ueNodes.Get (0);
-  Ptr<Ipv4StaticRouting> ueStaticRouting = ipv4RoutingHelper.GetStaticRouting (ueNode->GetObject<Ipv4> ());
-  ueStaticRouting->SetDefaultRoute (epcHelper->GetUeDefaultGatewayAddress (), 1);
+  ipv4h.SetBase ("2.0.0.0", "255.0.0.0");
+  ipv4h.Assign (UEDevices);
+  ipv4h.Assign (APDevices);
 
-  std::cout << "Install the IP Stack and Assign IP address to UEs" << std::endl;
+  Ptr<Node> ueNode = ueNodes.Get (0);
+  Ipv4StaticRoutingHelper ipv4RoutingHelper;
+  Ptr<Ipv4StaticRouting> ueStaticRouting = ipv4RoutingHelper.GetStaticRouting (ueNode->GetObject<Ipv4> ());
+  ueStaticRouting->AddHostRouteTo (Ipv4Address ("1.0.0.2"), 1);
+
+  Ptr<Ipv4StaticRouting> remoteHostStaticRouting = ipv4RoutingHelper.GetStaticRouting (remoteHost->GetObject<Ipv4> ());
+  remoteHostStaticRouting->AddHostRouteTo (Ipv4Address ("1.0.0.2"), Ipv4Address ("1.0.0.2"), 1);
 
   // Install and start applications on UE and remote host
-  
-  uint16_t dlPort = 20;
+  uint16_t dlPort = 1234;
+
   ApplicationContainer clientApps;
   ApplicationContainer serverApps;
-  serverApps.Start (Seconds (0.01));
-  clientApps.Start (Seconds (0.01));
 
-  BulkSendHelper dlClientHelper ("ns3::TcpSocketFactory", InetSocketAddress (Ipv4Address::GetAny (), dlPort));
-  dlClientHelper.SetAttribute ("MaxBytes", UintegerValue (10000000000));
-  dlClientHelper.SetAttribute ("PacketSize", UintegerValue (1024));
+  BulkSendHelper dlClientHelper ("ns3::TcpSocketFactory", Address (InetSocketAddress (Ipv4Address ("1.0.0.2"), dlPort)));
+  dlClientHelper.SetAttribute ("MaxBytes", UintegerValue (1000000000));
+  dlClientHelper.SetAttribute ("SendSize", UintegerValue (1024));
+  clientApps.Add (dlClientHelper.Install (ueNodes.Get (0));
 
-  clientApps.Add (dlClientHelper.Install (remoteHost));
-     
   PacketSinkHelper dlPacketSinkHelper ("ns3::TcpSocketFactory", InetSocketAddress (Ipv4Address::GetAny (), dlPort));
-  serverApps.Add (dlPacketSinkHelper.Install (ueNodes));
-  
- /*
-  uint16_t wifiPort=3000;
-  ApplicationContainer wifiClientApps;
-  ApplicationContainer wifiServerApps;
-  PacketSinkHelper wifiPacketSinkHelper ("ns3::UdpSocketFactory", InetSocketAddress (Ipv4Address::GetAny(),wifiPort));
-  wifiServerApps.Add (wifiPacketSinkHelper.Install(remoteHost.Get (0));
-  OnOffHelper wifiClient ("ns3::UdpSocketFactory",Address(InetSocketAddress(Ipv4Address("1.0.0.2"),wifiPort)));
-  wifiClient.SetAttribute("OnTime",StringValue("ns3::ExponentialRandomVariable[Mean=0.352]"));
-  wifiClient.SetAttribute("OffTime",StringValue("ns3::ExponentialRandomVariable[Mean=0.652]"));
-  wifiClient.SetAttribute("DataRate",StringValue("320kb/s"));
-  wifiClient.SetAttribute("PacketSize",UintegerValue(1024));
-  wifiClient.Install(ueNodes.Get(0));
-  wifiServerApps.Start(Seconds(.01));
-  wifiClientApps.Start(Seconds(.1));
-*/
+  serverApps.Add (dlPacketSinkHelper.Install (remoteHost));
+
   std::cout << "Install and start applications on UE and remote host" << std::endl;
 
   // Simulation Start
