@@ -194,15 +194,10 @@ main (int argc, char *argv[])
 
   // Simulation Start
   std::cout << "Simulation running" << std::endl;
-                  
-                   
+                        
   Simulator::Stop(Seconds(simTime));
 
   Simulator::Run();
-
-  //monitor->CheckForLostPackets ();
-
-  //monitor->SerializeToXmlFile ("lena-cr-result.xml" , true, true );
   
   Simulator::Destroy();
   return 0;
