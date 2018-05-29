@@ -194,10 +194,21 @@ main (int argc, char *argv[])
 
   // Simulation Start
   std::cout << "Simulation running" << std::endl;
-                        
+
+  lteHelper->EnableMacTraces;
+  lteHelper->EnableRlcTraces;
+  lteHelper->EnablePdcpTraces;
+
   Simulator::Stop(Seconds(simTime));
 
   Simulator::Run();
+  
+  FlowMonitorHelper flowMo;
+  Ptr<FlowMonitor> monitor;
+
+  monitor = flowmo.Install (ueNodes);
+  monitor = flowmo.Install (remoteHost);
+  monitor->SerializeToXmlFile ("lena-cr.xml", true, true);
   
   Simulator::Destroy();
   return 0;
