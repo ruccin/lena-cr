@@ -163,14 +163,14 @@ main (int argc, char *argv[])
   internet.Install (ueNodes);
   internet.Install (apNodes);
 
-  ipv4h.SetBase ("7.0.0.0", "255.0.0.0");
+  ipv4h.SetBase ("3.0.0.0", "255.0.0.0");
   ipv4h.Assign (UEDevices);
   ipv4h.Assign (APDevices);
 
   Ptr<Node> ueNode = ueNodes.Get (0);
   Ipv4StaticRoutingHelper ipv4RoutingHelper;
   Ptr<Ipv4StaticRouting> ueStaticRouting = ipv4RoutingHelper.GetStaticRouting (ueNode->GetObject<Ipv4> ());
-  ueStaticRouting->AddHostRouteTo (Ipv4Address ("1.0.0.2"), Ipv4Address ("7.0.0.1"), 1);
+  ueStaticRouting->AddHostRouteTo (Ipv4Address ("1.0.0.2"), Ipv4Address ("3.0.0.1"), 1);
 
   Ptr<Ipv4StaticRouting> remoteHostStaticRouting = ipv4RoutingHelper.GetStaticRouting (remoteHost->GetObject<Ipv4> ());
   remoteHostStaticRouting->AddHostRouteTo (Ipv4Address ("1.0.0.2"), Ipv4Address ("1.0.0.2"), 1);
