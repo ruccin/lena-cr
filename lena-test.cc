@@ -181,7 +181,7 @@ main (int argc, char *argv[])
   ApplicationContainer clientApps;
   ApplicationContainer serverApps;
 
-  OnOffHelper wifiClient ("ns3::UdpSocketFactory", InterSocketAddress (remoteHostAddr ,dlPort));
+  OnOffHelper wifiClient ("ns3::UdpSocketFactory", InetSocketAddress (remoteHostAddr ,dlPort));
   wifiClient.SetAttribute("OnTime",StringValue("ns3::ExponentialRandomVariable[Mean=0.352]"));
   wifiClient.SetAttribute("OffTime",StringValue("ns3::ExponentialRandomVariable[Mean=0.652]"));
   wifiClient.SetAttribute("DataRate",StringValue("320kb/s"));
