@@ -39,7 +39,6 @@ main (int argc, char *argv[])
   uint16_t numberOfAPNodes = 1;
   double simTime = 60;
   double distance = 4000;
-  double interPacketInterval = 100;
   uint16_t bw[6] = {6, 15, 25, 50, 75, 100};
   uint8_t maxbw = 0;
   uint16_t max = 100;
@@ -185,7 +184,7 @@ main (int argc, char *argv[])
   BulkSendHelper dlClientHelper ("ns3::TcpSocketFactory", Address (InetSocketAddress (Ipv4Address ("1.0.0.2"), dlPort)));
   dlClientHelper.SetAttribute ("MaxBytes", UintegerValue (1000000000));
   dlClientHelper.SetAttribute ("SendSize", UintegerValue (1024));
-  clientApps.Add (dlClientHelper.Install (ueNodes.Get (0));
+  clientApps.Add (dlClientHelper.Install (ueNodes.Get (0)));
 
   PacketSinkHelper dlPacketSinkHelper ("ns3::TcpSocketFactory", InetSocketAddress (Ipv4Address::GetAny (), dlPort));
   serverApps.Add (dlPacketSinkHelper.Install (remoteHost));
@@ -195,9 +194,9 @@ main (int argc, char *argv[])
   // Simulation Start
   std::cout << "Simulation running" << std::endl;
 
-  lteHelper->EnableMacTraces;
-  lteHelper->EnableRlcTraces;
-  lteHelper->EnablePdcpTraces;
+  lteHelper->EnableMacTraces ();
+  lteHelper->EnableRlcTraces ();
+  lteHelper->EnablePdcpTraces ();
 
   Simulator::Stop(Seconds(simTime));
 
@@ -206,10 +205,10 @@ main (int argc, char *argv[])
   FlowMonitorHelper flowMo;
   Ptr<FlowMonitor> monitor;
 
-  monitor = flowmo.Install (ueNodes);
-  monitor = flowmo.Install (remoteHost);
+  monitor = flowMo.Install (ueNodes);
+  monitor = flowMo.Install (remoteHost);
   monitor->SerializeToXmlFile ("lena-cr.xml", true, true);
-  
+
   Simulator::Destroy();
   return 0;
 
