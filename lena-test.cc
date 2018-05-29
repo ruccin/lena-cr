@@ -181,13 +181,20 @@ main (int argc, char *argv[])
   ApplicationContainer clientApps;
   ApplicationContainer serverApps;
 
+  OnOffHelper wifiClient ("ns3::UdpSocketFactory", InterSocketAddress (remoteHostAddr ,wifiPort));
+  wifiClient.SetAttribute("OnTime",StringValue("ns3::ExponentialRandomVariable[Mean=0.352]"));
+  wifiClient.SetAttribute("OffTime",StringValue("ns3::ExponentialRandomVariable[Mean=0.652]"));
+  wifiClient.SetAttribute("DataRate",StringValue("320kb/s"));
+  wifiClient.SetAttribute("PacketSize",UintegerValue(1024));
+  wifiClient.Install(ueNodes.Get(0));
+/*
   BulkSendHelper dlClientHelper ("ns3::TcpSocketFactory", InetSocketAddress (Ipv4Address::GetAny (), dlPort));
   dlClientHelper.SetAttribute ("MaxBytes", UintegerValue (1000000000));
   dlClientHelper.SetAttribute ("SendSize", UintegerValue (1024));
   clientApps.Add (dlClientHelper.Install (remoteHost));
-
-  PacketSinkHelper dlPacketSinkHelper ("ns3::TcpSocketFactory", InetSocketAddress (remoteHostAddr, dlPort));
-  serverApps.Add (dlPacketSinkHelper.Install (ueNodes.Get (0)));
+*/
+  PacketSinkHelper dlPacketSinkHelper ("ns3::TcpSocketFactory", InetSocketAddress (Ipv4Address::GetAny (), dlPort));
+  serverApps.Add (dlPacketSinkHelper.Install (remoteHost));
 
   std::cout << "Install and start applications on UE and remote host" << std::endl;
 
