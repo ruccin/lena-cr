@@ -163,14 +163,14 @@ main (int argc, char *argv[])
   internet.Install (ueNodes);
   internet.Install (apNodes);
 
-  ipv4h.SetBase ("2.0.0.0", "255.0.0.0");
+  ipv4h.SetBase ("7.0.0.0", "255.0.0.0");
   ipv4h.Assign (UEDevices);
   ipv4h.Assign (APDevices);
 
   Ptr<Node> ueNode = ueNodes.Get (0);
   Ipv4StaticRoutingHelper ipv4RoutingHelper;
   Ptr<Ipv4StaticRouting> ueStaticRouting = ipv4RoutingHelper.GetStaticRouting (ueNode->GetObject<Ipv4> ());
-  ueStaticRouting->AddHostRouteTo (Ipv4Address ("1.0.0.2"), 1);
+  ueStaticRouting->AddHostRouteTo (Ipv4Address ("1.0.0.2"), Ipv4Address ("7.0.0.2") 1);
 
   Ptr<Ipv4StaticRouting> remoteHostStaticRouting = ipv4RoutingHelper.GetStaticRouting (remoteHost->GetObject<Ipv4> ());
   remoteHostStaticRouting->AddHostRouteTo (Ipv4Address ("1.0.0.2"), Ipv4Address ("1.0.0.2"), 1);
@@ -181,18 +181,19 @@ main (int argc, char *argv[])
   ApplicationContainer clientApps;
   ApplicationContainer serverApps;
 
+/*
   OnOffHelper wifiClient ("ns3::UdpSocketFactory", InetSocketAddress (remoteHostAddr ,dlPort));
   wifiClient.SetAttribute("OnTime",StringValue("ns3::ExponentialRandomVariable[Mean=0.352]"));
   wifiClient.SetAttribute("OffTime",StringValue("ns3::ExponentialRandomVariable[Mean=0.652]"));
   wifiClient.SetAttribute("DataRate",StringValue("320kb/s"));
   wifiClient.SetAttribute("PacketSize",UintegerValue(1024));
   wifiClient.Install(ueNodes.Get(0));
-/*
-  BulkSendHelper dlClientHelper ("ns3::TcpSocketFactory", InetSocketAddress (Ipv4Address::GetAny (), dlPort));
+*/
+  BulkSendHelper dlClientHelper ("ns3::TcpSocketFactory", InetSocketAddress (remoteHostAddr, dlPort));
   dlClientHelper.SetAttribute ("MaxBytes", UintegerValue (1000000000));
   dlClientHelper.SetAttribute ("SendSize", UintegerValue (1024));
-  clientApps.Add (dlClientHelper.Install (remoteHost));
-*/
+  clientApps.Add (dlClientHelper.Install (ueNodes.Get(0)));
+
   PacketSinkHelper dlPacketSinkHelper ("ns3::TcpSocketFactory", InetSocketAddress (Ipv4Address::GetAny (), dlPort));
   serverApps.Add (dlPacketSinkHelper.Install (remoteHost));
 
