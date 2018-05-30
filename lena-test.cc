@@ -229,11 +229,11 @@ main (int argc, char *argv[])
   Simulator::Stop(Seconds(simTime + 1));
   Simulator::Run();
 
-  //double throughput = 0;
-  //uint64_t totalPacketsThrough = 0;
+  FlowMonitorHelper flowMo;
+  Ptr<FlowMonitor> monitor;
 
-  //totalPacketsThrough = DynamicCast<UdpServer> (serverApps.Get (0))->GetReceived ();
-  //throughput = totalPacketsThrough * payloadSize * 8 / (simTime * 1000000.0); //Mbit/s
+  monitor = flowMo.InstallAll ();
+  monitor->SerializeToXmlFile ("lena_cr_flowmon.xml", true, true);
 
   Simulator::Destroy();
   return 0;
