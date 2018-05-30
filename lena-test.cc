@@ -153,17 +153,14 @@ main (int argc, char *argv[])
   wifi.SetStandard (WIFI_PHY_STANDARD_80211n_5GHZ);
   WifiMacHelper mac;
   wifi.SetRemoteStationManager ("ns3::IdealWifiManager");
-  Ssid ssid = Ssid ("ns-3-ssid");
 
   NetDeviceContainer UEDevices;
   NetDeviceContainer APDevices;
 
-  mac.SetType ("ns3::StaWifiMac"
-               "Ssid", SsidValue (ssid));
+  mac.SetType ("ns3::StaWifiMac");
   UEDevices = wifi.Install (spectrumPhy, mac, ueNodes.Get (0));
 
-  mac.SetType ("ns3::ApWifiMac"
-               "Ssid", SsidValue (ssid));
+  mac.SetType ("ns3::ApWifiMac");
   APDevices = wifi.Install (spectrumPhy, mac, apNodes.Get (0));
  
   // Install the IP stack on the UEs
