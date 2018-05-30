@@ -131,7 +131,6 @@ main (int argc, char *argv[])
   spectrumPhy.SetErrorRateModel (errorModelType);
   spectrumPhy.Set ("TxPowerStart", DoubleValue (1)); // dBm  (1.26 mW)
   spectrumPhy.Set ("TxPowerEnd", DoubleValue (1));
-  spectrumPhy.Set ("ChannelWidth", UintegerValue (20));
   spectrumPhy.Set ("Receivers", UintegerValue (2));
   spectrumPhy.Set ("Transmitters", UintegerValue (2));
   spectrumPhy.Set ("RxNoiseFigure", DoubleValue (5));
