@@ -139,8 +139,6 @@ main (int argc, char *argv[])
   spectrumPhy.Set ("RxGain", DoubleValue (0));
   spectrumPhy.Set ("ShortGuardEnabled", BooleanValue (false));
 
-  Config::SetDefault ("ns3::WifiPhy::CcaMode1Threshold", DoubleValue (-62.0));
-
   WifiHelper wifi;
   wifi.SetStandard (WIFI_PHY_STANDARD_80211n_5GHZ);
   WifiMacHelper mac;
