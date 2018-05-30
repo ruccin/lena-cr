@@ -81,7 +81,7 @@ main (int argc, char *argv[])
   Ipv4AddressHelper ipv4h;
   ipv4h.SetBase ("1.0.0.0", "255.0.0.0");
   Ipv4InterfaceContainer internetIpIfaces = ipv4h.Assign (internetDevices);
-  Ipv4Address remoteHostAddr = internetIpIfaces.GetAddress (1);
+  //Ipv4Address remoteHostAddr = internetIpIfaces.GetAddress (1);
 
   NodeContainer ueNodes;
   NodeContainer enbNodes;
@@ -229,11 +229,11 @@ main (int argc, char *argv[])
   Simulator::Stop(Seconds(simTime + 1));
   Simulator::Run();
 
-  double throughput = 0;
-  uint64_t totalPacketsThrough = 0;
+  //double throughput = 0;
+  //uint64_t totalPacketsThrough = 0;
 
-  totalPacketsThrough = DynamicCast<UdpServer> (serverApps.Get (0))->GetReceived ();
-  throughput = totalPacketsThrough * payloadSize * 8 / (simTime * 1000000.0); //Mbit/s
+  //totalPacketsThrough = DynamicCast<UdpServer> (serverApps.Get (0))->GetReceived ();
+  //throughput = totalPacketsThrough * payloadSize * 8 / (simTime * 1000000.0); //Mbit/s
 
   Simulator::Destroy();
   return 0;
