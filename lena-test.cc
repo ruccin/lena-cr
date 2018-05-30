@@ -144,10 +144,8 @@ main (int argc, char *argv[])
   WifiHelper wifi;
   wifi.SetStandard (WIFI_PHY_STANDARD_80211n_5GHZ);
   WifiMacHelper mac;
-  //wifi.SetRemoteStationManager ("ns3::IdealWifiManager");
-  wifi.SetRemoteStationManager ("ns3::ConstantRateWifiManager","DataMode", DataRate,
-                               "ControlMode", DataRate);
-
+  wifi.SetRemoteStationManager ("ns3::IdealWifiManager");
+  
   NetDeviceContainer UEDevices;
   NetDeviceContainer APDevices;
 
