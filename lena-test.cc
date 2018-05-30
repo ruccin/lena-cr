@@ -135,8 +135,6 @@ main (int argc, char *argv[])
   spectrumPhy.Set ("Receivers", UintegerValue (2));
   spectrumPhy.Set ("Transmitters", UintegerValue (2));
   spectrumPhy.Set ("RxNoiseFigure", DoubleValue (5));
-  spectrumPhy.Set ("TxGain", DoubleValue (0));
-  spectrumPhy.Set ("RxGain", DoubleValue (0));
   spectrumPhy.Set ("ShortGuardEnabled", BooleanValue (false));
 
   WifiHelper wifi;
