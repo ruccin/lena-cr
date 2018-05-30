@@ -153,7 +153,7 @@ main (int argc, char *argv[])
   wifi.SetStandard (WIFI_PHY_STANDARD_80211n_5GHZ);
   WifiMacHelper mac;
   wifi.SetRemoteStationManager ("ns3::IdealWifiManager");
-  Ssid ssid = Ssid ("ns380211n");
+  Ssid ssid = Ssid ("ns-3-ssid");
 
   NetDeviceContainer UEDevices;
   NetDeviceContainer APDevices;
@@ -212,7 +212,7 @@ main (int argc, char *argv[])
 */
 
   UdpServerHelper server (dlPort);
-  serverApps = server.Install (UEDevices.Get (0));
+  serverApps = server.Install (ueNodes.Get (0));
   serverApps.Start (Seconds (0.0));
   serverApps.Stop (Seconds (simTime + 1));
 
@@ -236,18 +236,7 @@ main (int argc, char *argv[])
   uint64_t totalPacketsThrough = 0;
 
   totalPacketsThrough = DynamicCast<UdpServer> (serverApps.Get (0))->GetReceived ();
-  throughput = totalPacketsThrough * payloadSize * 8 / (simulationTime * 1000000.0); //Mbit/s
-  
-  //FlowMonitorHelper flowMo;
-  //Ptr<FlowMonitor> monitor;
-  Ptr<NetDevice> monitor = (wifi.Install (spectrumPhy, mac, ueNodes)).Get (0);
-  Ptr<WifiPhy> wifiPhy = monitor->GetObject<WifiNetDevice> ()->GetPhy ();
-  Ptr<SpectrumWifiPhy> spectrumWifiPhy = DynamicCast<SpectrumWifiPhy> (wifiPhy);
-
-  Ptr<LteEnbPhy> ltePhy = enbLteDevs->GetObject<LteEnbNetDevice> ()->GetPhy ();
-  Ptr<LteEnbMac> lteMac = enbLteDevs->GetObject<LteEnbNetDevice> ()->GetMac ();
-  
-  monitor->SerializeToXmlFile ("lena-cr.xml", true, true);
+  throughput = totalPacketsThrough * payloadSize * 8 / (simTime * 1000000.0); //Mbit/s
 
   Simulator::Destroy();
   return 0;
