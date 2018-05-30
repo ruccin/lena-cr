@@ -103,13 +103,6 @@ main (int argc, char *argv[])
   Mobility.Install (apNodes);
   Mobility.Install (ueNodes);
   
-  std::cout << "Set of Position of All" << std::endl;
-
-  // Set of Scheduler
-  lteHelper->SetSchedulerAttribute ("UlCqiFilter", EnumValue (FfMacScheduler::PUSCH_UL_CQI));
-  
-  std::cout << "Set of Scheduler" << std::endl;
-
   for (uint8_t i = 0; i < 6; i++)
   {
     if (bw[i] == max)
@@ -126,9 +119,9 @@ main (int argc, char *argv[])
   Config::SetDefault ("ns3::LteEnbPhy::NoiseFigure", DoubleValue (5.0));
 
   lteHelper->SetAttribute ("PathlossModel", StringValue ("ns3::LogDistancePropagationLossModel"));
-
+  lteHelper->SetAttribute ("UseIdealRrc", BooleanValue (true));
+  lteHelper->SetAttribute ("UsePdschForCqiGeneration", BooleanValue (true));
   lteHelper->SetEnbAntennaModelType("ns3::IsotropicAntennaModel");
-  lteHelper->SetUeAntennaModelType("ns3::IsotropicAntennaModel");
 
   Ptr<LteEnbNetDevice> lteEnbNetDevice = enbLteDevs.Get (0)->GetObject<LteEnbNetDevice> ();
   Ptr<SpectrumChannel> downlinkSpectrumChannel = lteEnbNetDevice->GetPhy ()->GetDownlinkSpectrumPhy ()->GetChannel ();
@@ -138,6 +131,13 @@ main (int argc, char *argv[])
   spectrumPhy.SetErrorRateModel (errorModelType);
   spectrumPhy.Set ("TxPowerStart", DoubleValue (1)); // dBm  (1.26 mW)
   spectrumPhy.Set ("TxPowerEnd", DoubleValue (1));
+  spectrumPhy.Set ("ChannelWidth", UintegerValue (20));
+  spectrumPhy.Set ("Receivers", UintegerValue (2));
+  spectrumPhy.Set ("Transmitters", UintegerValue (2));
+  spectrumPhy.Set ("RxNoiseFigure", DoubleValue (5);
+  spectrumPhy.Set ("TxGain", DoubleValue (0);
+  spectrumPhy.Set ("RxGain", DoubleValue (0);
+  spectrumPhy.Set ("ShortGuardEnabled", BooleanValue (false));
 
   Config::SetDefault ("ns3::WifiPhy::CcaMode1Threshold", DoubleValue (-62.0));
 
