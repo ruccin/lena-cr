@@ -41,7 +41,9 @@ main (int argc, char *argv[])
   double distance = 4000;
   uint16_t bw[6] = {6, 15, 25, 50, 75, 100};
   uint8_t maxbw = 0;
-  uint16_t max = 100;
+  uint16_t max = 75;
+  uint32_t payloadSize = 972;
+  std::string errorModelType = "ns3::NistErrorRateModel";
 
   // Command line arguments
   CommandLine cmd;
@@ -141,21 +143,27 @@ main (int argc, char *argv[])
 
   SpectrumWifiPhyHelper spectrumPhy = SpectrumWifiPhyHelper::Default ();
   spectrumPhy.SetChannel (downlinkSpectrumChannel);
+  spectrumPhy.SetErrorRateModel (errorModelType);
+  spectrumPhy.Set ("TxPowerStart", DoubleValue (1)); // dBm  (1.26 mW)
+  spectrumPhy.Set ("TxPowerEnd", DoubleValue (1));
+
+  Config::SetDefault ("ns3::WifiPhy::CcaMode1Threshold", DoubleValue (-62.0));
 
   WifiHelper wifi;
   wifi.SetStandard (WIFI_PHY_STANDARD_80211n_5GHZ);
   WifiMacHelper mac;
   wifi.SetRemoteStationManager ("ns3::IdealWifiManager");
-
-  mac.SetType ("ns3::StaWifiMac")
+  Ssid ssid = Ssid ("ns380211n");
 
   NetDeviceContainer UEDevices;
   NetDeviceContainer APDevices;
-  
+
+  mac.SetType ("ns3::StaWifiMac"
+               "Ssid", SsidValue (ssid));
   UEDevices = wifi.Install (spectrumPhy, mac, ueNodes.Get (0));
 
-  mac.SetType ("ns3::ApWifiMac");
-
+  mac.SetType ("ns3::ApWifiMac"
+               "Ssid", SsidValue (ssid));
   APDevices = wifi.Install (spectrumPhy, mac, apNodes.Get (0));
  
   // Install the IP stack on the UEs
@@ -163,8 +171,12 @@ main (int argc, char *argv[])
   internet.Install (apNodes);
 
   ipv4h.SetBase ("3.0.0.0", "255.0.0.0");
-  ipv4h.Assign (UEDevices);
-  ipv4h.Assign (APDevices);
+
+  Ipv4InterfaceContainer ueIpIfaces;
+  Ipv4InterfaceContainer apIpIfaces;
+
+  ueIpIfaces = ipv4h.Assign (UEDevices);
+  apIpIfaces = ipv4h.Assign (APDevices);
 
   Ptr<Node> ueNode = ueNodes.Get (0);
   Ipv4StaticRoutingHelper ipv4RoutingHelper;
@@ -188,22 +200,43 @@ main (int argc, char *argv[])
   wifiClient.SetAttribute("PacketSize",UintegerValue(1024));
   wifiClient.Install(ueNodes.Get(0));
 */
-  BulkSendHelper dlClientHelper ("ns3::TcpSocketFactory", InetSocketAddress (remoteHostAddr, dlPort));
-  dlClientHelper.SetAttribute ("MaxBytes", UintegerValue (1000000000));
-  dlClientHelper.SetAttribute ("SendSize", UintegerValue (1024));
+/*
+  BulkSendHelper dlClientHelper ("ns3::UdpSocketFactory", InetSocketAddress (remoteHostAddr, dlPort));
+  dlClientHelper.SetAttribute ("MaxPactets", UintegerValue (4294967295u));
+  dlClientHelper.SetAttribute ("PacketSize", UintegerValue (972));
+  dlClientHelper.SetAttribute ("Interval", TimeValue (Time ("0.00001")));
   clientApps.Add (dlClientHelper.Install (ueNodes.Get(0)));
 
-  PacketSinkHelper dlPacketSinkHelper ("ns3::TcpSocketFactory", InetSocketAddress (Ipv4Address::GetAny (), dlPort));
+  PacketSinkHelper dlPacketSinkHelper ("ns3::UdpSocketFactory", InetSocketAddress (Ipv4Address::GetAny (), dlPort));
   serverApps.Add (dlPacketSinkHelper.Install (remoteHost));
+*/
+
+  UdpServerHelper server (dlPort);
+  serverApps = server.Install (UEDevices.Get (0));
+  serverApps.Start (Seconds (0.0));
+  serverApps.Stop (Seconds (simTime + 1));
+
+  UdpClientHelper client (ueIpIfaces.GetAddress (0), dlPort);
+  client.SetAttribute ("MaxPackets", UintegerValue (4294967295u));
+  client.SetAttribute ("Interval", TimeValue (Time ("0.00001"))); //packets/s
+  client.SetAttribute ("PacketSize", UintegerValue (payloadSize));
+  clientApps = client.Install (remoteHost);
+  clientApps.Start (Seconds (1.0));
+  clientApps.Stop (Seconds (simTime + 1));
 
   std::cout << "Install and start applications on UE and remote host" << std::endl;
 
   // Simulation Start
   std::cout << "Simulation running" << std::endl;
 
-  Simulator::Stop(Seconds(simTime));
-
+  Simulator::Stop(Seconds(simTime + 1));
   Simulator::Run();
+
+  double throughput = 0;
+  uint64_t totalPacketsThrough = 0;
+
+  totalPacketsThrough = DynamicCast<UdpServer> (serverApps.Get (0))->GetReceived ();
+  throughput = totalPacketsThrough * payloadSize * 8 / (simulationTime * 1000000.0); //Mbit/s
   
   //FlowMonitorHelper flowMo;
   //Ptr<FlowMonitor> monitor;
