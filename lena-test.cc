@@ -152,7 +152,9 @@ main (int argc, char *argv[])
   WifiHelper wifi;
   wifi.SetStandard (WIFI_PHY_STANDARD_80211n_5GHZ);
   WifiMacHelper mac;
-  wifi.SetRemoteStationManager ("ns3::IdealWifiManager");
+  //wifi.SetRemoteStationManager ("ns3::IdealWifiManager");
+  wifi.SetRemoteStationManager ("ns3::ConstantRateWifiManager","DataMode", DataRate,
+                               "ControlMode", DataRate);
 
   NetDeviceContainer UEDevices;
   NetDeviceContainer APDevices;
@@ -176,6 +178,7 @@ main (int argc, char *argv[])
   apIpIfaces = ipv4h.Assign (APDevices);
 
   Ptr<Node> ueNode = ueNodes.Get (0);
+
   Ipv4StaticRoutingHelper ipv4RoutingHelper;
   Ptr<Ipv4StaticRouting> ueStaticRouting = ipv4RoutingHelper.GetStaticRouting (ueNode->GetObject<Ipv4> ());
   ueStaticRouting->AddHostRouteTo (Ipv4Address ("1.0.0.2"), Ipv4Address ("3.0.0.1"), 1);
@@ -189,25 +192,6 @@ main (int argc, char *argv[])
   ApplicationContainer clientApps;
   ApplicationContainer serverApps;
 
-/*
-  OnOffHelper wifiClient ("ns3::UdpSocketFactory", InetSocketAddress (remoteHostAddr ,dlPort));
-  wifiClient.SetAttribute("OnTime",StringValue("ns3::ExponentialRandomVariable[Mean=0.352]"));
-  wifiClient.SetAttribute("OffTime",StringValue("ns3::ExponentialRandomVariable[Mean=0.652]"));
-  wifiClient.SetAttribute("DataRate",StringValue("320kb/s"));
-  wifiClient.SetAttribute("PacketSize",UintegerValue(1024));
-  wifiClient.Install(ueNodes.Get(0));
-*/
-/*
-  BulkSendHelper dlClientHelper ("ns3::UdpSocketFactory", InetSocketAddress (remoteHostAddr, dlPort));
-  dlClientHelper.SetAttribute ("MaxPactets", UintegerValue (4294967295u));
-  dlClientHelper.SetAttribute ("PacketSize", UintegerValue (972));
-  dlClientHelper.SetAttribute ("Interval", TimeValue (Time ("0.00001")));
-  clientApps.Add (dlClientHelper.Install (ueNodes.Get(0)));
-
-  PacketSinkHelper dlPacketSinkHelper ("ns3::UdpSocketFactory", InetSocketAddress (Ipv4Address::GetAny (), dlPort));
-  serverApps.Add (dlPacketSinkHelper.Install (remoteHost));
-*/
-
   UdpServerHelper server (dlPort);
   serverApps = server.Install (ueNodes.Get (0));
   serverApps.Start (Seconds (0.0));
@@ -220,8 +204,6 @@ main (int argc, char *argv[])
   clientApps = client.Install (remoteHost);
   clientApps.Start (Seconds (1.0));
   clientApps.Stop (Seconds (simTime + 1));
-
-  std::cout << "Install and start applications on UE and remote host" << std::endl;
 
   // Simulation Start
   std::cout << "Simulation running" << std::endl;
