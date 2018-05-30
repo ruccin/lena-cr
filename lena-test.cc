@@ -81,7 +81,7 @@ main (int argc, char *argv[])
   Ipv4AddressHelper ipv4h;
   ipv4h.SetBase ("1.0.0.0", "255.0.0.0");
   Ipv4InterfaceContainer internetIpIfaces = ipv4h.Assign (internetDevices);
-  //Ipv4Address remoteHostAddr = internetIpIfaces.GetAddress (1);
+  Ipv4Address remoteHostAddr = internetIpIfaces.GetAddress (1);
 
   NodeContainer ueNodes;
   NodeContainer enbNodes;
@@ -183,15 +183,15 @@ main (int argc, char *argv[])
   ApplicationContainer serverApps;
 
   UdpServerHelper server (dlPort);
-  serverApps = server.Install (ueNodes.Get (0));
+  serverApps = server.Install (remoteHost);
   serverApps.Start (Seconds (0.0));
   serverApps.Stop (Seconds (simTime + 1));
 
-  UdpClientHelper client (ueIpIfaces.GetAddress (0), dlPort);
+  UdpClientHelper client (remoteHostAddr.GetAddress (0), dlPort);
   client.SetAttribute ("MaxPackets", UintegerValue (4294967295u));
   client.SetAttribute ("Interval", TimeValue (Time ("0.00001"))); //packets/s
   client.SetAttribute ("PacketSize", UintegerValue (payloadSize));
-  clientApps = client.Install (remoteHost);
+  clientApps = client.Install (ueNodes.Get (0));
   clientApps.Start (Seconds (1.0));
   clientApps.Stop (Seconds (simTime + 1));
 
