@@ -28,7 +28,13 @@
 using namespace ns3;
 using namespace std;
 
-NS_LOG_COMPONENT_DEFINE ("lena-cr-test");
+NS_LOG_COMPONENT_DEFINE ("lena-cr-wifi-test");
+
+// UE --- AP --- eNB -- pgw --- remoteHost
+//     |      |              |
+//   WiFi     |             P2P
+//            |
+//           CR(SpectrumAccess)
 
 int
 main (int argc, char *argv[])
