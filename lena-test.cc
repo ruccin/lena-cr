@@ -147,8 +147,7 @@ main (int argc, char *argv[])
   WifiMacHelper mac;
   wifi.SetRemoteStationManager ("ns3::IdealWifiManager");
 
-  mac.SetType ("ns3::StaWifiMac",
-               "ActiveProbing", BooleanValue (false));
+  mac.SetType ("ns3::StaWifiMac")
 
   NetDeviceContainer UEDevices;
   NetDeviceContainer APDevices;
@@ -206,11 +205,15 @@ main (int argc, char *argv[])
 
   Simulator::Run();
   
-  FlowMonitorHelper flowMo;
-  Ptr<FlowMonitor> monitor;
+  //FlowMonitorHelper flowMo;
+  //Ptr<FlowMonitor> monitor;
+  Ptr<NetDevice> monitor = (wifi.Install (spectrumPhy, mac, ueNodes)).Get (0);
+  Ptr<WifiPhy> wifiPhy = monitor->GetObject<WifiNetDevice> ()->GetPhy ();
+  Ptr<SpectrumWifiPhy> spectrumWifiPhy = DynamicCast<SpectrumWifiPhy> (wifiPhy);
 
-  monitor = flowMo.Install (ueNodes.Get (0));
-  monitor = flowMo.Install (remoteHost);
+  Ptr<LteEnbPhy> ltePhy = enbLteDevs->GetObject<LteEnbNetDevice> ()->GetPhy ();
+  Ptr<LteEnbMac> lteMac = enbLteDevs->GetObject<LteEnbNetDevice> ()->GetMac ();
+  
   monitor->SerializeToXmlFile ("lena-cr.xml", true, true);
 
   Simulator::Destroy();
