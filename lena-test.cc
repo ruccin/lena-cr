@@ -187,7 +187,7 @@ main (int argc, char *argv[])
   serverApps.Start (Seconds (0.0));
   serverApps.Stop (Seconds (simTime + 1));
 
-  UdpClientHelper client (remoteHostAddr.GetAddress (0), dlPort);
+  UdpClientHelper client (remoteHostAddr, dlPort);
   client.SetAttribute ("MaxPackets", UintegerValue (4294967295u));
   client.SetAttribute ("Interval", TimeValue (Time ("0.00001"))); //packets/s
   client.SetAttribute ("PacketSize", UintegerValue (payloadSize));
