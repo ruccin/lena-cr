@@ -102,7 +102,7 @@ main (int argc, char *argv[])
   Mobility.Install (enbNodes);
   Mobility.Install (apNodes);
   Mobility.Install (ueNodes);
-  
+
   for (uint8_t i = 0; i < 6; i++)
   {
     if (bw[i] == max)
@@ -134,9 +134,9 @@ main (int argc, char *argv[])
   spectrumPhy.Set ("ChannelWidth", UintegerValue (20));
   spectrumPhy.Set ("Receivers", UintegerValue (2));
   spectrumPhy.Set ("Transmitters", UintegerValue (2));
-  spectrumPhy.Set ("RxNoiseFigure", DoubleValue (5);
-  spectrumPhy.Set ("TxGain", DoubleValue (0);
-  spectrumPhy.Set ("RxGain", DoubleValue (0);
+  spectrumPhy.Set ("RxNoiseFigure", DoubleValue (5));
+  spectrumPhy.Set ("TxGain", DoubleValue (0));
+  spectrumPhy.Set ("RxGain", DoubleValue (0));
   spectrumPhy.Set ("ShortGuardEnabled", BooleanValue (false));
 
   Config::SetDefault ("ns3::WifiPhy::CcaMode1Threshold", DoubleValue (-62.0));
