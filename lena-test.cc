@@ -105,19 +105,11 @@ main (int argc, char *argv[])
   
   std::cout << "Set of Position of All" << std::endl;
 
-/*
-  // Configuration MIMO
-  Config::SetDefault("ns3::LteEnbRrc::DefaultTransmissionMode", UintegerValue(mimo));
-  Config::SetDefault("ns3::LteAmc::AmcModel", EnumValue(LteAmc::PiroEW2010));
-  Config::SetDefault("ns3::LteAmc::Ber", DoubleValue(0.00005));
-
-  std::cout << "Configuration MIMO" << std::endl;
-  
   // Set of Scheduler
   lteHelper->SetSchedulerAttribute ("UlCqiFilter", EnumValue (FfMacScheduler::PUSCH_UL_CQI));
   
   std::cout << "Set of Scheduler" << std::endl;
-*/
+
   for (uint8_t i = 0; i < 6; i++)
   {
     if (bw[i] == max)
