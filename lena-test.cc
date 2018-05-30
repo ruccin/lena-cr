@@ -47,7 +47,7 @@ main (int argc, char *argv[])
   double distance = 4000;
   uint16_t bw[6] = {6, 15, 25, 50, 75, 100};
   uint8_t maxbw = 0;
-  uint16_t max = 75;
+  uint16_t max = 100;
   uint32_t payloadSize = 972;
   std::string errorModelType = "ns3::NistErrorRateModel";
 
@@ -117,18 +117,21 @@ main (int argc, char *argv[])
 
   NetDeviceContainer enbLteDevs = lteHelper->InstallEnbDevice (enbNodes);
 
-  Config::SetDefault ("ns3::LteEnbNetDevice::DlEarfcn", UintegerValue (100));
-  Config::SetDefault ("ns3::LteEnbNetDevice::UlEarfcn", UintegerValue (100 + 18000));
+  Config::SetDefault ("ns3::LteEnbNetDevice::DlEarfcn", UintegerValue (255444));
+  Config::SetDefault ("ns3::LteUeNetDevice::DlEarfcn", UintegerValue (255444));
   Config::SetDefault ("ns3::LteEnbNetDevice::DlBandwidth", UintegerValue (maxbw));
-  Config::SetDefault ("ns3::LteEnbNetDevice::UlBandwidth", UintegerValue (maxbw));
   Config::SetDefault ("ns3::LteEnbPhy::TxPower", DoubleValue (35));
+  Config::SetDefault ("ns3::LteUePhy::TxPower", DoubleValue (20));
   Config::SetDefault ("ns3::LteEnbPhy::NoiseFigure", DoubleValue (5.0));
 
   lteHelper->SetAttribute ("PathlossModel", StringValue ("ns3::LogDistancePropagationLossModel"));
   lteHelper->SetAttribute ("UseIdealRrc", BooleanValue (true));
   lteHelper->SetAttribute ("UsePdschForCqiGeneration", BooleanValue (true));
   lteHelper->SetEnbAntennaModelType("ns3::IsotropicAntennaModel");
-
+  lteHelper->SetEnbAntennaModelAttribute("Gain", DoubleValue(5));
+  lteHelper->SetSchedulerType("ns3::PfFfMacScheduler");
+  lteHelper->SetSchedulerAttribute("UlCqiFillter", EnumValue (FfMacScheduler::PUSCH_UL_CQI));
+  
   Ptr<LteEnbNetDevice> lteEnbNetDevice = enbLteDevs.Get (0)->GetObject<LteEnbNetDevice> ();
   Ptr<SpectrumChannel> downlinkSpectrumChannel = lteEnbNetDevice->GetPhy ()->GetDownlinkSpectrumPhy ()->GetChannel ();
 
@@ -173,7 +176,7 @@ main (int argc, char *argv[])
 
   Ipv4StaticRoutingHelper ipv4RoutingHelper;
   Ptr<Ipv4StaticRouting> ueStaticRouting = ipv4RoutingHelper.GetStaticRouting (ueNode->GetObject<Ipv4> ());
-  ueStaticRouting->AddHostRouteTo (Ipv4Address ("1.0.0.2"), Ipv4Address ("3.0.0.1"), 1);
+  ueStaticRouting->AddHostRouteTo (Ipv4Address ("3.0.0.1"), Ipv4Address ("1.0.0.2"), 1);
 
   Ptr<Ipv4StaticRouting> remoteHostStaticRouting = ipv4RoutingHelper.GetStaticRouting (remoteHost->GetObject<Ipv4> ());
   remoteHostStaticRouting->AddHostRouteTo (Ipv4Address ("1.0.0.2"), Ipv4Address ("1.0.0.2"), 1);
@@ -184,16 +187,16 @@ main (int argc, char *argv[])
   ApplicationContainer clientApps;
   ApplicationContainer serverApps;
 
-  UdpServerHelper server (dlPort);
-  serverApps = server.Install (remoteHost);
+  UdpServerHelper server (remoteHostAddr, dlPort);
+  serverApps = server.Install (ueNodes.Get (0));
   serverApps.Start (Seconds (0.0));
   serverApps.Stop (Seconds (simTime + 1));
 
-  UdpClientHelper client (remoteHostAddr, dlPort);
+  UdpClientHelper client (dlPort);
   client.SetAttribute ("MaxPackets", UintegerValue (4294967295u));
   client.SetAttribute ("Interval", TimeValue (Time ("0.00001"))); //packets/s
   client.SetAttribute ("PacketSize", UintegerValue (payloadSize));
-  clientApps = client.Install (ueNodes.Get (0));
+  clientApps = client.Install (RemoteHost);
   clientApps.Start (Seconds (1.0));
   clientApps.Stop (Seconds (simTime + 1));
 
