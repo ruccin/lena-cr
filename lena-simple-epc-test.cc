@@ -175,17 +175,17 @@ main (int argc, char *argv[])
       UdpClientHelper dlClient (ueIpIface.GetAddress (u), dlPort);
       dlClient.SetAttribute ("Interval", TimeValue (MilliSeconds(interPacketInterval)));
       dlClient.SetAttribute ("MaxPackets", UintegerValue(4294967295u));
-      dlClient.SetAttribute ("SendSize", UintegerValue(4096));
+      dlClient.SetAttribute ("SendSize", UintegerValue(512));
 
       UdpClientHelper ulClient (remoteHostAddr, ulPort);
       ulClient.SetAttribute ("Interval", TimeValue (MilliSeconds(interPacketInterval)));
       ulClient.SetAttribute ("MaxPackets", UintegerValue(4294967295u));
-      ulClient.SetAttribute ("SendSize", UintegerValue(4096));
+      ulClient.SetAttribute ("SendSize", UintegerValue(512));
 
       UdpClientHelper client (ueIpIface.GetAddress (u), otherPort);
       client.SetAttribute ("Interval", TimeValue (MilliSeconds(interPacketInterval)));
       client.SetAttribute ("MaxPackets", UintegerValue(4294967295u));
-      client.SetAttribute ("SendSize", UintegerValue(4096));
+      client.SetAttribute ("SendSize", UintegerValue(512));
 
       clientApps.Add (dlClient.Install (remoteHost));
       clientApps.Add (ulClient.Install (ueNodes.Get(u)));
