@@ -180,12 +180,12 @@ main (int argc, char *argv[])
       BulkSendHelper ulClient (remoteHostAddr, ulPort);
       ulClient.SetAttribute ("Interval", TimeValue (MilliSeconds(interPacketInterval)));
       ulClient.SetAttribute ("MaxPackets", UintegerValue(4294967295u));
-      dlClient.SetAttribute ("SendSize", UintegerValue(4096));
+      ulClient.SetAttribute ("SendSize", UintegerValue(4096));
 
       BulkSendHelper client (ueIpIface.GetAddress (u), otherPort);
       client.SetAttribute ("Interval", TimeValue (MilliSeconds(interPacketInterval)));
       client.SetAttribute ("MaxPackets", UintegerValue(4294967295u));
-      dlClient.SetAttribute ("SendSize", UintegerValue(4096));
+      client.SetAttribute ("SendSize", UintegerValue(4096));
 
       clientApps.Add (dlClient.Install (remoteHost));
       clientApps.Add (ulClient.Install (ueNodes.Get(u)));
