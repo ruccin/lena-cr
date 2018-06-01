@@ -127,12 +127,12 @@ main (int argc, char *argv[])
   NetDeviceContainer enbLteDevs = lteHelper->InstallEnbDevice (enbNodes);
   NetDeviceContainer ueLteDevs = lteHelper->InstallUeDevice (ueNodes);
 
-  //Config::SetDefault ("ns3::LteEnbNetDevice::DlEarfcn", UintegerValue (255444));
-  //Config::SetDefault ("ns3::LteUeNetDevice::DlEarfcn", UintegerValue (255444));
   Config::SetDefault ("ns3::LteEnbNetDevice::DlBandwidth", UintegerValue (100));
+  Config::SetDefault ("ns3::LteEnbNetDevice::UlBandwidth", UintegerValue (100));
   Config::SetDefault ("ns3::LteEnbPhy::TxPower", DoubleValue (35));
   Config::SetDefault ("ns3::LteUePhy::TxPower", DoubleValue (20));
   Config::SetDefault ("ns3::LteEnbPhy::NoiseFigure", DoubleValue (5.0));
+  Config::SetDefault ("ns3::LteUePhy::NoiseFigure", DoubleValue (5.0));
 
   // Install the IP stack on the UEs
   internet.Install (ueNodes);
@@ -172,17 +172,20 @@ main (int argc, char *argv[])
       serverApps.Add (ulPacketSinkHelper.Install (remoteHost));
       serverApps.Add (packetSinkHelper.Install (ueNodes.Get(u)));
 
-      UdpClientHelper dlClient (ueIpIface.GetAddress (u), dlPort);
+      BulkSendHelper dlClient (ueIpIface.GetAddress (u), dlPort);
       dlClient.SetAttribute ("Interval", TimeValue (MilliSeconds(interPacketInterval)));
       dlClient.SetAttribute ("MaxPackets", UintegerValue(4294967295u));
+      dlClient.SetAttribute ("SendSize", UintegerValue(4096));
 
-      UdpClientHelper ulClient (remoteHostAddr, ulPort);
+      BulkSendHelper ulClient (remoteHostAddr, ulPort);
       ulClient.SetAttribute ("Interval", TimeValue (MilliSeconds(interPacketInterval)));
       ulClient.SetAttribute ("MaxPackets", UintegerValue(4294967295u));
+      dlClient.SetAttribute ("SendSize", UintegerValue(4096));
 
-      UdpClientHelper client (ueIpIface.GetAddress (u), otherPort);
+      BulkSendHelper client (ueIpIface.GetAddress (u), otherPort);
       client.SetAttribute ("Interval", TimeValue (MilliSeconds(interPacketInterval)));
       client.SetAttribute ("MaxPackets", UintegerValue(4294967295u));
+      dlClient.SetAttribute ("SendSize", UintegerValue(4096));
 
       clientApps.Add (dlClient.Install (remoteHost));
       clientApps.Add (ulClient.Install (ueNodes.Get(u)));
