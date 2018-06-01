@@ -31,6 +31,8 @@
 #include "ns3/config-store.h"
 #include "ns3/trace-helper.h"
 #include "ns3/flow-monitor-helper.h"
+#include "ns3/lte-enb-net-device.h"
+#include "ns3/lte-ue-net-device.h"
 //#include "ns3/gtk-config-store.h"
 
 using namespace ns3;
