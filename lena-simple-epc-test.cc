@@ -127,8 +127,8 @@ main (int argc, char *argv[])
   NetDeviceContainer enbLteDevs = lteHelper->InstallEnbDevice (enbNodes);
   NetDeviceContainer ueLteDevs = lteHelper->InstallUeDevice (ueNodes);
 
-  Config::SetDefault ("ns3::LteEnbNetDevice::DlEarfcn", UintegerValue (255444));
-  Config::SetDefault ("ns3::LteUeNetDevice::DlEarfcn", UintegerValue (255444));
+  //Config::SetDefault ("ns3::LteEnbNetDevice::DlEarfcn", UintegerValue (255444));
+  //Config::SetDefault ("ns3::LteUeNetDevice::DlEarfcn", UintegerValue (255444));
   Config::SetDefault ("ns3::LteEnbNetDevice::DlBandwidth", UintegerValue (100));
   Config::SetDefault ("ns3::LteEnbPhy::TxPower", DoubleValue (35));
   Config::SetDefault ("ns3::LteUePhy::TxPower", DoubleValue (20));
