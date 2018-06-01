@@ -48,7 +48,7 @@ main (int argc, char *argv[])
 {
 
   uint16_t numberOfNodes = 2;
-  double simTime = 1.1;
+  double simTime = 10;
   double distance = 60.0;
   double interPacketInterval = 100;
   bool useCa = false;
@@ -172,15 +172,15 @@ main (int argc, char *argv[])
 
       UdpClientHelper dlClient (ueIpIface.GetAddress (u), dlPort);
       dlClient.SetAttribute ("Interval", TimeValue (MilliSeconds(interPacketInterval)));
-      dlClient.SetAttribute ("MaxPackets", UintegerValue(1000000));
+      dlClient.SetAttribute ("MaxPackets", UintegerValue(4294967295u));
 
       UdpClientHelper ulClient (remoteHostAddr, ulPort);
       ulClient.SetAttribute ("Interval", TimeValue (MilliSeconds(interPacketInterval)));
-      ulClient.SetAttribute ("MaxPackets", UintegerValue(1000000));
+      ulClient.SetAttribute ("MaxPackets", UintegerValue(4294967295u));
 
       UdpClientHelper client (ueIpIface.GetAddress (u), otherPort);
       client.SetAttribute ("Interval", TimeValue (MilliSeconds(interPacketInterval)));
-      client.SetAttribute ("MaxPackets", UintegerValue(1000000));
+      client.SetAttribute ("MaxPackets", UintegerValue(4294967295u));
 
       clientApps.Add (dlClient.Install (remoteHost));
       clientApps.Add (ulClient.Install (ueNodes.Get(u)));
@@ -195,7 +195,9 @@ main (int argc, char *argv[])
     }
   serverApps.Start (Seconds (0.01));
   clientApps.Start (Seconds (0.01));
+
   lteHelper->EnableTraces ();
+
   // Uncomment to enable PCAP tracing
   //p2ph.EnablePcapAll("lena-epc-first");
 
@@ -208,7 +210,8 @@ main (int argc, char *argv[])
   FlowMonitorHelper flowmo;
   Ptr<FlowMonitor> monitor;
 
-  monitor = flowmo.InstallAll ();
+  monitor = flowmo.Install (remoteHost);
+  monitor = flowmo.Install (ueNodes);
   monitor->SerializeToXmlFile ("flowmon.xml", true, true);
 
   Simulator::Destroy();
