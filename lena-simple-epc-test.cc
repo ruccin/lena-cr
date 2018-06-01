@@ -165,24 +165,24 @@ main (int argc, char *argv[])
     {
       ++ulPort;
       ++otherPort;
-      PacketSinkHelper dlPacketSinkHelper ("ns3::UdpSocketFactory", InetSocketAddress (Ipv4Address::GetAny (), dlPort));
-      PacketSinkHelper ulPacketSinkHelper ("ns3::UdpSocketFactory", InetSocketAddress (Ipv4Address::GetAny (), ulPort));
-      PacketSinkHelper packetSinkHelper ("ns3::UdpSocketFactory", InetSocketAddress (Ipv4Address::GetAny (), otherPort));
+      BulkSendHelper dlPacketSinkHelper ("ns3::UdpSocketFactory", InetSocketAddress (Ipv4Address::GetAny (), dlPort));
+      BulkSendHelper ulPacketSinkHelper ("ns3::UdpSocketFactory", InetSocketAddress (Ipv4Address::GetAny (), ulPort));
+      BulkSendHelper packetSinkHelper ("ns3::UdpSocketFactory", InetSocketAddress (Ipv4Address::GetAny (), otherPort));
       serverApps.Add (dlPacketSinkHelper.Install (ueNodes.Get(u)));
       serverApps.Add (ulPacketSinkHelper.Install (remoteHost));
       serverApps.Add (packetSinkHelper.Install (ueNodes.Get(u)));
 
-      BulkSendHelper dlClient (ueIpIface.GetAddress (u), dlPort);
+      UdpClientHelper dlClient (ueIpIface.GetAddress (u), dlPort);
       dlClient.SetAttribute ("Interval", TimeValue (MilliSeconds(interPacketInterval)));
       dlClient.SetAttribute ("MaxPackets", UintegerValue(4294967295u));
       dlClient.SetAttribute ("SendSize", UintegerValue(4096));
 
-      BulkSendHelper ulClient (remoteHostAddr, ulPort);
+      UdpClientHelper ulClient (remoteHostAddr, ulPort);
       ulClient.SetAttribute ("Interval", TimeValue (MilliSeconds(interPacketInterval)));
       ulClient.SetAttribute ("MaxPackets", UintegerValue(4294967295u));
       ulClient.SetAttribute ("SendSize", UintegerValue(4096));
 
-      BulkSendHelper client (ueIpIface.GetAddress (u), otherPort);
+      UdpClientHelper client (ueIpIface.GetAddress (u), otherPort);
       client.SetAttribute ("Interval", TimeValue (MilliSeconds(interPacketInterval)));
       client.SetAttribute ("MaxPackets", UintegerValue(4294967295u));
       client.SetAttribute ("SendSize", UintegerValue(4096));
