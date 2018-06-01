@@ -175,9 +175,9 @@ main (int argc, char *argv[])
       BulkSendApplication ulBulkSendApplication ("ns3::BulkSendApplication", InetSocketAddress (Ipv4Address::GetAny (), ulPort));
       BulkSendApplication bulkSendApplication ("ns3::BulkSendApplication", InetSocketAddress (Ipv4Address::GetAny (), otherPort));
 
-      dlBulkSendApplication.SetAttribute ("SendSize", 4096);
-      ulBulkSendApplication.SetAttribute ("SendSize", 4096);
-      bulkSendApplication.SetAttribute ("SendSize", 4096);
+      dlBulkSendApplication.SetAttribute ("SendSize", UintegerValue(4096));
+      ulBulkSendApplication.SetAttribute ("SendSize", UintegerValue(4096));
+      bulkSendApplication.SetAttribute ("SendSize", UintegerValue(4096));
 
       // KwangMin
       serverApps.Add (dlPacketSinkHelper.Install (ueNodes.Get(u)));
