@@ -138,14 +138,17 @@ main (int argc, char *argv[])
   SpectrumWifiPhyHelper spectrumPhy = SpectrumWifiPhyHelper::Default ();
   spectrumPhy.SetChannel (downlinkSpectrumChannel);
   spectrumPhy.SetErrorRateModel (errorModelType);
-  /*
+
   spectrumPhy.Set ("TxPowerStart", DoubleValue (1)); // dBm  (1.26 mW)
   spectrumPhy.Set ("TxPowerEnd", DoubleValue (1));
   spectrumPhy.Set ("Receivers", UintegerValue (2));
   spectrumPhy.Set ("Transmitters", UintegerValue (2));
   spectrumPhy.Set ("RxNoiseFigure", DoubleValue (5));
   spectrumPhy.Set ("ShortGuardEnabled", BooleanValue (false));
-  */
+  spectrumPhy.Set ("TxGain", DoubleValue(5));
+  spectrumPhy.Set ("RxGain", DoubleValue(5)); 
+  spectrumPhy.SetPcapDataLinkType (SpectrumWifiPhyHelper::DLT_IEEE802_11_RADIO);
+  
   WifiHelper wifi;
   wifi.SetStandard (WIFI_PHY_STANDARD_80211n_5GHZ);
   WifiMacHelper mac;
