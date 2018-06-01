@@ -124,14 +124,14 @@ main (int argc, char *argv[])
   // Install LTE Devices to the nodes
   NetDeviceContainer enbLteDevs = lteHelper->InstallEnbDevice (enbNodes);
   NetDeviceContainer ueLteDevs = lteHelper->InstallUeDevice (ueNodes);
-/*
+
   Config::SetDefault ("ns3::LteEnbNetDevice::DlEarfcn", UintegerValue (255444));
   Config::SetDefault ("ns3::LteUeNetDevice::DlEarfcn", UintegerValue (255444));
-  Config::SetDefault ("ns3::LteEnbNetDevice::DlBandwidth", UintegerValue (maxbw));
+  Config::SetDefault ("ns3::LteEnbNetDevice::DlBandwidth", UintegerValue (100));
   Config::SetDefault ("ns3::LteEnbPhy::TxPower", DoubleValue (35));
   Config::SetDefault ("ns3::LteUePhy::TxPower", DoubleValue (20));
   Config::SetDefault ("ns3::LteEnbPhy::NoiseFigure", DoubleValue (5.0));
-*/
+
   // Install the IP stack on the UEs
   internet.Install (ueNodes);
   Ipv4InterfaceContainer ueIpIface;
