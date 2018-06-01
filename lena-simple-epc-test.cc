@@ -165,27 +165,28 @@ main (int argc, char *argv[])
     {
       ++ulPort;
       ++otherPort;
-      BulkSendHelper dlPacketSinkHelper ("ns3::UdpSocketFactory", InetSocketAddress (Ipv4Address::GetAny (), dlPort));
-      BulkSendHelper ulPacketSinkHelper ("ns3::UdpSocketFactory", InetSocketAddress (Ipv4Address::GetAny (), ulPort));
-      BulkSendHelper packetSinkHelper ("ns3::UdpSocketFactory", InetSocketAddress (Ipv4Address::GetAny (), otherPort));
+      PacketSinkHelper dlPacketSinkHelper ("ns3::UdpSocketFactory", InetSocketAddress (Ipv4Address::GetAny (), dlPort));
+      PacketSinkHelper ulPacketSinkHelper ("ns3::UdpSocketFactory", InetSocketAddress (Ipv4Address::GetAny (), ulPort));
+      PacketSinkHelper packetSinkHelper ("ns3::UdpSocketFactory", InetSocketAddress (Ipv4Address::GetAny (), otherPort));
+
       serverApps.Add (dlPacketSinkHelper.Install (ueNodes.Get(u)));
       serverApps.Add (ulPacketSinkHelper.Install (remoteHost));
       serverApps.Add (packetSinkHelper.Install (ueNodes.Get(u)));
 
-      UdpClientHelper dlClient (ueIpIface.GetAddress (u), dlPort);
-      dlClient.SetAttribute ("Interval", TimeValue (MilliSeconds(interPacketInterval)));
-      dlClient.SetAttribute ("MaxPackets", UintegerValue(4294967295u));
-      dlClient.SetAttribute ("SendSize", UintegerValue(512));
+      BulkSendApplication dlClient (ueIpIface.GetAddress (u), dlPort);
+      //dlClient.SetAttribute ("Interval", TimeValue (MilliSeconds(interPacketInterval)));
+      //dlClient.SetAttribute ("MaxPackets", UintegerValue(4294967295u));
+      dlClient.SetAttribute ("SendSize", UintegerValue(1024));
 
-      UdpClientHelper ulClient (remoteHostAddr, ulPort);
-      ulClient.SetAttribute ("Interval", TimeValue (MilliSeconds(interPacketInterval)));
-      ulClient.SetAttribute ("MaxPackets", UintegerValue(4294967295u));
-      ulClient.SetAttribute ("SendSize", UintegerValue(512));
+      BulkSendApplication ulClient (remoteHostAddr, ulPort);
+      //ulClient.SetAttribute ("Interval", TimeValue (MilliSeconds(interPacketInterval)));
+      //ulClient.SetAttribute ("MaxPackets", UintegerValue(4294967295u));
+      ulClient.SetAttribute ("SendSize", UintegerValue(1024));
 
-      UdpClientHelper client (ueIpIface.GetAddress (u), otherPort);
-      client.SetAttribute ("Interval", TimeValue (MilliSeconds(interPacketInterval)));
-      client.SetAttribute ("MaxPackets", UintegerValue(4294967295u));
-      client.SetAttribute ("SendSize", UintegerValue(512));
+      BulkSendApplication client (ueIpIface.GetAddress (u), otherPort);
+      //client.SetAttribute ("Interval", TimeValue (MilliSeconds(interPacketInterval)));
+      //client.SetAttribute ("MaxPackets", UintegerValue(4294967295u));
+      client.SetAttribute ("SendSize", UintegerValue(1024));
 
       clientApps.Add (dlClient.Install (remoteHost));
       clientApps.Add (ulClient.Install (ueNodes.Get(u)));
