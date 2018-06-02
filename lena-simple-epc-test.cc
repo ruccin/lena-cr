@@ -176,7 +176,6 @@ main (int argc, char *argv[])
       serverApps.Add (ulPacketSinkHelper.Install (remoteHost));
       serverApps.SetAttribute ("SendSize", UintegerValue (1024));
       serverApps.SetAttribute ("MaxBytes", UintegerValue (4294967295u));
-
     }
 
   serverApps.Start (Seconds (0.01));
