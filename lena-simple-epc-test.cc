@@ -169,7 +169,7 @@ main (int argc, char *argv[])
       BulkSendHelper dlPacketSinkHelper ("ns3::UdpSocketFactory", InetSocketAddress (ueIpIface.GetAddress (u), dlPort));
       BulkSendHelper ulPacketSinkHelper ("ns3::UdpSocketFactory", InetSocketAddress (remoteHostAddr, ulPort));
       
-      clientApps.Add (dlPacketSinkHelper.Install (RemoteHost));
+      clientApps.Add (dlPacketSinkHelper.Install (remoteHost));
       dlPacketSinkHelper.SetAttribute ("SendSize", UintegerValue (1024));
       dlPacketSinkHelper.SetAttribute ("MaxBytes", UintegerValue (4294967295u));
 
