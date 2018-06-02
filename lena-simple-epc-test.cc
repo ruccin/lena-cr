@@ -50,7 +50,7 @@ main (int argc, char *argv[])
 {
 
   uint16_t numberOfNodes = 2;
-  double simTime = 10;
+  double simTime = 120;
   double distance = 60.0;
   double interPacketInterval = 100;
   bool useCa = false;
