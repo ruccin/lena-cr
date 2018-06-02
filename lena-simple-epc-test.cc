@@ -166,7 +166,7 @@ main (int argc, char *argv[])
     {
       ++ulPort;
       ++otherPort;
-      BulkSendHelper dlPacketSinkHelper ("ns3::UdpSocketFactory", InetSocketAddress (ueIpIface, dlPort));
+      BulkSendHelper dlPacketSinkHelper ("ns3::UdpSocketFactory", InetSocketAddress (ueIpIface.GetAddress (u), dlPort));
       BulkSendHelper ulPacketSinkHelper ("ns3::UdpSocketFactory", InetSocketAddress (remoteHostAddr, ulPort));
       
       clientApps.Add (dlPacketSinkHelper.Install (RemoteHost));
