@@ -165,8 +165,8 @@ main (int argc, char *argv[])
   for (uint32_t u = 0; u < ueNodes.GetN (); ++u)
     {
       ++ulPort;
-      BulkSendHelper dlPacketSinkHelper ("ns3::UdpSocketFactory", InetSocketAddress (ueIpIface.GetAddress (u), dlPort));
-      BulkSendHelper ulPacketSinkHelper ("ns3::UdpSocketFactory", InetSocketAddress (remoteHostAddr, ulPort));
+      BulkSendHelper dlPacketSinkHelper ("ns3::TcpSocketFactory", InetSocketAddress (ueIpIface.GetAddress (u), dlPort));
+      BulkSendHelper ulPacketSinkHelper ("ns3::TcpSocketFactory", InetSocketAddress (remoteHostAddr, ulPort));
       
       clientApps.Add (dlPacketSinkHelper.Install (remoteHost));
       dlPacketSinkHelper.SetAttribute ("SendSize", UintegerValue (1024));
