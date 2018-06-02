@@ -157,24 +157,20 @@ main (int argc, char *argv[])
 
   // Install and start applications on UEs and remote host
   uint16_t dlPort = 1234;
-  uint16_t ulPort = 2000;
 
   ApplicationContainer clientApps;
   ApplicationContainer serverApps;
 
   for (uint32_t u = 0; u < ueNodes.GetN (); ++u)
     {
-      ++ulPort;
       BulkSendHelper dlPacketSinkHelper ("ns3::TcpSocketFactory", InetSocketAddress (ueIpIface.GetAddress (u), dlPort));
-      BulkSendHelper ulPacketSinkHelper ("ns3::TcpSocketFactory", InetSocketAddress (remoteHostAddr, ulPort));
+      PacketSinkHelper ulPacketSinkHelper ("ns3::TcpSocketFactory", InetSocketAddress (Ipv4Address::GetAny (), dlPort));
       
       clientApps.Add (dlPacketSinkHelper.Install (remoteHost));
-      dlPacketSinkHelper.SetAttribute ("SendSize", UintegerValue (1024));
-      dlPacketSinkHelper.SetAttribute ("MaxBytes", UintegerValue (4294967295u));
+      dlPacketSinkHelper.SetAttribute ("SendSize", UintegerValue (2000));
+      dlPacketSinkHelper.SetAttribute ("MaxBytes", UintegerValue (1000000000));
 
       serverApps.Add (ulPacketSinkHelper.Install (ueNodes.Get(u)));
-      ulPacketSinkHelper.SetAttribute ("SendSize", UintegerValue (1024));
-      ulPacketSinkHelper.SetAttribute ("MaxBytes", UintegerValue (4294967295u));
     }
 
   serverApps.Start (Seconds (0.01));
