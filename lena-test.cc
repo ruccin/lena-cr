@@ -48,7 +48,6 @@ main (int argc, char *argv[])
   uint16_t bw[6] = {6, 15, 25, 50, 75, 100};
   uint8_t maxbw = 0;
   uint16_t max = 100;
-  uint32_t payloadSize = 972;
   std::string errorModelType = "ns3::NistErrorRateModel";
 
   // Command line arguments
@@ -189,19 +188,32 @@ main (int argc, char *argv[])
 
   ApplicationContainer clientApps;
   ApplicationContainer serverApps;
-
+/*
   UdpServerHelper server (remoteHostAddr, dlPort);
   serverApps = server.Install (ueNodes.Get (0));
   serverApps.Start (Seconds (0.0));
   serverApps.Stop (Seconds (simTime + 1));
 
   UdpClientHelper client (dlPort);
-  client.SetAttribute ("MaxPackets", UintegerValue (4294967295u));
+  client.SetAttribute ("MaxPackets", UintegerValue (1000000000));
   client.SetAttribute ("Interval", TimeValue (Time ("0.00001"))); //packets/s
   client.SetAttribute ("PacketSize", UintegerValue (payloadSize));
   clientApps = client.Install (RemoteHost);
   clientApps.Start (Seconds (1.0));
   clientApps.Stop (Seconds (simTime + 1));
+*/
+
+  BulkSendHelper dlBulkSendHelper ("ns3::TcpSocketFactory", InetSocketAddress (Ipv4Address::GetAny (), dlPort));
+  PacketSinkHelper dlPacketSinkHelper ("ns3::TcpSocketFactory", InetSocketAddress (Ipv4Address::GetAny (), dlPort));
+
+  clientApps.Add (dlBulkSendHelper.Install (remoteHost));
+  dlBulkSendHelper.SetAttribute ("SendSize", UintegerValue (2000));
+  dlBulkSendHelper.SetAttribute ("MaxBytes", UintegerValue (1000000000));
+
+  serverApps.Add (dlPacketSinkHelper.Install (ueNodes));
+
+  serverApps.Start (Seconds (0.01));
+  clientApps.Start (Seconds (0.01));
 
   // Simulation Start
   std::cout << "Simulation running" << std::endl;
