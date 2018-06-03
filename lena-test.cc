@@ -128,8 +128,8 @@ main (int argc, char *argv[])
   lteHelper->SetAttribute ("UsePdschForCqiGeneration", BooleanValue (true));
   //lteHelper->SetEnbAntennaModelType("ns3::IsotropicAntennaModel");
   //lteHelper->SetEnbAntennaModelAttribute("Gain", DoubleValue(5));
-  lteHelper->SetSchedulerType("ns3::PfFfMacScheduler");
-  lteHelper->SetSchedulerAttribute("UlCqiFillter", EnumValue (FfMacScheduler::PUSCH_UL_CQI));
+  //lteHelper->SetSchedulerType("ns3::PfFfMacScheduler");
+  //lteHelper->SetSchedulerAttribute("UlCqiFillter", EnumValue (FfMacScheduler::PUSCH_UL_CQI));
   
   Ptr<LteEnbNetDevice> lteEnbNetDevice = enbLteDevs.Get (0)->GetObject<LteEnbNetDevice> ();
   Ptr<SpectrumChannel> downlinkSpectrumChannel = lteEnbNetDevice->GetPhy ()->GetDownlinkSpectrumPhy ()->GetChannel ();
