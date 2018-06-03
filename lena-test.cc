@@ -126,8 +126,8 @@ main (int argc, char *argv[])
   lteHelper->SetAttribute ("PathlossModel", StringValue ("ns3::LogDistancePropagationLossModel"));
   lteHelper->SetAttribute ("UseIdealRrc", BooleanValue (true));
   lteHelper->SetAttribute ("UsePdschForCqiGeneration", BooleanValue (true));
-  lteHelper->SetEnbAntennaModelType("ns3::IsotropicAntennaModel");
-  lteHelper->SetEnbAntennaModelAttribute("Gain", DoubleValue(5));
+  //lteHelper->SetEnbAntennaModelType("ns3::IsotropicAntennaModel");
+  //lteHelper->SetEnbAntennaModelAttribute("Gain", DoubleValue(5));
   lteHelper->SetSchedulerType("ns3::PfFfMacScheduler");
   lteHelper->SetSchedulerAttribute("UlCqiFillter", EnumValue (FfMacScheduler::PUSCH_UL_CQI));
   
