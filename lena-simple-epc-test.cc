@@ -42,6 +42,7 @@
 #include "ns3/lte-common.h"
 #include "ns3/trace-helper.h"
 #include "ns3/packet-sink-helper.h"
+#include "ns3/flow-monitor-module.h"
 
 using namespace ns3;
 
