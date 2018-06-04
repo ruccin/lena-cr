@@ -50,7 +50,7 @@ main (int argc, char *argv[])
 {
 
   uint16_t numberOfEnbNodes = 1;
-  uint16_t numberOfUeNodes = 2;
+  uint16_t numberOfUeNodes = 1;
   double simTime = 120;
   double distance = 4000.0;
   double interPacketInterval = 100;
@@ -65,7 +65,7 @@ main (int argc, char *argv[])
   cmd.Parse(argc, argv);
 
   Ptr<LteHelper> lteHelper = CreateObject<LteHelper> ();
-  Ptr<PointToPointEpcHelper>  epcHelper = CreateObject<PointToPointEpcHelper> ();
+  Ptr<PointToPointEpcHelper> epcHelper = CreateObject<PointToPointEpcHelper> ();
   lteHelper->SetEpcHelper (epcHelper);
 
   ConfigStore inputConfig;
@@ -102,21 +102,21 @@ main (int argc, char *argv[])
   NodeContainer ueNodes;
   NodeContainer enbNodes;
   enbNodes.Create(numberOfEnbNodes);
-  ueNodes.Create(numberOfUeNodes.Get (0));
-  staNodes.Create(numberOfUeNodes.Get (1));
+  ueNodes.Create(numberOfUeNodes);
+  //staNodes.Create(numberOfUeNodes);
 
   // Install Mobility Model
   Ptr<ListPositionAllocator> positionAlloc = CreateObject<ListPositionAllocator> ();
   positionAlloc->Add (Vector (distance, 0.0, 0.0));
   positionAlloc->Add (Vector (distance * 0.161, 0.0, 0.0));
-  positionAlloc->Add (Vector (distance * 0.334, 0.0, 0.0));
+  //positionAlloc->Add (Vector (distance * 0.334, 0.0, 0.0));
 
   MobilityHelper mobility;
   mobility.SetMobilityModel("ns3::ConstantPositionMobilityModel");
   mobility.SetPositionAllocator(positionAlloc);
   mobility.Install(enbNodes);
   mobility.Install(ueNodes);
-  mobility.Install(staNodes);
+  //mobility.Install(staNodes);
 
   // Install LTE Devices to the nodes
   NetDeviceContainer enbLteDevs = lteHelper->InstallEnbDevice (enbNodes);
