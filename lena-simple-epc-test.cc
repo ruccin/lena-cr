@@ -43,6 +43,7 @@
 #include "ns3/trace-helper.h"
 #include "ns3/packet-sink-helper.h"
 #include "ns3/flow-monitor-module.h"
+#include "ns3/wifi-module.h"
 
 using namespace ns3;
 
@@ -60,9 +61,13 @@ main (int argc, char *argv[])
 
   uint16_t numberOfEnbNodes = 1;
   uint16_t numberOfUeNodes = 1;
+  uint16_t numberOfStaNodes = 1;
+  uint32_t payloadSize = 1472;
   double simTime = 30;
   double distance = 4000.0;
   double interPacketInterval = 100;
+  std::string phyRate = "HtMcs7";
+  std::string dataRate = "100Mbps";
 
   // Command line arguments
   CommandLine cmd;
@@ -110,49 +115,41 @@ main (int argc, char *argv[])
 
   NodeContainer ueNodes;
   NodeContainer enbNodes;
+  NodeContainer staNodes;
   enbNodes.Create(numberOfEnbNodes);
   ueNodes.Create(numberOfUeNodes);
-  //staNodes.Create(numberOfUeNodes);
+  staNodes.Create(numberOfStaNodes);
 
   // Install Mobility Model
   Ptr<ListPositionAllocator> positionAlloc = CreateObject<ListPositionAllocator> ();
   positionAlloc->Add (Vector (distance, 0.0, 0.0));
   positionAlloc->Add (Vector (distance * 0.161, 0.0, 0.0));
-  //positionAlloc->Add (Vector (distance * 0.334, 0.0, 0.0));
+  positionAlloc->Add (Vector (distance * 0.334, 0.0, 0.0));
 
   MobilityHelper mobility;
   mobility.SetMobilityModel("ns3::ConstantPositionMobilityModel");
   mobility.SetPositionAllocator(positionAlloc);
   mobility.Install(enbNodes);
   mobility.Install(ueNodes);
-  //mobility.Install(staNodes);
+  mobility.Install(staNodes);
 
   // Install LTE Devices to the nodes
   NetDeviceContainer enbLteDevs = lteHelper->InstallEnbDevice (enbNodes);
   NetDeviceContainer ueLteDevs = lteHelper->InstallUeDevice (ueNodes);
-/*
-  //Config::SetDefault ("ns3::LteEnbNetDevice::DlEarfcn", UintegerValue (255444));
-  //Config::SetDefault ("ns3::LteUeNetDevice::DlEarfcn", UintegerValue (255444));
-  Config::SetDefault ("ns3::LteEnbNetDevice::DlBandwidth", UintegerValue (50));
-  Config::SetDefault ("ns3::LteEnbPhy::TxPower", DoubleValue (35));
-  Config::SetDefault ("ns3::LteUePhy::TxPower", DoubleValue (20));
-  Config::SetDefault ("ns3::LteEnbPhy::NoiseFigure", DoubleValue (5.0));
-  Config::SetDefault ("ns3::LteUePhy::NoiseFigure", DoubleValue (5.0));
-*/  
 
   // LTE configuration parametes
   lteHelper->SetSchedulerType ("ns3::PfFfMacScheduler");
   lteHelper->SetSchedulerAttribute ("UlCqiFilter", EnumValue (FfMacScheduler::PUSCH_UL_CQI));
   // LTE-U DL transmission @5180 MHz
-  //lteHelper->SetEnbDeviceAttribute ("DlEarfcn", UintegerValue (255444));
+  lteHelper->SetEnbDeviceAttribute ("DlEarfcn", UintegerValue (255444));
   lteHelper->SetEnbDeviceAttribute ("DlBandwidth", UintegerValue (6));
   // needed for initial cell search
-  //lteHelper->SetUeDeviceAttribute ("DlEarfcn", UintegerValue (255444));
+  lteHelper->SetUeDeviceAttribute ("DlEarfcn", UintegerValue (255444));
   // LTE calibration
-  //lteHelper->SetEnbAntennaModelType ("ns3::IsotropicAntennaModel");
-  //lteHelper->SetEnbAntennaModelAttribute ("Gain",   DoubleValue (5));
-  //Config::SetDefault ("ns3::LteEnbPhy::TxPower", DoubleValue (35));
-  //Config::SetDefault ("ns3::LteUePhy::TxPower", DoubleValue (20));
+  lteHelper->SetEnbAntennaModelType ("ns3::IsotropicAntennaModel");
+  lteHelper->SetEnbAntennaModelAttribute ("Gain",   DoubleValue (5));
+  Config::SetDefault ("ns3::LteEnbPhy::TxPower", DoubleValue (35));
+  Config::SetDefault ("ns3::LteUePhy::TxPower", DoubleValue (20));
 
   // Install the IP stack on the UEs
   internet.Install (ueNodes);
@@ -172,20 +169,74 @@ main (int argc, char *argv[])
   EpsBearer bearer (q);
   lteHelper->ActivateDedicatedEpsBearer (ueDevice, bearer, EpcTft::Default ());
 
+  // WiFi
+  WifiHelper wifiHelper;
+  wifiHelper.SetStandard (WIFI_PHY_STANDARD_80211n_5GHZ);
+  WifiMacHelper wifiMac;
+
+  YansWifiChannelHelper wifiChannel = YansWifiChannelHelper::Default ();
+  wifiChannel.SetPropagationDelay ("ns3::ConstantSpeedPropagationDelayModel");
+  wifiChannel.AddPropagationLoss ("ns3::FriisPropagationLossModel", "Frequency", DoubleValue (5e9));
+
+  YansWifiPhyHelper wifiPhy = YansWifiPhyHelper::Default ();
+  wifiPhy.SetChannel (wifiChannel.Create());
+  wifiPhy.Set ("TxPowerStart", DoubleValue (10.0));
+  wifiPhy.Set ("TxPowerEnd", DoubleValue (10.0));
+  wifiPhy.Set ("TxPowerLevels", UintegerValue (1));
+  wifiPhy.Set ("TxGain", DoubleValue (0));
+  wifiPhy.Set ("RxGain", DoubleValue (0));
+  wifiPhy.Set ("RxNoiseFigure", DoubleValue (10));
+  wifiPhy.Set ("CcaMode1Threshold", DoubleValue (-79));
+  wifiPhy.Set ("EnergyDetectionThreshold", DoubleValue (-79 + 3));
+  wifiPhy.SetErrorRateModel ("ns3::YansErrorRateModel");
+  wifiHelper.SetRemoteStationManager ("ns3::ConstantRateWifiManager",
+                                      "DataMode", StringValue (phyRate),
+                                      "ControlMode", StringValue ("HtMcs0"));
+
+  /* Configure AP */
+  Ssid ssid = Ssid ("network");
+  wifiMac.SetType ("ns3::ApWifiMac",
+                   "Ssid", SsidValue (ssid));
+  
+  NetDeviceContainer apDevices;
+  apDevices = wifiHelper.Install (wifiPhy, wifiMac, ueNodes);
+
+  /* Configure STA */
+  wifiMac.SetType ("ns3::StaWifiMac",
+                   "Ssid", SsidValue (ssid));
+
+  NetDeviceContainer staDevices;
+  staDevices = wifiHelper.Install (wifiPhy, wifiMac, staNodes);
+
+  internet.Install (staNodes);
+  ipv4h.SetBase ("3.0.0.0", "255.0.0.0");
+  Ipv4InterfaceContainer staInterface;
+  staInterface = ipv4h.assign (staDevices);
+
+  /* Populate routing table */
+  Ipv4GlobalRoutingHelper::PopulateRoutingTables ();
+
+  Ptr<Node> staNode = staNodes.Get (0);
+  Ptr<Ipv4StaticRouting> staStaticRouting = ipv4RoutingHelper.GetStaticRouting (staNode->GetObject<Ipv4> ());
+  staStaticRouting->AddHostRouteTo (Ipv4Address ("1.0.0.2"), Ipv4Address ("7.0.0.1"), 1);
+
   // Install and start applications on UEs and remote host
   uint16_t dlPort = 1234;
 
   ApplicationContainer clientApps;
   ApplicationContainer serverApps;
 
-  BulkSendHelper clientbulk ("ns3::TcpSocketFactory", InetSocketAddress (ueIpIface.GetAddress (0), dlPort));
-  PacketSinkHelper serverbulk ("ns3::TcpSocketFactory", InetSocketAddress (Ipv4Address::GetAny (), dlPort));
-      
+  PacketSinkHelper clientbulk ("ns3::TcpSocketFactory", InetSocketAddress (staInterface.GetAddress (0), dlPort));
   clientApps.Add (clientbulk.Install (remoteHost));
   clientbulk.SetAttribute ("SendSize", UintegerValue (2000));
   clientbulk.SetAttribute ("MaxBytes", UintegerValue (1000000000));
 
-  serverApps.Add (serverbulk.Install (ueNodes.Get (0))); 
+  OnOffHelper server ("ns3::TcpSocketFactory", (InetSocketAddress (apInterface.GetAddress (0), dlPort)));
+  server.SetAttribute ("PacketSize", UintegerValue (payloadSize));
+  server.SetAttribute ("OnTime", StringValue ("ns3::ConstantRandomVariable[Constant=1]"));
+  server.SetAttribute ("OffTime", StringValue ("ns3::ConstantRandomVariable[Constant=0]"));
+  server.SetAttribute ("DataRate", DataRateValue (DataRate (dataRate)));
+  serverApps.Add (server.Install (staNodes.Get (0))); 
   
   serverApps.Start (Seconds (0.01));
   clientApps.Start (Seconds (0.01));
@@ -197,6 +248,7 @@ main (int argc, char *argv[])
   Ptr<FlowMonitor> monitor;
 
   monitor = flowmo.Install (remoteHost);
+  monitor = flowmo.Install (staNodes);
   monitor = flowmo.Install (ueNodes);
 
   monitor->SerializeToXmlFile ("flowmo.xml", true, true);
