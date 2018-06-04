@@ -144,10 +144,10 @@ main (int argc, char *argv[])
   lteHelper->SetSchedulerType ("ns3::PfFfMacScheduler");
   lteHelper->SetSchedulerAttribute ("UlCqiFilter", EnumValue (FfMacScheduler::PUSCH_UL_CQI));
   // LTE-U DL transmission @5180 MHz
-  lteHelper->SetEnbDeviceAttribute ("DlEarfcn", UintegerValue (255444));
+  //lteHelper->SetEnbDeviceAttribute ("DlEarfcn", UintegerValue (255444));
   lteHelper->SetEnbDeviceAttribute ("DlBandwidth", UintegerValue (6));
   // needed for initial cell search
-  lteHelper->SetUeDeviceAttribute ("DlEarfcn", UintegerValue (255444));
+  //lteHelper->SetUeDeviceAttribute ("DlEarfcn", UintegerValue (255444));
   // LTE calibration
   lteHelper->SetEnbAntennaModelType ("ns3::IsotropicAntennaModel");
   lteHelper->SetEnbAntennaModelAttribute ("Gain",   DoubleValue (5));
