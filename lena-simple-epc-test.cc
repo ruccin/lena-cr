@@ -201,11 +201,11 @@ main (int argc, char *argv[])
   config.ConfigureAttributes();*/
 
   FlowMonitorHelper flowmo;
-  Ptr<FlowMonitor> monitor;
+  Ptr<FlowMonitor> monitorC = flowmo.Install (remoteHost);
+  Ptr<FlowMonitor> monitorS = flowmo.Install (ueNodes);
 
-  monitor = flowmo.Install (remoteHost);
-  monitor = flowmo.Install (ueNodes);
-  monitor->SerializeToXmlFile ("flowmon.xml", true, true);
+  monitorC->SerializeToXmlFile ("Client.xml", true, true);
+  monitorC->SerializeToXmlFile ("Server.xml", true, true);
 
   Simulator::Destroy();
   return 0;
