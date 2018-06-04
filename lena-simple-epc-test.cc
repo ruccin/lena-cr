@@ -149,10 +149,10 @@ main (int argc, char *argv[])
   // needed for initial cell search
   //lteHelper->SetUeDeviceAttribute ("DlEarfcn", UintegerValue (255444));
   // LTE calibration
-  lteHelper->SetEnbAntennaModelType ("ns3::IsotropicAntennaModel");
-  lteHelper->SetEnbAntennaModelAttribute ("Gain",   DoubleValue (5));
-  Config::SetDefault ("ns3::LteEnbPhy::TxPower", DoubleValue (35));
-  Config::SetDefault ("ns3::LteUePhy::TxPower", DoubleValue (20));
+  //lteHelper->SetEnbAntennaModelType ("ns3::IsotropicAntennaModel");
+  //lteHelper->SetEnbAntennaModelAttribute ("Gain",   DoubleValue (5));
+  //Config::SetDefault ("ns3::LteEnbPhy::TxPower", DoubleValue (35));
+  //Config::SetDefault ("ns3::LteUePhy::TxPower", DoubleValue (20));
 
   // Install the IP stack on the UEs
   internet.Install (ueNodes);
