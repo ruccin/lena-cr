@@ -211,7 +211,7 @@ main (int argc, char *argv[])
   internet.Install (staNodes);
   ipv4h.SetBase ("3.0.0.0", "255.0.0.0");
   Ipv4InterfaceContainer staInterface;
-  staInterface = ipv4h.assign (staDevices);
+  staInterface = ipv4h.Assign (staDevices);
 
   /* Populate routing table */
   Ipv4GlobalRoutingHelper::PopulateRoutingTables ();
@@ -231,7 +231,7 @@ main (int argc, char *argv[])
   clientbulk.SetAttribute ("SendSize", UintegerValue (2000));
   clientbulk.SetAttribute ("MaxBytes", UintegerValue (1000000000));
 
-  OnOffHelper server ("ns3::TcpSocketFactory", (InetSocketAddress (apInterface.GetAddress (0), dlPort)));
+  OnOffHelper server ("ns3::TcpSocketFactory", (InetSocketAddress (ueIpIface.GetAddress (0), dlPort)));
   server.SetAttribute ("PacketSize", UintegerValue (payloadSize));
   server.SetAttribute ("OnTime", StringValue ("ns3::ConstantRandomVariable[Constant=1]"));
   server.SetAttribute ("OffTime", StringValue ("ns3::ConstantRandomVariable[Constant=0]"));
