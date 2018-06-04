@@ -191,22 +191,17 @@ main (int argc, char *argv[])
 
   lteHelper->EnableTraces ();
 
-  // Uncomment to enable PCAP tracing
-  //p2ph.EnablePcapAll("lena-epc-first");
+  FlowMonitorHelper flowmo;
 
+  Ptr<FlowMonitor> monitor;
+
+  monitor = flowmo.Install (remoteHost);
+  monitor = flowmo.Install (ueNodes);
+
+  monitor->SerializeToXmlFile ("flowmo.xml", true, true);
+  
   Simulator::Stop(Seconds(simTime));
   Simulator::Run();
-
-  /*GtkConfigStore config;
-  config.ConfigureAttributes();*/
-
-  FlowMonitorHelper flowmo;
-  Ptr<FlowMonitor> monitorC = flowmo.Install (remoteHost);
-  Ptr<FlowMonitor> monitorS = flowmo.Install (ueNodes);
-
-  monitorC->SerializeToXmlFile ("Client.xml", true, true);
-  monitorC->SerializeToXmlFile ("Server.xml", true, true);
-
   Simulator::Destroy();
   return 0;
 
