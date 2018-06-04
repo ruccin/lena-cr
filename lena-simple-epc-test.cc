@@ -49,27 +49,20 @@ int
 main (int argc, char *argv[])
 {
 
-  uint16_t numberOfNodes = 2;
+  uint16_t numberOfEnbNodes = 1;
+  uint16_t numberOfUeNodes = 2;
   double simTime = 120;
-  double distance = 60.0;
+  double distance = 4000.0;
   double interPacketInterval = 100;
-  bool useCa = false;
 
   // Command line arguments
   CommandLine cmd;
-  cmd.AddValue("numberOfNodes", "Number of eNodeBs + UE pairs", numberOfNodes);
+  cmd.AddValue("numberOfNodes", "Number of eNodeBs", numberOfEnbNodes);
+  cmd.AddValue("numberOfNodes", "Number of Ues", numberOfUeNodes);
   cmd.AddValue("simTime", "Total duration of the simulation [s])", simTime);
   cmd.AddValue("distance", "Distance between eNBs [m]", distance);
   cmd.AddValue("interPacketInterval", "Inter packet interval [ms])", interPacketInterval);
-  cmd.AddValue("useCa", "Whether to use carrier aggregation.", useCa);
   cmd.Parse(argc, argv);
-
-  if (useCa)
-   {
-     Config::SetDefault ("ns3::LteHelper::UseCa", BooleanValue (useCa));
-     Config::SetDefault ("ns3::LteHelper::NumberOfComponentCarriers", UintegerValue (2));
-     Config::SetDefault ("ns3::LteHelper::EnbComponentCarrierManager", StringValue ("ns3::RrComponentCarrierManager"));
-   }
 
   Ptr<LteHelper> lteHelper = CreateObject<LteHelper> ();
   Ptr<PointToPointEpcHelper>  epcHelper = CreateObject<PointToPointEpcHelper> ();
@@ -108,52 +101,55 @@ main (int argc, char *argv[])
 
   NodeContainer ueNodes;
   NodeContainer enbNodes;
-  enbNodes.Create(numberOfNodes);
-  ueNodes.Create(numberOfNodes);
+  enbNodes.Create(numberOfEnbNodes);
+  ueNodes.Create(numberOfUeNodes.Get (0));
+  staNodes.Create(numberOfUeNodes.Get (1));
 
   // Install Mobility Model
   Ptr<ListPositionAllocator> positionAlloc = CreateObject<ListPositionAllocator> ();
-  for (uint16_t i = 0; i < numberOfNodes; i++)
-    {
-      positionAlloc->Add (Vector(distance * i, 0, 0));
-    }
+  positionAlloc->Add (Vector (distance, 0.0, 0.0));
+  positionAlloc->Add (Vector (distance * 0.161, 0.0, 0.0));
+  positionAlloc->Add (Vector (distance * 0.334, 0.0, 0.0));
+
   MobilityHelper mobility;
   mobility.SetMobilityModel("ns3::ConstantPositionMobilityModel");
   mobility.SetPositionAllocator(positionAlloc);
   mobility.Install(enbNodes);
   mobility.Install(ueNodes);
+  mobility.Install(staNodes);
 
   // Install LTE Devices to the nodes
   NetDeviceContainer enbLteDevs = lteHelper->InstallEnbDevice (enbNodes);
   NetDeviceContainer ueLteDevs = lteHelper->InstallUeDevice (ueNodes);
 
-  Config::SetDefault ("ns3::LteEnbNetDevice::DlBandwidth", UintegerValue (100));
-  Config::SetDefault ("ns3::LteEnbNetDevice::UlBandwidth", UintegerValue (100));
+  //Config::SetDefault ("ns3::LteEnbNetDevice::DlEarfcn", UintegerValue (255444));
+  //Config::SetDefault ("ns3::LteUeNetDevice::DlEarfcn", UintegerValue (255444));
+  Config::SetDefault ("ns3::LteEnbNetDevice::DlBandwidth", UintegerValue (5));
   Config::SetDefault ("ns3::LteEnbPhy::TxPower", DoubleValue (35));
   Config::SetDefault ("ns3::LteUePhy::TxPower", DoubleValue (20));
   Config::SetDefault ("ns3::LteEnbPhy::NoiseFigure", DoubleValue (5.0));
   Config::SetDefault ("ns3::LteUePhy::NoiseFigure", DoubleValue (5.0));
+  
+  lteHelper->SetEnbAntennaModelType("ns3::IsotropicAntennaModel");
+  lteHelper->SetEnbAntennaModelAttribute("Gain", DoubleValue(5));
 
   // Install the IP stack on the UEs
   internet.Install (ueNodes);
   Ipv4InterfaceContainer ueIpIface;
   ueIpIface = epcHelper->AssignUeIpv4Address (NetDeviceContainer (ueLteDevs));
+  
   // Assign IP address to UEs, and install applications
-  for (uint32_t u = 0; u < ueNodes.GetN (); ++u)
-    {
-      Ptr<Node> ueNode = ueNodes.Get (u);
-      // Set the default gateway for the UE
-      Ptr<Ipv4StaticRouting> ueStaticRouting = ipv4RoutingHelper.GetStaticRouting (ueNode->GetObject<Ipv4> ());
-      ueStaticRouting->SetDefaultRoute (epcHelper->GetUeDefaultGatewayAddress (), 1);
-    }
-
+  Ptr<Node> ueNode = ueNodes.Get (0);
+  // Set the default gateway for the UE
+  Ptr<Ipv4StaticRouting> ueStaticRouting = ipv4RoutingHelper.GetStaticRouting (ueNode->GetObject<Ipv4> ());
+  ueStaticRouting->SetDefaultRoute (epcHelper->GetUeDefaultGatewayAddress (), 1);
+  
   // Attach one UE per eNodeB
-  for (uint16_t i = 0; i < numberOfNodes; i++)
-      {
-        lteHelper->Attach (ueLteDevs.Get(i), enbLteDevs.Get(i));
-        // side effect: the default EPS bearer will be activated
-      }
-
+  lteHelper->Attach (ueLteDevs.Get(0), enbLteDevs.Get(0));
+  Ptr<NetDevice> ueDevice = ueLteDevs.Get (0);
+  enum EpsBearer::Qci q = EpsBearer::GBR_NON_CONV_VIDEO;
+  EpsBearer bearer (q);
+  lteHelper->ActivateDedicatedEpsBearer (ueDevice, bearer, EpcTft::Default ());
 
   // Install and start applications on UEs and remote host
   uint16_t dlPort = 1234;
@@ -161,18 +157,15 @@ main (int argc, char *argv[])
   ApplicationContainer clientApps;
   ApplicationContainer serverApps;
 
-  for (uint32_t u = 0; u < ueNodes.GetN (); ++u)
-    {
-      BulkSendHelper dlPacketSinkHelper ("ns3::TcpSocketFactory", InetSocketAddress (ueIpIface.GetAddress (u), dlPort));
-      PacketSinkHelper ulPacketSinkHelper ("ns3::TcpSocketFactory", InetSocketAddress (Ipv4Address::GetAny (), dlPort));
+  BulkSendHelper clientbulk ("ns3::TcpSocketFactory", InetSocketAddress (ueIpIface.GetAddress (), dlPort));
+  PacketSinkHelper serverbulk ("ns3::TcpSocketFactory", InetSocketAddress (Ipv4Address::GetAny (), dlPort));
       
-      clientApps.Add (dlPacketSinkHelper.Install (remoteHost));
-      dlPacketSinkHelper.SetAttribute ("SendSize", UintegerValue (2000));
-      dlPacketSinkHelper.SetAttribute ("MaxBytes", UintegerValue (1000000000));
+  clientApps.Add (clientbulk.Install (remoteHost));
+  clientbulk.SetAttribute ("SendSize", UintegerValue (2000));
+  clientbulk.SetAttribute ("MaxBytes", UintegerValue (1000000000));
 
-      serverApps.Add (ulPacketSinkHelper.Install (ueNodes.Get(u))); 
-    }
-
+  serverApps.Add (serverbulk.Install (ueNodes.Get(0))); 
+  
   serverApps.Start (Seconds (0.01));
   clientApps.Start (Seconds (0.01));
 
