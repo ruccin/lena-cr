@@ -29,11 +29,19 @@
 #include "ns3/applications-module.h"
 #include "ns3/point-to-point-helper.h"
 #include "ns3/config-store.h"
-#include "ns3/trace-helper.h"
-#include "ns3/flow-monitor-helper.h"
+#include "ns3/ipv4-flow-classifier.h"
+#include "ns3/propagation-loss-model.h"
+#include "ns3/lte-enb-phy.h"
+#include "ns3/lte-enb-mac.h"
+#include "ns3/lte-ue-phy.h"
+#include "ns3/lte-ue-mac.h"
 #include "ns3/lte-enb-net-device.h"
 #include "ns3/lte-ue-net-device.h"
-//#include "ns3/gtk-config-store.h"
+#include "ns3/lte-enb-rrc.h"
+#include "ns3/lte-ue-rrc.h"
+#include "ns3/lte-common.h"
+#include "ns3/trace-helper.h"
+#include "ns3/packet-sink-helper.h"
 
 using namespace ns3;
 
@@ -121,7 +129,7 @@ main (int argc, char *argv[])
   // Install LTE Devices to the nodes
   NetDeviceContainer enbLteDevs = lteHelper->InstallEnbDevice (enbNodes);
   NetDeviceContainer ueLteDevs = lteHelper->InstallUeDevice (ueNodes);
-
+/*
   //Config::SetDefault ("ns3::LteEnbNetDevice::DlEarfcn", UintegerValue (255444));
   //Config::SetDefault ("ns3::LteUeNetDevice::DlEarfcn", UintegerValue (255444));
   Config::SetDefault ("ns3::LteEnbNetDevice::DlBandwidth", UintegerValue (50));
@@ -129,7 +137,22 @@ main (int argc, char *argv[])
   Config::SetDefault ("ns3::LteUePhy::TxPower", DoubleValue (20));
   Config::SetDefault ("ns3::LteEnbPhy::NoiseFigure", DoubleValue (5.0));
   Config::SetDefault ("ns3::LteUePhy::NoiseFigure", DoubleValue (5.0));
-  
+*/  
+
+  // LTE configuration parametes
+  lteHelper->SetSchedulerType ("ns3::PfFfMacScheduler");
+  lteHelper->SetSchedulerAttribute ("UlCqiFilter", EnumValue (FfMacScheduler::PUSCH_UL_CQI));
+  // LTE-U DL transmission @5180 MHz
+  lteHelper->SetEnbDeviceAttribute ("DlEarfcn", UintegerValue (255444));
+  lteHelper->SetEnbDeviceAttribute ("DlBandwidth", UintegerValue (6));
+  // needed for initial cell search
+  lteHelper->SetUeDeviceAttribute ("DlEarfcn", UintegerValue (255444));
+  // LTE calibration
+  lteHelper->SetEnbAntennaModelType ("ns3::IsotropicAntennaModel");
+  lteHelper->SetEnbAntennaModelAttribute ("Gain",   DoubleValue (5));
+  Config::SetDefault ("ns3::LteEnbPhy::TxPower", DoubleValue (35));
+  Config::SetDefault ("ns3::LteUePhy::TxPower", DoubleValue (20));
+
   // Install the IP stack on the UEs
   internet.Install (ueNodes);
   Ipv4InterfaceContainer ueIpIface;
