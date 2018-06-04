@@ -130,9 +130,6 @@ main (int argc, char *argv[])
   Config::SetDefault ("ns3::LteEnbPhy::NoiseFigure", DoubleValue (5.0));
   Config::SetDefault ("ns3::LteUePhy::NoiseFigure", DoubleValue (5.0));
   
-  lteHelper->SetEnbAntennaModelType("ns3::IsotropicAntennaModel");
-  lteHelper->SetEnbAntennaModelAttribute("Gain", DoubleValue(5));
-
   // Install the IP stack on the UEs
   internet.Install (ueNodes);
   Ipv4InterfaceContainer ueIpIface;
