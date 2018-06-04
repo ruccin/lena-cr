@@ -144,7 +144,7 @@ main (int argc, char *argv[])
   lteHelper->SetEnbDeviceAttribute ("DlEarfcn", UintegerValue (255444));
   lteHelper->SetEnbDeviceAttribute ("DlBandwidth", UintegerValue (6));
   // needed for initial cell search
-  lteHelper->SetUeDeviceAttribute ("DlEarfcn", UintegerValue (255444));
+  //lteHelper->SetUeDeviceAttribute ("DlEarfcn", UintegerValue (255444));
   // LTE calibration
   lteHelper->SetEnbAntennaModelType ("ns3::IsotropicAntennaModel");
   lteHelper->SetEnbAntennaModelAttribute ("Gain",   DoubleValue (5));
