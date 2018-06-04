@@ -157,14 +157,14 @@ main (int argc, char *argv[])
   ApplicationContainer clientApps;
   ApplicationContainer serverApps;
 
-  BulkSendHelper clientbulk ("ns3::TcpSocketFactory", InetSocketAddress (ueIpIface.GetAddress (), dlPort));
+  BulkSendHelper clientbulk ("ns3::TcpSocketFactory", InetSocketAddress (ueIpIface.GetAddress (0), dlPort));
   PacketSinkHelper serverbulk ("ns3::TcpSocketFactory", InetSocketAddress (Ipv4Address::GetAny (), dlPort));
       
   clientApps.Add (clientbulk.Install (remoteHost));
   clientbulk.SetAttribute ("SendSize", UintegerValue (2000));
   clientbulk.SetAttribute ("MaxBytes", UintegerValue (1000000000));
 
-  serverApps.Add (serverbulk.Install (ueNodes.Get(0))); 
+  serverApps.Add (serverbulk.Install (ueNodes.Get (0))); 
   
   serverApps.Start (Seconds (0.01));
   clientApps.Start (Seconds (0.01));
