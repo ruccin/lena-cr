@@ -211,7 +211,7 @@ main (int argc, char *argv[])
   ipv4h.SetBase ("3.0.0.0", "255.0.0.0");
   Ipv4InterfaceContainer staInterface;
   staInterface = ipv4h.Assign (staDevices);  
-  Ipv4Address staAddr = staInterface.GetAddress (1);
+  //Ipv4Address staAddr = staInterface.GetAddress (1);
 
 
   //Ptr<EpcSgwPgwApplication> epcsgwpgwapp = CreateObject<EpcSgwPgwApplication> ();
@@ -234,7 +234,7 @@ main (int argc, char *argv[])
   ApplicationContainer clientApps;
   ApplicationContainer serverApps;
 
-  PacketSinkHelper server ("ns3::UdpSocketFactory", InetSocketAddress (staAddr, dlPort));
+  PacketSinkHelper server ("ns3::UdpSocketFactory", InetSocketAddress (Ipv4Address::GetAny(), dlPort));
   serverApps.Add (server.Install (remoteHost));
 
   OnOffHelper client ("ns3::UdpSocketFactory", (InetSocketAddress (remoteHostAddr, dlPort)));
