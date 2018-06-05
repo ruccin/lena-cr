@@ -61,7 +61,6 @@ main (int argc, char *argv[])
 
   uint16_t numberOfEnbNodes = 1;
   uint16_t numberOfUeNodes = 1;
-  //uint16_t numberOfApNodes = 1;
   uint16_t numberOfStaNodes = 1;
   uint32_t payloadSize = 1472;
   double simTime = 30;
@@ -110,20 +109,21 @@ main (int argc, char *argv[])
   // interface 0 is localhost, 1 is the p2p device
   Ipv4Address remoteHostAddr = internetIpIfaces.GetAddress (1);
 
+  Ipv4StaticRoutingHelper ipv4RoutingHelper;
+  Ptr<Ipv4StaticRouting> remoteHostStaticRouting = ipv4RoutingHelper.GetStaticRouting (remoteHost->GetObject<Ipv4> ());
+  remoteHostStaticRouting->AddNetworkRouteTo (Ipv4Address ("7.0.0.0"), Ipv4Mask ("255.0.0.0"), 1);
+
   NodeContainer ueNodes;
   NodeContainer enbNodes;
   NodeContainer staNodes;
-  //NodeContainer apNodes;
   enbNodes.Create(numberOfEnbNodes);
   ueNodes.Create(numberOfUeNodes);
   staNodes.Create(numberOfStaNodes);
-  //apNodes.Create(numberOfApNodes);
 
   // Install Mobility Model
   Ptr<ListPositionAllocator> positionAlloc = CreateObject<ListPositionAllocator> ();
   positionAlloc->Add (Vector (distance, 0.0, 0.0));
   positionAlloc->Add (Vector (distance * 0.161, 0.0, 0.0));
-  //positionAlloc->Add (Vector (distance * 0.161, 0.0, 0.0));
   positionAlloc->Add (Vector (distance * 0.334, 0.0, 0.0));
 
   MobilityHelper mobility;
@@ -131,7 +131,6 @@ main (int argc, char *argv[])
   mobility.SetPositionAllocator(positionAlloc);
   mobility.Install(enbNodes);
   mobility.Install(ueNodes);
-  //mobility.Install(apNodes);
   mobility.Install(staNodes);
 
   // Install LTE Devices to the nodes
@@ -156,23 +155,12 @@ main (int argc, char *argv[])
   internet.Install (ueNodes);
   Ipv4InterfaceContainer ueIpIface;
   ueIpIface = epcHelper->AssignUeIpv4Address (NetDeviceContainer (ueLteDevs));
-  //internet.Install (apNodes);
 
   // Assign IP address to UEs, and install applications
   Ptr<Node> ueNode = ueNodes.Get (0);
-  //Ptr<Node> apNode = apNodes.Get (0);
   // Set the default gateway for the UE
-  Ipv4StaticRoutingHelper ipv4RoutingHelper;
-  
-  Ptr<Ipv4StaticRouting> remoteHostStaticRouting = ipv4RoutingHelper.GetStaticRouting (remoteHost->GetObject<Ipv4> ());
-  remoteHostStaticRouting->AddNetworkRouteTo (Ipv4Address ("7.0.0.0"), Ipv4Mask ("255.0.0.0"), 1);
-
   Ptr<Ipv4StaticRouting> ueStaticRouting = ipv4RoutingHelper.GetStaticRouting (ueNode->GetObject<Ipv4> ());
   ueStaticRouting->SetDefaultRoute (epcHelper->GetUeDefaultGatewayAddress (), 1);
-  //ipv4h.SetBase ("4.0.0.0", "255.0.0.0");
-  //NetDeviceContainer interp2p = p2ph.Install (ueNode, apNode);
-  //Ipv4InterfaceContainer interp2pIfaces = ipv4h.Assign (interp2p);
-  //Ipv4Address ueNodeAddr = interp2pIfaces.GetAddress (1);
 
   // Attach one UE per eNodeB
   lteHelper->Attach (ueLteDevs.Get(0), enbLteDevs.Get(0));
@@ -223,8 +211,7 @@ main (int argc, char *argv[])
   internet.Install (staNodes);
   ipv4h.SetBase ("3.0.0.0", "255.0.0.0");
   Ipv4InterfaceContainer staInterface;
-  staInterface = ipv4h.Assign (staDevices);
-  Ipv4Address stanodeAddr = staInterface.GetAddress (1);    
+  staInterface = ipv4h.Assign (staDevices);  
 
   /* Populate routing table */
   Ipv4GlobalRoutingHelper::PopulateRoutingTables ();
@@ -245,7 +232,7 @@ main (int argc, char *argv[])
   ApplicationContainer clientApps;
   ApplicationContainer serverApps;
 
-  PacketSinkHelper server ("ns3::UdpSocketFactory", InetSocketAddress (stanodeAddr, dlPort));
+  PacketSinkHelper server ("ns3::UdpSocketFactory", InetSocketAddress (Ipv4Address::GetAny(), dlPort));
   serverApps.Add (server.Install (remoteHost));
 
   OnOffHelper client ("ns3::UdpSocketFactory", (InetSocketAddress (remoteHostAddr, dlPort)));
