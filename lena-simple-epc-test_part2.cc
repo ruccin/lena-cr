@@ -163,6 +163,7 @@ main (int argc, char *argv[])
 
   // Assign IP address to UEs, and install applications
   Ptr<Node> ueNode = ueNodes.Get (0);
+  Ptr<Node> apNode = apNodes.Get (0);
   // Set the default gateway for the UE
   Ptr<Ipv4StaticRouting> ueStaticRouting = ipv4RoutingHelper.GetStaticRouting (ueNode->GetObject<Ipv4> ());
   ueStaticRouting->SetDefaultRoute (epcHelper->GetUeDefaultGatewayAddress (), 1);
@@ -174,7 +175,7 @@ main (int argc, char *argv[])
   EpsBearer bearer (q);
   lteHelper->ActivateDedicatedEpsBearer (ueDevice, bearer, EpcTft::Default ());
 
-  NetDeviceContainer in_p2p = p2ph.Install (apNodes, ueNodes);
+  NetDeviceContainer in_p2p = p2ph.Install (apNode, ueNode);
   ipv4h.SetBase ("7.0.0.0", "255.0.0.0");
   Ipv4InterfaceContainer in_IpIfaces = ipv4h.Assign (in_p2p);
   // interface 0 is localhost, 1 is the p2p device
@@ -224,9 +225,8 @@ main (int argc, char *argv[])
 
   Ipv4GlobalRoutingHelper::PopulateRoutingTables ();
 
-  Ptr<EpcSgwPgwApplication> epcsgwpgwapp = CreateObject<EpcSgwPgwApplication> ();
-  epcsgwpgwapp->RecvFromTunDevice (Ptr<Packet> packet, Ipv4Address ("3.0.0.1"), Ipv4Address ("1.0.0.2"), protocolNumber);
-
+  //Ptr<EpcSgwPgwApplication> epcsgwpgwapp = CreateObject<EpcSgwPgwApplication> ();
+  //epcsgwpgwapp->RecvFromTunDevice (Ptr<Packet> packet, Ipv4Address ("3.0.0.1"), Ipv4Address ("1.0.0.2"), protocolNumber);
 
   Ptr<Node> staNode = staNodes.Get (0);
   Ptr<Ipv4StaticRouting> staStaticRouting = ipv4RoutingHelper.GetStaticRouting (staNode->GetObject<Ipv4> ());
