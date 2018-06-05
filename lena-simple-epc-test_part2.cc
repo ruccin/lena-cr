@@ -239,7 +239,7 @@ main (int argc, char *argv[])
   rhStaticRouting->AddHostRouteTo (Ipv4Address ("1.0.0.2"), Ipv4Address ("1.0.0.2"), 1);
 
   // Install and start applications on UEs and remote host
-  uint16_t dlPort1 = 1234;
+  uint16_t dlPort = 1234;
 
   ApplicationContainer clientApps;
   ApplicationContainer clientApps2;
@@ -253,7 +253,7 @@ main (int argc, char *argv[])
   client.SetAttribute ("OnTime", StringValue ("ns3::ConstantRandomVariable[Constant=1]"));
   client.SetAttribute ("OffTime", StringValue ("ns3::ConstantRandomVariable[Constant=0]"));
   client.SetAttribute ("DataRate", DataRateValue (DataRate (dataRate)));
-  clientApps.Add (client.Install (staNodes.Get(0)); 
+  clientApps.Add (client.Install (staNodes.Get(0))); 
   
   serverApps.Start (Seconds (0.01));
   clientApps.Start (Seconds (0.01));
