@@ -111,8 +111,8 @@ main (int argc, char *argv[])
   Ipv4Address remoteHostAddr = internetIpIfaces.GetAddress (1);
 
   Ipv4StaticRoutingHelper ipv4RoutingHelper;
-  //Ptr<Ipv4StaticRouting> remoteHostStaticRouting = ipv4RoutingHelper.GetStaticRouting (remoteHost->GetObject<Ipv4> ());
-  //remoteHostStaticRouting->AddNetworkRouteTo (Ipv4Address ("7.0.0.0"), Ipv4Mask ("255.0.0.0"), 1);
+  Ptr<Ipv4StaticRouting> remoteHostStaticRouting = ipv4RoutingHelper.GetStaticRouting (remoteHost->GetObject<Ipv4> ());
+  remoteHostStaticRouting->AddNetworkRouteTo (Ipv4Address ("7.0.0.0"), Ipv4Mask ("255.0.0.0"), Ipv4Address ("3.0.0.0"), 1);
 
   NodeContainer ueNodes;
   NodeContainer enbNodes;
@@ -248,10 +248,7 @@ main (int argc, char *argv[])
   PacketSinkHelper server ("ns3::UdpSocketFactory", InetSocketAddress (staInterface, dlPort));
   serverApps.Add (server.Install (remoteHost));
 
-  PacketSinkHelper client2 ("ns3::UdpSocketFactory", InetSocketAddress (remoteHostAddr, dlPort));
-  clientApps2.Add (client2.Install (ueNodes.Get(0));
-
-  OnOffHelper client ("ns3::UdpSocketFactory", (InetSocketAddress (in_IpIfaces, dlPort)));
+  OnOffHelper client ("ns3::UdpSocketFactory", (InetSocketAddress (remoteHostAddr, dlPort)));
   client.SetAttribute ("PacketSize", UintegerValue (payloadSize));
   client.SetAttribute ("OnTime", StringValue ("ns3::ConstantRandomVariable[Constant=1]"));
   client.SetAttribute ("OffTime", StringValue ("ns3::ConstantRandomVariable[Constant=0]"));
