@@ -168,8 +168,8 @@ main (int argc, char *argv[])
 
   //Ptr<Ipv4StaticRouting> ueStaticRouting = ipv4RoutingHelper.GetStaticRouting (ueNode->GetObject<Ipv4> ());
   //ueStaticRouting->SetDefaultRoute (epcHelper->GetUeDefaultGatewayAddress (), 1);
-  ipv4h.SetBase ("7.0.0.0", "255.0.0.0");
-  NetDeviceContainer interp2p = p2ph.Install (ueNode, apNode);
+  ipv4h.SetBase ("4.0.0.0", "255.0.0.0");
+  NetDeviceContainer interp2p = p2ph.Install (ueNodes, apNodes);
   Ipv4InterfaceContainer interp2pIfaces = ipv4h.Assign (interp2p);
   //Ipv4Address ueNodeAddr = interp2pIfaces.GetAddress (1);
 
