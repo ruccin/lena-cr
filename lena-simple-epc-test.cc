@@ -156,7 +156,8 @@ main (int argc, char *argv[])
   internet.Install (ueNodes);
   Ipv4InterfaceContainer ueIpIface;
   ueIpIface = epcHelper->AssignUeIpv4Address (NetDeviceContainer (ueLteDevs));
-  
+  internet.Install (apNodes);
+
   // Assign IP address to UEs, and install applications
   Ptr<Node> ueNode = ueNodes.Get (0);
   Ptr<Node> apNode = apNodes.Get (0);
@@ -220,7 +221,6 @@ main (int argc, char *argv[])
   staDevices = wifiHelper.Install (wifiPhy, wifiMac, staNodes);
 
   internet.Install (staNodes);
-  internet.Install (apNodes);
 
   ipv4h.SetBase ("3.0.0.0", "255.0.0.0");
 
