@@ -234,10 +234,10 @@ main (int argc, char *argv[])
 
   Ptr<Node> staNode = staNodes.Get (0);
   Ptr<Ipv4StaticRouting> staStaticRouting = ipv4RoutingHelper.GetStaticRouting (staNode->GetObject<Ipv4> ());
-  staStaticRouting->AddHostRouteTo (Ipv4Address ("1.0.0.2"), Ipv4Address ("3.0.0.1"), 1);
+  staStaticRouting->AddHostRouteTo (Ipv4Address ("1.0.0.2"), Ipv4Address ("7.0.0.1"), 1);
 
-  Ptr<Ipv4StaticRouting> apStaticRouting = ipv4RoutingHelper.GetStaticRouting (ueNode->GetObject<Ipv4> ());
-  apStaticRouting->AddHostRouteTo (Ipv4Address ("1.0.0.2"), Ipv4Address ("7.0.0.1"), 1);  
+  //Ptr<Ipv4StaticRouting> apStaticRouting = ipv4RoutingHelper.GetStaticRouting (ueNode->GetObject<Ipv4> ());
+  //apStaticRouting->AddHostRouteTo (Ipv4Address ("1.0.0.2"), Ipv4Address ("7.0.0.1"), 2);  
 
   Ptr<Ipv4StaticRouting> rhStaticRouting = ipv4RoutingHelper.GetStaticRouting (remoteHost->GetObject<Ipv4> ());
   rhStaticRouting->AddHostRouteTo (Ipv4Address ("1.0.0.2"), Ipv4Address ("1.0.0.2"), 1);
@@ -248,15 +248,15 @@ main (int argc, char *argv[])
   ApplicationContainer clientApps;
   ApplicationContainer serverApps;
 
-  PacketSinkHelper server ("ns3::UdpSocketFactory", InetSocketAddress (remoteHostAddr, dlPort));
-  serverApps.Add (server.Install (staNodes.Get(0)));
+  PacketSinkHelper client ("ns3::UdpSocketFactory", InetSocketAddress (stanodeAddr, dlPort));
+  clientApps.Add (client.Install (remoteHost));
 
-  OnOffHelper client ("ns3::UdpSocketFactory", (InetSocketAddress (stanodeAddr, dlPort)));
-  client.SetAttribute ("PacketSize", UintegerValue (payloadSize));
-  client.SetAttribute ("OnTime", StringValue ("ns3::ConstantRandomVariable[Constant=1]"));
-  client.SetAttribute ("OffTime", StringValue ("ns3::ConstantRandomVariable[Constant=0]"));
-  client.SetAttribute ("DataRate", DataRateValue (DataRate (dataRate)));
-  clientApps.Add (client.Install (remoteHost)); 
+  OnOffHelper server ("ns3::UdpSocketFactory", (InetSocketAddress (remoteHostAddr, dlPort)));
+  server.SetAttribute ("PacketSize", UintegerValue (payloadSize));
+  server.SetAttribute ("OnTime", StringValue ("ns3::ConstantRandomVariable[Constant=1]"));
+  server.SetAttribute ("OffTime", StringValue ("ns3::ConstantRandomVariable[Constant=0]"));
+  server.SetAttribute ("DataRate", DataRateValue (DataRate (dataRate)));
+  serverApps.Add (server.Install (staNodes.Get(0))); 
   
   serverApps.Start (Seconds (0.01));
   clientApps.Start (Seconds (0.01));
