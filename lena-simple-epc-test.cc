@@ -221,9 +221,7 @@ main (int argc, char *argv[])
   staDevices = wifiHelper.Install (wifiPhy, wifiMac, staNodes);
 
   internet.Install (staNodes);
-
   ipv4h.SetBase ("3.0.0.0", "255.0.0.0");
-
   Ipv4InterfaceContainer staInterface;
   staInterface = ipv4h.Assign (staDevices);
   Ipv4Address stanodeAddr = staInterface.GetAddress (1);    
@@ -247,15 +245,15 @@ main (int argc, char *argv[])
   ApplicationContainer clientApps;
   ApplicationContainer serverApps;
 
-  PacketSinkHelper client ("ns3::UdpSocketFactory", InetSocketAddress (stanodeAddr, dlPort));
-  clientApps.Add (client.Install (remoteHost));
+  PacketSinkHelper server ("ns3::UdpSocketFactory", InetSocketAddress (stanodeAddr, dlPort));
+  serverApps.Add (server.Install (remoteHost));
 
-  OnOffHelper server ("ns3::UdpSocketFactory", (InetSocketAddress (remoteHostAddr, dlPort)));
-  server.SetAttribute ("PacketSize", UintegerValue (payloadSize));
-  server.SetAttribute ("OnTime", StringValue ("ns3::ConstantRandomVariable[Constant=1]"));
-  server.SetAttribute ("OffTime", StringValue ("ns3::ConstantRandomVariable[Constant=0]"));
-  server.SetAttribute ("DataRate", DataRateValue (DataRate (dataRate)));
-  serverApps.Add (server.Install (staNodes.Get(0))); 
+  OnOffHelper client ("ns3::UdpSocketFactory", (InetSocketAddress (remoteHostAddr, dlPort)));
+  client.SetAttribute ("PacketSize", UintegerValue (payloadSize));
+  client.SetAttribute ("OnTime", StringValue ("ns3::ConstantRandomVariable[Constant=1]"));
+  sclienterver.SetAttribute ("OffTime", StringValue ("ns3::ConstantRandomVariable[Constant=0]"));
+  client.SetAttribute ("DataRate", DataRateValue (DataRate (dataRate)));
+  clientApps.Add (client.Install (staNodes.Get(0))); 
   
   serverApps.Start (Seconds (0.01));
   clientApps.Start (Seconds (0.01));
