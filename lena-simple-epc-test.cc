@@ -162,10 +162,13 @@ main (int argc, char *argv[])
   Ptr<Node> apNode = apNodes.Get (0);
   // Set the default gateway for the UE
   Ipv4StaticRoutingHelper ipv4RoutingHelper;
-  Ptr<Ipv4StaticRouting> remoteHostStaticRouting = ipv4RoutingHelper.GetStaticRouting (remoteHost->GetObject<Ipv4> ());
-  remoteHostStaticRouting->AddNetworkRouteTo (Ipv4Address ("7.0.0.0"), Ipv4Mask ("255.0.0.0"), 1);
-  Ptr<Ipv4StaticRouting> ueStaticRouting = ipv4RoutingHelper.GetStaticRouting (ueNode->GetObject<Ipv4> ());
-  ueStaticRouting->SetDefaultRoute (epcHelper->GetUeDefaultGatewayAddress (), 1);
+  
+  //Ptr<Ipv4StaticRouting> remoteHostStaticRouting = ipv4RoutingHelper.GetStaticRouting (remoteHost->GetObject<Ipv4> ());
+  //remoteHostStaticRouting->AddNetworkRouteTo (Ipv4Address ("7.0.0.0"), Ipv4Mask ("255.0.0.0"), 1);
+
+  //Ptr<Ipv4StaticRouting> ueStaticRouting = ipv4RoutingHelper.GetStaticRouting (ueNode->GetObject<Ipv4> ());
+  //ueStaticRouting->SetDefaultRoute (epcHelper->GetUeDefaultGatewayAddress (), 1);
+  ipv4h.SetBase ("7.0.0.0", "255.0.0.0");
   NetDeviceContainer interp2p = p2ph.Install (ueNode, apNode);
   Ipv4InterfaceContainer interp2pIfaces = ipv4h.Assign (interp2p);
   //Ipv4Address ueNodeAddr = interp2pIfaces.GetAddress (1);
@@ -217,9 +220,13 @@ main (int argc, char *argv[])
   staDevices = wifiHelper.Install (wifiPhy, wifiMac, staNodes);
 
   internet.Install (staNodes);
+  internet.Install (apNodes);
+
   ipv4h.SetBase ("3.0.0.0", "255.0.0.0");
+
   Ipv4InterfaceContainer staInterface;
   staInterface = ipv4h.Assign (staDevices);
+  ipv4h.Assign (apDevices);
   Ipv4Address stanodeAddr = staInterface.GetAddress (1);    
 
   /* Populate routing table */
