@@ -241,17 +241,15 @@ main (int argc, char *argv[])
   ApplicationContainer clientApps;
   ApplicationContainer serverApps;
 
-  PacketSinkHelper clientbulk ("ns3::TcpSocketFactory", InetSocketAddress (stanodeAddr, dlPort));
-  clientApps.Add (clientbulk.Install (remoteHost));
-  clientbulk.SetAttribute ("SendSize", UintegerValue (2000));
-  clientbulk.SetAttribute ("MaxBytes", UintegerValue (1000000000));
+  PacketSinkHelper server ("ns3::UdpSocketFactory", InetSocketAddress (remoteHostAddr, dlPort));
+  serverApps.Add (server.Install (staNodes.Get(0)));
 
-  OnOffHelper server ("ns3::TcpSocketFactory", (InetSocketAddress (remoteHostAddr, dlPort)));
-  server.SetAttribute ("PacketSize", UintegerValue (payloadSize));
-  server.SetAttribute ("OnTime", StringValue ("ns3::ConstantRandomVariable[Constant=1]"));
-  server.SetAttribute ("OffTime", StringValue ("ns3::ConstantRandomVariable[Constant=0]"));
-  server.SetAttribute ("DataRate", DataRateValue (DataRate (dataRate)));
-  serverApps.Add (server.Install (staNodes.Get (0))); 
+  OnOffHelper client ("ns3::UdpSocketFactory", (InetSocketAddress (stanodeAddr, dlPort)));
+  client.SetAttribute ("PacketSize", UintegerValue (payloadSize));
+  client.SetAttribute ("OnTime", StringValue ("ns3::ConstantRandomVariable[Constant=1]"));
+  client.SetAttribute ("OffTime", StringValue ("ns3::ConstantRandomVariable[Constant=0]"));
+  client.SetAttribute ("DataRate", DataRateValue (DataRate (dataRate)));
+  clientApps.Add (client.Install (remoteHost)); 
   
   serverApps.Start (Seconds (0.01));
   clientApps.Start (Seconds (0.01));
