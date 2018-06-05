@@ -251,7 +251,7 @@ main (int argc, char *argv[])
   OnOffHelper client ("ns3::UdpSocketFactory", (InetSocketAddress (remoteHostAddr, dlPort)));
   client.SetAttribute ("PacketSize", UintegerValue (payloadSize));
   client.SetAttribute ("OnTime", StringValue ("ns3::ConstantRandomVariable[Constant=1]"));
-  sclienterver.SetAttribute ("OffTime", StringValue ("ns3::ConstantRandomVariable[Constant=0]"));
+  client.SetAttribute ("OffTime", StringValue ("ns3::ConstantRandomVariable[Constant=0]"));
   client.SetAttribute ("DataRate", DataRateValue (DataRate (dataRate)));
   clientApps.Add (client.Install (staNodes.Get(0))); 
   
