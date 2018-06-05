@@ -61,6 +61,7 @@ main (int argc, char *argv[])
 
   uint16_t numberOfEnbNodes = 1;
   uint16_t numberOfUeNodes = 1;
+  uint16_t numberOfApNodes = 1;
   uint16_t numberOfStaNodes = 1;
   uint32_t payloadSize = 1472;
   double simTime = 30;
@@ -110,19 +111,22 @@ main (int argc, char *argv[])
   Ipv4Address remoteHostAddr = internetIpIfaces.GetAddress (1);
 
   Ipv4StaticRoutingHelper ipv4RoutingHelper;
-  Ptr<Ipv4StaticRouting> remoteHostStaticRouting = ipv4RoutingHelper.GetStaticRouting (remoteHost->GetObject<Ipv4> ());
-  remoteHostStaticRouting->AddNetworkRouteTo (Ipv4Address ("7.0.0.0"), Ipv4Mask ("255.0.0.0"), 1);
+  //Ptr<Ipv4StaticRouting> remoteHostStaticRouting = ipv4RoutingHelper.GetStaticRouting (remoteHost->GetObject<Ipv4> ());
+  //remoteHostStaticRouting->AddNetworkRouteTo (Ipv4Address ("7.0.0.0"), Ipv4Mask ("255.0.0.0"), 1);
 
   NodeContainer ueNodes;
   NodeContainer enbNodes;
   NodeContainer staNodes;
+  NodeContainer apNodes;
   enbNodes.Create(numberOfEnbNodes);
   ueNodes.Create(numberOfUeNodes);
   staNodes.Create(numberOfStaNodes);
+  apNodes.Create(numberOfApNodes);
 
   // Install Mobility Model
   Ptr<ListPositionAllocator> positionAlloc = CreateObject<ListPositionAllocator> ();
   positionAlloc->Add (Vector (distance, 0.0, 0.0));
+  positionAlloc->Add (Vector (distance * 0.161, 0.0, 0.0));
   positionAlloc->Add (Vector (distance * 0.161, 0.0, 0.0));
   positionAlloc->Add (Vector (distance * 0.334, 0.0, 0.0));
 
@@ -131,6 +135,7 @@ main (int argc, char *argv[])
   mobility.SetPositionAllocator(positionAlloc);
   mobility.Install(enbNodes);
   mobility.Install(ueNodes);
+  mobility.Install(apNodes);
   mobility.Install(staNodes);
 
   // Install LTE Devices to the nodes
@@ -169,6 +174,11 @@ main (int argc, char *argv[])
   EpsBearer bearer (q);
   lteHelper->ActivateDedicatedEpsBearer (ueDevice, bearer, EpcTft::Default ());
 
+  NetDeviceContainer in_p2p = p2ph.Install (apNodes, ueNodes);
+  ipv4h.SetBase ("7.0.0.0", "255.0.0.0");
+  Ipv4InterfaceContainer in_IpIfaces = ipv4h.Assign (in_p2p);
+  // interface 0 is localhost, 1 is the p2p device
+  Ipv4Address in_Addr = in_IpIfaces.GetAddress (1);
   // WiFi
   WifiHelper wifiHelper;
   wifiHelper.SetStandard (WIFI_PHY_STANDARD_80211n_5GHZ);
@@ -232,12 +242,17 @@ main (int argc, char *argv[])
   uint16_t dlPort = 1234;
 
   ApplicationContainer clientApps;
+  ApplicationContainer clientApps2;
   ApplicationContainer serverApps;
+  ApplicationContainer serverApps2;
 
-  PacketSinkHelper server ("ns3::UdpSocketFactory", InetSocketAddress (Ipv4Address::GetAny(), dlPort));
+  PacketSinkHelper server ("ns3::UdpSocketFactory", InetSocketAddress (in_IpIfaces, dlPort));
   serverApps.Add (server.Install (remoteHost));
 
-  OnOffHelper client ("ns3::UdpSocketFactory", (InetSocketAddress (remoteHostAddr, dlPort)));
+  PacketSinkHelper client2 ("ns3::UdpSocketFactory", InetSocketAddress (remoteHostAddr, dlPort));
+  clientApps2.Add (client2.Install (ueNodes.Get(0));
+
+  OnOffHelper client ("ns3::UdpSocketFactory", (InetSocketAddress (in_IpIfaces, dlPort)));
   client.SetAttribute ("PacketSize", UintegerValue (payloadSize));
   client.SetAttribute ("OnTime", StringValue ("ns3::ConstantRandomVariable[Constant=1]"));
   client.SetAttribute ("OffTime", StringValue ("ns3::ConstantRandomVariable[Constant=0]"));
