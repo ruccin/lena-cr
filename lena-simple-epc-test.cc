@@ -226,7 +226,6 @@ main (int argc, char *argv[])
 
   Ipv4InterfaceContainer staInterface;
   staInterface = ipv4h.Assign (staDevices);
-  ipv4h.Assign (apDevices);
   Ipv4Address stanodeAddr = staInterface.GetAddress (1);    
 
   /* Populate routing table */
