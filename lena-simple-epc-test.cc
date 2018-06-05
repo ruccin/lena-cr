@@ -193,7 +193,6 @@ main (int argc, char *argv[])
                                       "DataMode", StringValue (phyRate),
                                       "ControlMode", StringValue ("HtMcs0"));
 
-  /* Configure AP */
   Ssid ssid = Ssid ("network");
   wifiMac.SetType ("ns3::ApWifiMac",
                    "Ssid", SsidValue (ssid));
@@ -201,7 +200,6 @@ main (int argc, char *argv[])
   NetDeviceContainer apDevices;
   apDevices = wifiHelper.Install (wifiPhy, wifiMac, ueNodes);
 
-  /* Configure STA */
   wifiMac.SetType ("ns3::StaWifiMac",
                    "Ssid", SsidValue (ssid));
 
@@ -212,6 +210,9 @@ main (int argc, char *argv[])
   ipv4h.SetBase ("3.0.0.0", "255.0.0.0");
   Ipv4InterfaceContainer staInterface;
   staInterface = ipv4h.Assign (staDevices);  
+
+  
+
 
   /* Populate routing table */
   Ipv4GlobalRoutingHelper::PopulateRoutingTables ();
