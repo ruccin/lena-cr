@@ -245,7 +245,7 @@ main (int argc, char *argv[])
   ApplicationContainer clientApps2;
   ApplicationContainer serverApps;
 
-  PacketSinkHelper server ("ns3::UdpSocketFactory", InetSocketAddress (in_IpIfaces, dlPort));
+  PacketSinkHelper server ("ns3::UdpSocketFactory", InetSocketAddress (staInterface, dlPort));
   serverApps.Add (server.Install (remoteHost));
 
   PacketSinkHelper client2 ("ns3::UdpSocketFactory", InetSocketAddress (remoteHostAddr, dlPort));
