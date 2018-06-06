@@ -44,11 +44,6 @@
 #include "ns3/packet-sink-helper.h"
 #include "ns3/flow-monitor-module.h"
 #include "ns3/wifi-module.h"
-#include <iostream>
-#include <fstream>
-#include <string>
-#include <iomanip>
-#include <iosfwd>
 
 using namespace ns3;
 
@@ -65,8 +60,6 @@ NS_LOG_COMPONENT_DEFINE ("EpcFirstExample");
   void PrintStats(Ptr<FlowMonitor> monitor){
     double rxBD = 0;
     std::ofstream THROUGHPUT;
-
-    THROUGHPUT.open("THROUGHPUT.txt", ios::out|ios::app);
 
     FlowMonitorHelper flowmonitor;
     monitor->CheckForLostPackets(Time(0.001));
