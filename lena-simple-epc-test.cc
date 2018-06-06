@@ -54,9 +54,8 @@ using namespace ns3;
  */
 
 NS_LOG_COMPONENT_DEFINE ("EpcFirstExample");
-
+/*
 // FlowMonitor
-
   void PrintStats(Ptr<FlowMonitor> monitor){
     double rxBD = 0;
     std::ofstream THROUGHPUT;
@@ -82,7 +81,7 @@ NS_LOG_COMPONENT_DEFINE ("EpcFirstExample");
   
   return;
   }
-
+*/
 int
 main (int argc, char *argv[])
 {
@@ -282,20 +281,25 @@ main (int argc, char *argv[])
   serverApps.Start (Seconds (0.01));
   clientApps.Start (Seconds (0.01));
 
+  enbPhy.EnablePcap ("lena-simple-epc-test", enbLteDevs);
+  uePhy.EnablePcap ("lena-simple-epc-test", ueLteDevs);
+  wifiPhy.EnablePcap ("lena-simple-epc-test", apDevices);  
+  wifiPhy.EnablePcap ("lena-simple-epc-test", staDevices);  
+
   FlowMonitorHelper flowmonitor;
   Ptr<FlowMonitor> monitor;
 
   monitor = flowmonitor.Install (remoteHost);
-  monitor = flowmonitor.Install (staNodes);
   monitor = flowmonitor.Install (ueNodes);
+  monitor = flowmonitor.Install (staNodes);
+  
+  monitor->SerializeToXmlFile ("flowmo.xml", true, true);
 
   Simulator::Stop(Seconds(simTime));
+  Simulator::Schedule(Seconds(1.0), monitor);
   
-  Simulator::Schedule(Seconds(1.0), &PrintStats, monitor);
-  monitor->SerializeToXmlFile ("flowmo.xml", true, true);
   
   Simulator::Run();
-  
   Simulator::Destroy();
   return 0;
 
