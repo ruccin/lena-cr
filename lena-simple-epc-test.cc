@@ -262,7 +262,6 @@ main (int argc, char *argv[])
 
   PacketSinkHelper server ("ns3::UdpSocketFactory", InetSocketAddress (Ipv4Address::GetAny(), dlPort));
   serverApps.Add (server.Install (remoteHost));
-  server.SetAttribute ("Local", AddressValue (staAddr));
 
   OnOffHelper client ("ns3::UdpSocketFactory", (InetSocketAddress (remoteHostAddr, dlPort)));
   client.SetAttribute ("PacketSize", UintegerValue (payloadSize));
@@ -271,7 +270,6 @@ main (int argc, char *argv[])
   client.SetAttribute ("PacketSize", UintegerValue (1024));
   client.SetAttribute ("MaxBytes", UintegerValue (1000000000));
   client.SetAttribute ("DataRate", DataRateValue (DataRate ("100Mb/s")));
-  client.SetAttribute ("Remote", AddressValue (remoteHostAddr));
   clientApps.Add (client.Install (staNodes.Get(0))); 
   
   serverApps.Start (Seconds (0.01));
