@@ -277,7 +277,7 @@ main (int argc, char *argv[])
 
   lteHelper->EnableDlPhyTraces ();
   lteHelper->EnableDlMacTraces ();  
-  wifiPhy->EnablePcap("lena-simple-epc-test", staDevices);
+  wifiPhy.EnablePcap("lena-simple-epc-test", staDevices);
 
   FlowMonitorHelper flowmonitor;
   Ptr<FlowMonitor> monitor;
