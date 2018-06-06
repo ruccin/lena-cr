@@ -247,10 +247,7 @@ main (int argc, char *argv[])
   serverApps.Start (Seconds (0.01));
   clientApps.Start (Seconds (0.01));
 
-  lteHelper->EnableTraces ();
-
   FlowMonitorHelper flowmo;
-
   Ptr<FlowMonitor> monitor;
 
   monitor = flowmo.Install (remoteHost);
@@ -260,6 +257,7 @@ main (int argc, char *argv[])
   monitor->SerializeToXmlFile ("flowmo.xml", true, true);
   
   Simulator::Stop(Seconds(simTime));
+  Simulator::Schedule(Seconds(1.0), &print_state, monitor);
   Simulator::Run();
   Simulator::Destroy();
   return 0;
