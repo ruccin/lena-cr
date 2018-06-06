@@ -295,7 +295,7 @@ main (int argc, char *argv[])
   monitor->SerializeToXmlFile ("flowmo.xml", true, true);
 
   Simulator::Stop(Seconds(simTime));
-  Simulator::Schedule(Seconds(1.0), monitor);
+  //Simulator::Schedule(Seconds(1.0), monitor);
   
   
   Simulator::Run();
