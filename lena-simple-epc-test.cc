@@ -65,7 +65,7 @@ main (int argc, char *argv[])
   uint32_t payloadSize = 1472;
   double simTime = 30;
   double distance = 4000.0;
-  double interPacketInterval = 100;
+  double rxBD = 0;
   std::string phyRate = "HtMcs7";
   std::string dataRate = "100Mbps";
 
@@ -73,10 +73,36 @@ main (int argc, char *argv[])
   CommandLine cmd;
   cmd.AddValue("numberOfNodes", "Number of eNodeBs", numberOfEnbNodes);
   cmd.AddValue("numberOfNodes", "Number of Ues", numberOfUeNodes);
+  cmd.AddValue("numberOfNodes", "Number of STAs(Ue)", numberOfStaNodes);
   cmd.AddValue("simTime", "Total duration of the simulation [s])", simTime);
   cmd.AddValue("distance", "Distance between eNBs [m]", distance);
-  cmd.AddValue("interPacketInterval", "Inter packet interval [ms])", interPacketInterval);
   cmd.Parse(argc, argv);
+
+  // FlowMonitor
+
+  void PrintStats(Ptr<FlowMonitor> monitor){
+    
+    FlowMonitorHelper flowmonitor;
+    monitor->CheckForLostPackets(Time(0.001));
+
+    Ptr<Ipv4FlowClassifier> classifier = DynamicCast<Ipv4FlowClassifier>(flowmonitor.GetClassifier());
+    std::map<FlowId, FlowMonitor::FlowStats> stats = monitor->GetFlowStats();
+
+    for (std::map<FlowId, FlowMonitor::FlowStats>::const_iterator iter = stats.begin(); iter != stats.end(); ++iter){
+      
+      if (iter->first == 1){
+
+        double Throughput = (iter->second.rxBytes-rxBD) * 8.0 / 1024 / 1024;
+        THROUGHPUT<<Throughput<<"\n";
+        rxBD = iter->sencond.rxBytes;
+
+        std::cout<<"THROUGHPUT"<<Throughput<<"\n"<<std::endl;
+      }
+    }
+  Simulator::Schedule(Seconds(1.0), &PrintStats, monitor);
+  THROUGHPUT.close();
+  return 0;
+  }
 
   Ptr<LteHelper> lteHelper = CreateObject<LteHelper> ();
   Ptr<PointToPointEpcHelper> epcHelper = CreateObject<PointToPointEpcHelper> ();
@@ -148,9 +174,17 @@ main (int argc, char *argv[])
   // LTE calibration
   //lteHelper->SetEnbAntennaModelType ("ns3::IsotropicAntennaModel");
   //lteHelper->SetEnbAntennaModelAttribute ("Gain",   DoubleValue (5));
-  Config::SetDefault ("ns3::LteEnbPhy::TxPower", DoubleValue (35));
-  Config::SetDefault ("ns3::LteUePhy::TxPower", DoubleValue (20));
+  //Config::SetDefault ("ns3::LteEnbPhy::TxPower", DoubleValue (35));
+  //Config::SetDefault ("ns3::LteUePhy::TxPower", DoubleValue (20));
 
+  Ptr<LteEnbPhy> enbPhy = enbLteDevs.Get(0)->GetObject<LteEnbNetDevice>()->GetPhy();
+  enbPhy->SetTxPower (DoubleValue (35));
+  enbPhy->SetAttribute ("NoiseFigure", DoubleValue (5.0));
+
+  Ptr<LteUePhy> uePhy = ueLteDevs.Get(0)->GetObject<LteUeNetDevice>()->GetPhy();
+  uePhy->SetTxPower (DoubleValue (20));
+  uePhy->SetAttribute ("NoiseFigure", DoubleValue (9.0));
+  
   // Install the IP stack on the UEs
   internet.Install (ueNodes);
   Ipv4InterfaceContainer ueIpIface;
@@ -254,11 +288,13 @@ main (int argc, char *argv[])
   monitor = flowmo.Install (staNodes);
   monitor = flowmo.Install (ueNodes);
 
+  Simulator::Stop(Seconds(simTime));
+  
+  Simulator::Schedule(Seconds(1.0), &PrintStats, monitor);
   monitor->SerializeToXmlFile ("flowmo.xml", true, true);
   
-  Simulator::Stop(Seconds(simTime));
-  Simulator::Schedule(Seconds(1.0), &print_state, monitor);
   Simulator::Run();
+  
   Simulator::Destroy();
   return 0;
 
