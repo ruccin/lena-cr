@@ -44,6 +44,10 @@
 #include "ns3/packet-sink-helper.h"
 #include "ns3/flow-monitor-module.h"
 #include "ns3/wifi-module.h"
+#include <iostream>
+#include <fstream>
+#include <string>
+#include <iomanip>
 
 using namespace ns3;
 
