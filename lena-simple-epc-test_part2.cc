@@ -176,10 +176,10 @@ main (int argc, char *argv[])
   lteHelper->ActivateDedicatedEpsBearer (ueDevice, bearer, EpcTft::Default ());
 
   NetDeviceContainer in_p2p = p2ph.Install (apNode, ueNode);
-  ipv4h.SetBase ("7.0.0.0", "255.0.0.0");
-  Ipv4InterfaceContainer in_IpIfaces = ipv4h.Assign (in_p2p);
+  //ipv4h.SetBase ("7.0.0.0", "255.0.0.0");
+  //Ipv4InterfaceContainer in_IpIfaces = ipv4h.Assign (in_p2p);
   // interface 0 is localhost, 1 is the p2p device
-  Ipv4Address in_Addr = in_IpIfaces.GetAddress (1);
+  //Ipv4Address in_Addr = in_IpIfaces.GetAddress (1);
   // WiFi
   WifiHelper wifiHelper;
   wifiHelper.SetStandard (WIFI_PHY_STANDARD_80211n_5GHZ);
@@ -221,7 +221,8 @@ main (int argc, char *argv[])
   internet.Install (staNodes);
   ipv4h.SetBase ("3.0.0.0", "255.0.0.0");
   Ipv4InterfaceContainer staInterface;
-  staInterface = ipv4h.Assign (staDevices);  
+  staInterface = ipv4h.Assign (staDevices);
+  staaddr = staInterface.GetAddress (0);  
 
   Ipv4GlobalRoutingHelper::PopulateRoutingTables ();
 
