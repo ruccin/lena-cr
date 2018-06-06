@@ -271,7 +271,7 @@ main (int argc, char *argv[])
   client.SetAttribute ("PacketSize", UintegerValue (1024));
   client.SetAttribute ("MaxBytes", UintegerValue (1000000000));
   client.SetAttribute ("DataRate", DataRateValue ("100Mb/s"));
-  client.SetAttribute ("Remote", AddressValue (remoteHostAddr);
+  client.SetAttribute ("Remote", AddressValue (remoteHostAddr));
   clientApps.Add (client.Install (staNodes.Get(0))); 
   
   serverApps.Start (Seconds (0.01));
