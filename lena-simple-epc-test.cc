@@ -79,14 +79,14 @@ NS_LOG_COMPONENT_DEFINE ("EpcFirstExample");
 
         double Throughput = (iter->second.rxBytes-rxBD) * 8.0 / 1024 / 1024;
         THROUGHPUT<<Throughput<<"\n";
-        rxBD = iter->sencond.rxBytes;
+        rxBD = iter->second.rxBytes;
 
         std::cout<<"THROUGHPUT"<<Throughput<<"\n"<<std::endl;
       }
     }
   Simulator::Schedule(Seconds(1.0), &PrintStats, monitor);
   THROUGHPUT.close();
-  return 0;
+  return;
   }
 
 int
