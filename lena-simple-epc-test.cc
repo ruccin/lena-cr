@@ -293,7 +293,7 @@ main (int argc, char *argv[])
    *   Instantiate De-activation using Simulator::Schedule() method which will initiate bearer de-activation after deActivateTime
    *   Instantiate De-activation in sequence (Time const &time, MEM mem_ptr, OBJ obj, T1 a1, T2 a2, T3 a3)
    */
-  Simulator::Schedule (lteHelper, ueDevice, enbDevice, apDevice, staDevice,  2);
+  Simulator::Schedule (lteHelper, ueDevice, enbDevice, apDevice, staDevice);
 
   FlowMonitorHelper flowmonitor;
   Ptr<FlowMonitor> monitor;
