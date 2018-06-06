@@ -48,6 +48,7 @@
 #include <fstream>
 #include <string>
 #include <iomanip>
+#include <iosfwd>
 
 using namespace ns3;
 
