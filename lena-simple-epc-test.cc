@@ -242,7 +242,7 @@ main (int argc, char *argv[])
   ipv4h.SetBase ("3.0.0.0", "255.0.0.0");
   Ipv4InterfaceContainer staInterface;
   staInterface = ipv4h.Assign (staDevices);  
-  Ipv4Address staAddr = staInterface.GetAddress (1);
+  //Ipv4Address staAddr = staInterface.GetAddress (1);
 
   Ptr<Node> staNode = staNodes.Get (0);
   Ptr<Ipv4StaticRouting> staStaticRouting = ipv4RoutingHelper.GetStaticRouting (staNode->GetObject<Ipv4> ());
@@ -274,6 +274,10 @@ main (int argc, char *argv[])
   
   serverApps.Start (Seconds (0.01));
   clientApps.Start (Seconds (0.01));
+
+  lteHelper->EnableDlPhyTraces ();
+  lteHelper->EnableDlMacTraces ();  
+  wifiPhy->EnablePcap("lena-simple-epc-test", staDevices);
 
   FlowMonitorHelper flowmonitor;
   Ptr<FlowMonitor> monitor;
