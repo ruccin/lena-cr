@@ -55,32 +55,10 @@ using namespace ns3;
 
 NS_LOG_COMPONENT_DEFINE ("EpcFirstExample");
 
-int
-main (int argc, char *argv[])
-{
-
-  uint16_t numberOfEnbNodes = 1;
-  uint16_t numberOfUeNodes = 1;
-  uint16_t numberOfStaNodes = 1;
-  uint32_t payloadSize = 1472;
-  double simTime = 30;
-  double distance = 4000.0;
-  double rxBD = 0;
-  std::string phyRate = "HtMcs7";
-  std::string dataRate = "100Mbps";
-
-  // Command line arguments
-  CommandLine cmd;
-  cmd.AddValue("numberOfNodes", "Number of eNodeBs", numberOfEnbNodes);
-  cmd.AddValue("numberOfNodes", "Number of Ues", numberOfUeNodes);
-  cmd.AddValue("numberOfNodes", "Number of STAs(Ue)", numberOfStaNodes);
-  cmd.AddValue("simTime", "Total duration of the simulation [s])", simTime);
-  cmd.AddValue("distance", "Distance between eNBs [m]", distance);
-  cmd.Parse(argc, argv);
-
-  // FlowMonitor
+// FlowMonitor
 
   void PrintStats(Ptr<FlowMonitor> monitor){
+    double rxBD = 0;
     
     FlowMonitorHelper flowmonitor;
     monitor->CheckForLostPackets(Time(0.001));
@@ -103,6 +81,28 @@ main (int argc, char *argv[])
   THROUGHPUT.close();
   return 0;
   }
+
+int
+main (int argc, char *argv[])
+{
+
+  uint16_t numberOfEnbNodes = 1;
+  uint16_t numberOfUeNodes = 1;
+  uint16_t numberOfStaNodes = 1;
+  uint32_t payloadSize = 1472;
+  double simTime = 30;
+  double distance = 4000.0;
+  std::string phyRate = "HtMcs7";
+  std::string dataRate = "100Mbps";
+
+  // Command line arguments
+  CommandLine cmd;
+  cmd.AddValue("numberOfNodes", "Number of eNodeBs", numberOfEnbNodes);
+  cmd.AddValue("numberOfNodes", "Number of Ues", numberOfUeNodes);
+  cmd.AddValue("numberOfNodes", "Number of STAs(Ue)", numberOfStaNodes);
+  cmd.AddValue("simTime", "Total duration of the simulation [s])", simTime);
+  cmd.AddValue("distance", "Distance between eNBs [m]", distance);
+  cmd.Parse(argc, argv);
 
   Ptr<LteHelper> lteHelper = CreateObject<LteHelper> ();
   Ptr<PointToPointEpcHelper> epcHelper = CreateObject<PointToPointEpcHelper> ();
