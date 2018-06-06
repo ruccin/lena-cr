@@ -59,7 +59,10 @@ NS_LOG_COMPONENT_DEFINE ("EpcFirstExample");
 
   void PrintStats(Ptr<FlowMonitor> monitor){
     double rxBD = 0;
-    
+    std::ofstream THROUGHPUT;
+
+    THROUGHPUT.open("THROUGHPUT.txt", ios::out|ios::app);
+
     FlowMonitorHelper flowmonitor;
     monitor->CheckForLostPackets(Time(0.001));
 
