@@ -282,12 +282,12 @@ main (int argc, char *argv[])
   serverApps.Start (Seconds (0.01));
   clientApps.Start (Seconds (0.01));
 
-  FlowMonitorHelper flowmo;
+  FlowMonitorHelper flowmonitor;
   Ptr<FlowMonitor> monitor;
 
-  monitor = flowmo.Install (remoteHost);
-  monitor = flowmo.Install (staNodes);
-  monitor = flowmo.Install (ueNodes);
+  monitor = flowmonitor.Install (remoteHost);
+  monitor = flowmonitor.Install (staNodes);
+  monitor = flowmonitor.Install (ueNodes);
 
   Simulator::Stop(Seconds(simTime));
   
