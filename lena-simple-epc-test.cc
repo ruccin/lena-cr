@@ -79,7 +79,7 @@ NS_LOG_COMPONENT_DEFINE ("EpcFirstExample");
       }
     }
   Simulator::Schedule(Seconds(1.0), &PrintStats, monitor);
-  THROUGHPUT.close();
+  
   return;
   }
 
