@@ -242,6 +242,7 @@ main (int argc, char *argv[])
   ipv4h.SetBase ("3.0.0.0", "255.0.0.0");
   Ipv4InterfaceContainer staInterface;
   staInterface = ipv4h.Assign (staDevices);  
+  Ipv4Address staAddr = staInterface.GetAddress (1);
 
   Ptr<Node> staNode = staNodes.Get (0);
   Ptr<Ipv4StaticRouting> staStaticRouting = ipv4RoutingHelper.GetStaticRouting (staNode->GetObject<Ipv4> ());
@@ -261,6 +262,7 @@ main (int argc, char *argv[])
 
   PacketSinkHelper server ("ns3::UdpSocketFactory", InetSocketAddress (Ipv4Address::GetAny(), dlPort));
   serverApps.Add (server.Install (remoteHost));
+  server.SetAttribute ("Local", AddressValue (staAddr));
 
   OnOffHelper client ("ns3::UdpSocketFactory", (InetSocketAddress (remoteHostAddr, dlPort)));
   client.SetAttribute ("PacketSize", UintegerValue (payloadSize));
@@ -269,6 +271,7 @@ main (int argc, char *argv[])
   client.SetAttribute ("PacketSize", UintegerValue (1024));
   client.SetAttribute ("MaxBytes", UintegerValue (1000000000));
   client.SetAttribute ("DataRate", DataRateValue ("100Mbps");
+  client.SetAttribute ("Remote", AddressValue (remoteHostAddr);
   clientApps.Add (client.Install (staNodes.Get(0))); 
   
   serverApps.Start (Seconds (0.01));
