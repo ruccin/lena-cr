@@ -181,11 +181,11 @@ main (int argc, char *argv[])
   //Config::SetDefault ("ns3::LteUePhy::TxPower", DoubleValue (20));
 
   Ptr<LteEnbPhy> enbPhy = enbLteDevs.Get(0)->GetObject<LteEnbNetDevice>()->GetPhy();
-  enbPhy->SetTxPower (DoubleValue (35));
+  enbPhy->SetTxPower (35);
   enbPhy->SetAttribute ("NoiseFigure", DoubleValue (5.0));
 
   Ptr<LteUePhy> uePhy = ueLteDevs.Get(0)->GetObject<LteUeNetDevice>()->GetPhy();
-  uePhy->SetTxPower (DoubleValue (20));
+  uePhy->SetTxPower (20);
   uePhy->SetAttribute ("NoiseFigure", DoubleValue (9.0));
   
   // Install the IP stack on the UEs
