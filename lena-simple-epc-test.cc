@@ -281,8 +281,7 @@ main (int argc, char *argv[])
   serverApps.Start (Seconds (0.01));
   clientApps.Start (Seconds (0.01));
 
-  enbPhy.EnablePcap ("lena-simple-epc-test", enbLteDevs);
-  uePhy.EnablePcap ("lena-simple-epc-test", ueLteDevs);
+  p2ph.EnablePcapAll ("lena-simple-epc-test");
   wifiPhy.EnablePcap ("lena-simple-epc-test", apDevices);  
   wifiPhy.EnablePcap ("lena-simple-epc-test", staDevices);  
 
