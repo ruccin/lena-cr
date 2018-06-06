@@ -82,6 +82,7 @@ NS_LOG_COMPONENT_DEFINE ("EpcFirstExample");
   return;
   }
 */
+
 int
 main (int argc, char *argv[])
 {
@@ -275,16 +276,29 @@ main (int argc, char *argv[])
   serverApps.Start (Seconds (0.01));
   clientApps.Start (Seconds (0.01));
 
-  lteHelper->EnableDlPhyTraces ();
-  lteHelper->EnableDlMacTraces ();  
+  //lteHelper->EnableTraces ();
   wifiPhy.EnablePcap("lena-simple-epc-test", staDevices);
+  lteHelper->EnableRlcTraces ();
+  Ptr<RadioBearerStatsCalculator> rlcStats = lteHelper->GetRlcStats ();
+  rlcStats->SetAttribute ("StartTime", TimeValue (Seconds (statsStartTime)));
+  rlcStats->SetAttribute ("EpochDuration", TimeValue (Seconds (statsDuration)));
+
+  //get ue device pointer for UE-ID 0 IMSI 1 and enb device pointer
+  Ptr<NetDevice> ueDevice = ueLteDevs.Get (0);
+  Ptr<NetDevice> enbDevice = enbLteDevs.Get (0);
+  Ptr<NetDevice> apDevice = apDevices.Get (0);
+  Ptr<NetDevice> staDevice = staDevices.Get (0);
+
+  /*
+   *   Instantiate De-activation using Simulator::Schedule() method which will initiate bearer de-activation after deActivateTime
+   *   Instantiate De-activation in sequence (Time const &time, MEM mem_ptr, OBJ obj, T1 a1, T2 a2, T3 a3)
+   */
+  Simulator::Schedule (lteHelper, ueDevice, enbDevice, apDevice, staDevice,  2);
 
   FlowMonitorHelper flowmonitor;
   Ptr<FlowMonitor> monitor;
 
-  monitor = flowmonitor.Install (remoteHost);
-  monitor = flowmonitor.Install (ueNodes);
-  monitor = flowmonitor.Install (staNodes);
+  monitor = flowmonitor.InstallAll ();
   
   monitor->SerializeToXmlFile ("flowmo.xml", true, true);
 
