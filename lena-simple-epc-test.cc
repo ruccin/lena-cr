@@ -276,24 +276,16 @@ main (int argc, char *argv[])
   serverApps.Start (Seconds (0.01));
   clientApps.Start (Seconds (0.01));
 
+  double statsStartTime = 0.04; // need to allow for RRC connection establishment + SRS
+  double statsDuration = 1.0;
+
   //lteHelper->EnableTraces ();
   wifiPhy.EnablePcap("lena-simple-epc-test", staDevices);
+  
   lteHelper->EnableRlcTraces ();
   Ptr<RadioBearerStatsCalculator> rlcStats = lteHelper->GetRlcStats ();
   rlcStats->SetAttribute ("StartTime", TimeValue (Seconds (statsStartTime)));
   rlcStats->SetAttribute ("EpochDuration", TimeValue (Seconds (statsDuration)));
-
-  //get ue device pointer for UE-ID 0 IMSI 1 and enb device pointer
-  Ptr<NetDevice> ueDevice = ueLteDevs.Get (0);
-  Ptr<NetDevice> enbDevice = enbLteDevs.Get (0);
-  Ptr<NetDevice> apDevice = apDevices.Get (0);
-  Ptr<NetDevice> staDevice = staDevices.Get (0);
-
-  /*
-   *   Instantiate De-activation using Simulator::Schedule() method which will initiate bearer de-activation after deActivateTime
-   *   Instantiate De-activation in sequence (Time const &time, MEM mem_ptr, OBJ obj, T1 a1, T2 a2, T3 a3)
-   */
-  Simulator::Schedule (lteHelper, ueDevice, enbDevice, apDevice, staDevice);
 
   FlowMonitorHelper flowmonitor;
   Ptr<FlowMonitor> monitor;
