@@ -93,7 +93,6 @@ main (int argc, char *argv[])
   double simTime = 30;
   double distance = 4000.0;
   std::string phyRate = "HtMcs7";
-  std::string dataRate = "100Mbps";
 
   // Command line arguments
   CommandLine cmd;
@@ -166,17 +165,15 @@ main (int argc, char *argv[])
   // LTE configuration parametes
   lteHelper->SetSchedulerType ("ns3::PfFfMacScheduler");
   lteHelper->SetSchedulerAttribute ("UlCqiFilter", EnumValue (FfMacScheduler::PUSCH_UL_CQI));
+  
   // LTE-U DL transmission @5180 MHz
   //lteHelper->SetEnbDeviceAttribute ("DlEarfcn", UintegerValue (255444));
   lteHelper->SetEnbDeviceAttribute ("DlBandwidth", UintegerValue (6));
+  
   // needed for initial cell search
   //lteHelper->SetUeDeviceAttribute ("DlEarfcn", UintegerValue (255444));
+  
   // LTE calibration
-  //lteHelper->SetEnbAntennaModelType ("ns3::IsotropicAntennaModel");
-  //lteHelper->SetEnbAntennaModelAttribute ("Gain",   DoubleValue (5));
-  //Config::SetDefault ("ns3::LteEnbPhy::TxPower", DoubleValue (35));
-  //Config::SetDefault ("ns3::LteUePhy::TxPower", DoubleValue (20));
-
   Ptr<LteEnbPhy> enbPhy = enbLteDevs.Get(0)->GetObject<LteEnbNetDevice>()->GetPhy();
   enbPhy->SetTxPower (35);
   enbPhy->SetAttribute ("NoiseFigure", DoubleValue (5.0));
@@ -245,12 +242,6 @@ main (int argc, char *argv[])
   ipv4h.SetBase ("3.0.0.0", "255.0.0.0");
   Ipv4InterfaceContainer staInterface;
   staInterface = ipv4h.Assign (staDevices);  
-  //Ipv4Address staAddr = staInterface.GetAddress (1);
-
-
-  //Ptr<EpcSgwPgwApplication> epcsgwpgwapp = CreateObject<EpcSgwPgwApplication> ();
-  //epcsgwpgwapp->RecvFromTunDevice (Ptr<Packet> packet, Ipv4Address ("3.0.0.1"), Ipv4Address ("1.0.0.2"), protocolNumber);
-
 
   Ptr<Node> staNode = staNodes.Get (0);
   Ptr<Ipv4StaticRouting> staStaticRouting = ipv4RoutingHelper.GetStaticRouting (staNode->GetObject<Ipv4> ());
@@ -275,15 +266,13 @@ main (int argc, char *argv[])
   client.SetAttribute ("PacketSize", UintegerValue (payloadSize));
   client.SetAttribute ("OnTime", StringValue ("ns3::ConstantRandomVariable[Constant=1]"));
   client.SetAttribute ("OffTime", StringValue ("ns3::ConstantRandomVariable[Constant=0]"));
-  client.SetAttribute ("DataRate", DataRateValue (DataRate (dataRate)));
+  client.SetAttribute ("PacketSize", UintegerValue (1024));
+  client.SetAttribute ("MaxBytes", UintegerValue (1000000000));
+  client.SetAttribute ("DataRate", DataRateValue ("100Mbps");
   clientApps.Add (client.Install (staNodes.Get(0))); 
   
   serverApps.Start (Seconds (0.01));
   clientApps.Start (Seconds (0.01));
-
-  p2ph.EnablePcapAll ("lena-simple-epc-test");
-  wifiPhy.EnablePcap ("lena-simple-epc-test", apDevices);  
-  wifiPhy.EnablePcap ("lena-simple-epc-test", staDevices);  
 
   FlowMonitorHelper flowmonitor;
   Ptr<FlowMonitor> monitor;
