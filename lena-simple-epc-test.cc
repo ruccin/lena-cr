@@ -247,7 +247,6 @@ main (int argc, char *argv[])
   //Ipv4Address staAddr = staInterface.GetAddress (1);
 /*
   Ptr<Packet> packet = Create<Packet> (payloadSize);
-
   Ptr<EpcSgwPgwApplication> epcsgwpgwapp = CreateObject<EpcSgwPgwApplication> ();
   epcsgwpgwapp.RecvFromTunDevice (packet, Ipv4Address ("3.0.0.1"), Ipv4Address ("1.0.0.2"), 1);
   remoteHost->AddApplication (epcsgwpgwapp);
@@ -257,25 +256,17 @@ main (int argc, char *argv[])
   staStaticRouting->AddHostRouteTo (Ipv4Address ("1.0.0.2"), Ipv4Address ("3.0.0.1"), 1);
  
   Ptr<Ipv4StaticRouting> apStaticRouting = ipv4RoutingHelper.GetStaticRouting (ueNode->GetObject<Ipv4> ());
-  apStaticRouting->AddHostRouteTo (Ipv4Address ("1.0.0.2"), Ipv4Address ("7.0.0.1"), 1);  
+  apStaticRouting->AddHostRouteTo (Ipv4Address ("1.0.0.2"), Ipv4Address ("7.0.0.1"), 2);  
 
   Ptr<Ipv4StaticRouting> rhStaticRouting = ipv4RoutingHelper.GetStaticRouting (remoteHost->GetObject<Ipv4> ());
   rhStaticRouting->AddHostRouteTo (Ipv4Address ("1.0.0.2"), Ipv4Address ("1.0.0.2"), 1);
 
   // Install and start applications on UEs and remote host
   ApplicationContainer clientApps;
-  //ApplicationContainer clientApps2;
   ApplicationContainer serverApps;
 
   PacketSinkHelper server ("ns3::UdpSocketFactory", (InetSocketAddress (Ipv4Address::GetAny(), dlPort)));
   serverApps.Add (server.Install (remoteHost));
-  //server.SetAttribute ("SendSize", UintegerValue (1024));
-  //server.SetAttribute ("MaxBytes", UintegerValue (1000000000));
-
-  //PacketSinkHelper client2 ("ns3::UdpSocketFactory", (InetSocketAddress (staAddr, dlPort)));
-  //clientApps2.Add (client2.Install (ueNodes.Get(0)));
-  //client2.SetAttribute ("SendSize", UintegerValue (1024));
-  //client2.SetAttribute ("MaxBytes", UintegerValue (1000000000));
 
   OnOffHelper client ("ns3::UdpSocketFactory", Address(InetSocketAddress (Ipv4Address("1.0.0.2"), dlPort)));
   client.SetAttribute ("PacketSize", UintegerValue (payloadSize));
@@ -289,16 +280,8 @@ main (int argc, char *argv[])
   serverApps.Start (Seconds (0.01));
   clientApps.Start (Seconds (0.01));
 
-  double statsStartTime = 0.04; // need to allow for RRC connection establishment + SRS
-  double statsDuration = 1.0;
-
-  //lteHelper->EnableTraces ();
+  lteHelper->EnableTraces ();
   wifiPhy.EnablePcap("lena-simple-epc-test", staDevices);
-  
-  lteHelper->EnableRlcTraces ();
-  Ptr<RadioBearerStatsCalculator> rlcStats = lteHelper->GetRlcStats ();
-  rlcStats->SetAttribute ("StartTime", TimeValue (Seconds (statsStartTime)));
-  rlcStats->SetAttribute ("EpochDuration", TimeValue (Seconds (statsDuration)));
 
   FlowMonitorHelper flowmonitor;
   Ptr<FlowMonitor> monitor;

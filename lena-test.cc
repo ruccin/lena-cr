@@ -25,6 +25,7 @@
 #include "ns3/packet-sink-helper.h"
 #include "ns3/spectrum-wifi-helper.h"
 
+
 using namespace ns3;
 using namespace std;
 
@@ -48,6 +49,7 @@ main (int argc, char *argv[])
   uint16_t bw[6] = {6, 15, 25, 50, 75, 100};
   uint8_t maxbw = 0;
   uint16_t max = 100;
+  uint16_t dlPort = 1234;
   std::string errorModelType = "ns3::NistErrorRateModel";
 
   // Command line arguments
@@ -174,6 +176,12 @@ main (int argc, char *argv[])
   ueIpIfaces = ipv4h.Assign (UEDevices);
   apIpIfaces = ipv4h.Assign (APDevices);
 
+
+
+
+
+
+
   Ptr<Node> ueNode = ueNodes.Get (0);
 
   Ipv4StaticRoutingHelper ipv4RoutingHelper;
@@ -184,7 +192,6 @@ main (int argc, char *argv[])
   remoteHostStaticRouting->AddHostRouteTo (Ipv4Address ("1.0.0.2"), Ipv4Address ("1.0.0.2"), 1);
 
   // Install and start applications on UE and remote host
-  uint16_t dlPort = 1234;
 
   ApplicationContainer clientApps;
   ApplicationContainer serverApps;
