@@ -86,7 +86,7 @@ NS_LOG_COMPONENT_DEFINE ("EpcFirstExample");
 int
 main (int argc, char *argv[])
 {
-
+  uint16_t dlPort = 1234;
   uint16_t numberOfEnbNodes = 1;
   uint16_t numberOfUeNodes = 1;
   uint16_t numberOfStaNodes = 1;
@@ -243,26 +243,34 @@ main (int argc, char *argv[])
   ipv4h.SetBase ("3.0.0.0", "255.0.0.0");
   Ipv4InterfaceContainer staInterface;
   staInterface = ipv4h.Assign (staDevices);  
-  //Ipv4Address staAddr = staInterface.GetAddress (1);
+  Ipv4Address staAddr = staInterface.GetAddress (1);
+/*
+  Ptr<Packet> packet = Create<Packet> (payloadSize);
 
+  Ptr<EpcSgwPgwApplication> epcsgwpgwapp = CreateObject<EpcSgwPgwApplication> ();
+  epcsgwpgwapp.RecvFromTunDevice (packet, Ipv4Address ("3.0.0.1"), Ipv4Address ("1.0.0.2"), 1);
+  remoteHost->AddApplication (epcsgwpgwapp);
+*/
   Ptr<Node> staNode = staNodes.Get (0);
   Ptr<Ipv4StaticRouting> staStaticRouting = ipv4RoutingHelper.GetStaticRouting (staNode->GetObject<Ipv4> ());
-  staStaticRouting->AddHostRouteTo (Ipv4Address ("1.0.0.2"), Ipv4Address ("7.0.0.1"), 1);
+  staStaticRouting->AddHostRouteTo (Ipv4Address ("1.0.0.2"), Ipv4Address ("3.0.0.1"), 1);
  
   Ptr<Ipv4StaticRouting> apStaticRouting = ipv4RoutingHelper.GetStaticRouting (ueNode->GetObject<Ipv4> ());
-  apStaticRouting->AddHostRouteTo (Ipv4Address ("1.0.0.2"), Ipv4Address ("1.0.0.1"), 1);  
+  apStaticRouting->AddHostRouteTo (Ipv4Address ("1.0.0.2"), Ipv4Address ("7.0.0.1"), 1);  
 
-  //Ptr<Ipv4StaticRouting> rhStaticRouting = ipv4RoutingHelper.GetStaticRouting (remoteHost->GetObject<Ipv4> ());
-  //rhStaticRouting->AddHostRouteTo (Ipv4Address ("1.0.0.2"), Ipv4Address ("1.0.0.2"), 1);
+  Ptr<Ipv4StaticRouting> rhStaticRouting = ipv4RoutingHelper.GetStaticRouting (remoteHost->GetObject<Ipv4> ());
+  rhStaticRouting->AddHostRouteTo (Ipv4Address ("1.0.0.2"), Ipv4Address ("1.0.0.2"), 1);
 
   // Install and start applications on UEs and remote host
-  uint16_t dlPort = 1234;
-
   ApplicationContainer clientApps;
+  ApplicationContainer clientApps2;
   ApplicationContainer serverApps;
 
-  PacketSinkHelper server ("ns3::UdpSocketFactory", InetSocketAddress (Ipv4Address::GetAny(), dlPort));
+  PacketSinkHelper server ("ns3::UdpSocketFactory", Address (InetSocketAddress (Ipv4Address("7.0.0.2"), dlPort)));
   serverApps.Add (server.Install (remoteHost));
+
+  PacketSinkHelper client2 ("ns3::UdpSocketFactory", (InetSocketAddress (staAddr, dlPort)));
+  clientApps2.Add (client2.Install (ueNodes.Get(0)));
 
   OnOffHelper client ("ns3::UdpSocketFactory", (InetSocketAddress (remoteHostAddr, dlPort)));
   client.SetAttribute ("PacketSize", UintegerValue (payloadSize));
