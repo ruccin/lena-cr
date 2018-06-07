@@ -272,7 +272,7 @@ main (int argc, char *argv[])
   server.SetAttribute ("SendSize", UintegerValue (1024));
   server.SetAttribute ("MaxBytes", UintegerValue (1000000000));
 
-  BulkSendHelper client2 ("ns3::TcpSocketFactory", (InetSocketAddress (staAddr, dlPort)));
+  PacketSinkHelper client2 ("ns3::TcpSocketFactory", (InetSocketAddress (staAddr, dlPort)));
   clientApps2.Add (client2.Install (ueNodes.Get(0)));
   client2.SetAttribute ("SendSize", UintegerValue (1024));
   client2.SetAttribute ("MaxBytes", UintegerValue (1000000000));
