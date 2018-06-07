@@ -277,7 +277,7 @@ main (int argc, char *argv[])
   client2.SetAttribute ("SendSize", UintegerValue (1024));
   client2.SetAttribute ("MaxBytes", UintegerValue (1000000000));
 
-  OnOffHelper client ("ns3::TcpSocketFactory", (InetSocketAddress (remoteHostAddr, dlPort)));
+  OnOffHelper client ("ns3::UdpSocketFactory", (InetSocketAddress (remoteHostAddr, dlPort)));
   client.SetAttribute ("PacketSize", UintegerValue (payloadSize));
   client.SetAttribute ("OnTime", StringValue ("ns3::ConstantRandomVariable[Constant=1]"));
   client.SetAttribute ("OffTime", StringValue ("ns3::ConstantRandomVariable[Constant=0]"));
