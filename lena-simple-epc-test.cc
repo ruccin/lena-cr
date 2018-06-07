@@ -266,7 +266,7 @@ main (int argc, char *argv[])
   ApplicationContainer clientApps2;
   ApplicationContainer serverApps;
 
-  PacketSinkHelper server ("ns3::UdpSocketFactory", (InetSocketAddress (ueIpIface.GetAddress(1), dlPort)));
+  PacketSinkHelper server ("ns3::UdpSocketFactory", (InetSocketAddress (Ipv4Address::GetAny (), dlPort)));
   serverApps.Add (server.Install (remoteHost));
 
   PacketSinkHelper client2 ("ns3::UdpSocketFactory", (InetSocketAddress (staAddr, dlPort)));
