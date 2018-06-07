@@ -244,7 +244,7 @@ main (int argc, char *argv[])
   ipv4h.SetBase ("3.0.0.0", "255.0.0.0");
   Ipv4InterfaceContainer staInterface;
   staInterface = ipv4h.Assign (staDevices);  
-  Ipv4Address staAddr = staInterface.GetAddress (1);
+  //Ipv4Address staAddr = staInterface.GetAddress (1);
 /*
   Ptr<Packet> packet = Create<Packet> (payloadSize);
 
