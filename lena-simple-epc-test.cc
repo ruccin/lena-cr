@@ -133,7 +133,7 @@ main (int argc, char *argv[])
   ipv4h.SetBase ("1.0.0.0", "255.0.0.0");
   Ipv4InterfaceContainer internetIpIfaces = ipv4h.Assign (internetDevices);
   // interface 0 is localhost, 1 is the p2p device
-  Ipv4Address remoteHostAddr = internetIpIfaces.GetAddress (1);
+  //Ipv4Address remoteHostAddr = internetIpIfaces.GetAddress (1);
 
   Ipv4StaticRoutingHelper ipv4RoutingHelper;
   Ptr<Ipv4StaticRouting> remoteHostStaticRouting = ipv4RoutingHelper.GetStaticRouting (remoteHost->GetObject<Ipv4> ());
@@ -244,7 +244,7 @@ main (int argc, char *argv[])
   ipv4h.SetBase ("3.0.0.0", "255.0.0.0");
   Ipv4InterfaceContainer staInterface;
   staInterface = ipv4h.Assign (staDevices);  
-  Ipv4Address staAddr = staInterface.GetAddress (1);
+  //Ipv4Address staAddr = staInterface.GetAddress (1);
 /*
   Ptr<Packet> packet = Create<Packet> (payloadSize);
 
@@ -267,15 +267,15 @@ main (int argc, char *argv[])
   ApplicationContainer clientApps2;
   ApplicationContainer serverApps;
 
-  BulkSendHelper server ("ns3::TcpSocketFactory", (InetSocketAddress (ueAddr, dlPort)));
+  PacketSinkHelper server ("ns3::UdpSocketFactory", (InetSocketAddress (Ipv4Address::GetAny(), dlPort)));
   serverApps.Add (server.Install (remoteHost));
-  server.SetAttribute ("SendSize", UintegerValue (1024));
-  server.SetAttribute ("MaxBytes", UintegerValue (1000000000));
+  //server.SetAttribute ("SendSize", UintegerValue (1024));
+  //server.SetAttribute ("MaxBytes", UintegerValue (1000000000));
 
-  PacketSinkHelper client2 ("ns3::TcpSocketFactory", (InetSocketAddress (staAddr, dlPort)));
+  PacketSinkHelper client2 ("ns3::UdpSocketFactory", (InetSocketAddress (Ipv4Address::GetAny(), dlPort)));
   clientApps2.Add (client2.Install (ueNodes.Get(0)));
-  client2.SetAttribute ("SendSize", UintegerValue (1024));
-  client2.SetAttribute ("MaxBytes", UintegerValue (1000000000));
+  //client2.SetAttribute ("SendSize", UintegerValue (1024));
+  //client2.SetAttribute ("MaxBytes", UintegerValue (1000000000));
 
   OnOffHelper client ("ns3::UdpSocketFactory", (InetSocketAddress (ueAddr, dlPort)));
   client.SetAttribute ("PacketSize", UintegerValue (payloadSize));
