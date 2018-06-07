@@ -133,7 +133,7 @@ main (int argc, char *argv[])
   ipv4h.SetBase ("1.0.0.0", "255.0.0.0");
   Ipv4InterfaceContainer internetIpIfaces = ipv4h.Assign (internetDevices);
   // interface 0 is localhost, 1 is the p2p device
-  //Ipv4Address remoteHostAddr = internetIpIfaces.GetAddress (1);
+  Ipv4Address remoteHostAddr = internetIpIfaces.GetAddress (1);
 
   Ipv4StaticRoutingHelper ipv4RoutingHelper;
   Ptr<Ipv4StaticRouting> remoteHostStaticRouting = ipv4RoutingHelper.GetStaticRouting (remoteHost->GetObject<Ipv4> ());
@@ -187,7 +187,7 @@ main (int argc, char *argv[])
   internet.Install (ueNodes);
   Ipv4InterfaceContainer ueIpIface;
   ueIpIface = epcHelper->AssignUeIpv4Address (NetDeviceContainer (ueLteDevs));
-  Ipv4Address ueAddr = ueIpIface.GetAddress (1);
+  //Ipv4Address ueAddr = ueIpIface.GetAddress (1);
 
   // Assign IP address to UEs, and install applications
   Ptr<Node> ueNode = ueNodes.Get (0);
@@ -277,7 +277,7 @@ main (int argc, char *argv[])
   //client2.SetAttribute ("SendSize", UintegerValue (1024));
   //client2.SetAttribute ("MaxBytes", UintegerValue (1000000000));
 
-  OnOffHelper client ("ns3::UdpSocketFactory", (InetSocketAddress (ueAddr, dlPort)));
+  OnOffHelper client ("ns3::UdpSocketFactory", (InetSocketAddress (remoteHostAddr, dlPort)));
   client.SetAttribute ("PacketSize", UintegerValue (payloadSize));
   client.SetAttribute ("OnTime", StringValue ("ns3::ConstantRandomVariable[Constant=1]"));
   client.SetAttribute ("OffTime", StringValue ("ns3::ConstantRandomVariable[Constant=0]"));
