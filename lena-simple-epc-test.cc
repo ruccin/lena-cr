@@ -187,6 +187,7 @@ main (int argc, char *argv[])
   internet.Install (ueNodes);
   Ipv4InterfaceContainer ueIpIface;
   ueIpIface = epcHelper->AssignUeIpv4Address (NetDeviceContainer (ueLteDevs));
+  Ipv4Address ueAddr = ueIpIface.GetAddress (1);
 
   // Assign IP address to UEs, and install applications
   Ptr<Node> ueNode = ueNodes.Get (0);
@@ -266,13 +267,17 @@ main (int argc, char *argv[])
   ApplicationContainer clientApps2;
   ApplicationContainer serverApps;
 
-  PacketSinkHelper server ("ns3::UdpSocketFactory", (InetSocketAddress (Ipv4Address::GetAny (), dlPort)));
+  BulkSendHelper server ("ns3::TcpSocketFactory", (InetSocketAddress (ueAddr, dlPort)));
   serverApps.Add (server.Install (remoteHost));
+  server.SetAttribute ("SendSize", UintegerValue (1024));
+  server.SetAttribute ("MaxBytes", UintegerValue (1000000000));
 
-  PacketSinkHelper client2 ("ns3::UdpSocketFactory", (InetSocketAddress (staAddr, dlPort)));
+  BulkSendHelper client2 ("ns3::TcpSocketFactory", (InetSocketAddress (staAddr, dlPort)));
   clientApps2.Add (client2.Install (ueNodes.Get(0)));
+  client2.SetAttribute ("SendSize", UintegerValue (1024));
+  client2.SetAttribute ("MaxBytes", UintegerValue (1000000000));
 
-  OnOffHelper client ("ns3::UdpSocketFactory", (InetSocketAddress (remoteHostAddr, dlPort)));
+  OnOffHelper client ("ns3::TcpSocketFactory", (InetSocketAddress (ueAddr, dlPort)));
   client.SetAttribute ("PacketSize", UintegerValue (payloadSize));
   client.SetAttribute ("OnTime", StringValue ("ns3::ConstantRandomVariable[Constant=1]"));
   client.SetAttribute ("OffTime", StringValue ("ns3::ConstantRandomVariable[Constant=0]"));
