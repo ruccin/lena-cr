@@ -238,7 +238,7 @@ main (int argc, char *argv[])
   PacketSinkHelper server ("ns3::UdpSocketFactory", (InetSocketAddress (Ipv4Address::GetAny(), dlPort)));
   serverApps.Add (server.Install (remoteHost));
 
-  OnOffHelper client ("ns3::UdpSocketFactory", Address(InetSocketAddress (Ipv4Address("1.0.0.2"), dlPort)));
+  OnOffHelper client ("ns3::UdpSocketFactory", Address(InetSocketAddress (remoteHostAddr, dlPort)));
   client.SetAttribute ("PacketSize", UintegerValue (payloadSize));
   client.SetAttribute ("OnTime", StringValue ("ns3::ConstantRandomVariable[Constant=1]"));
   client.SetAttribute ("OffTime", StringValue ("ns3::ConstantRandomVariable[Constant=0]"));
