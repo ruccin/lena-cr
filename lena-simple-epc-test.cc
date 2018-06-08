@@ -54,36 +54,8 @@ using namespace ns3;
  */
 
 NS_LOG_COMPONENT_DEFINE ("EpcFirstExample");
-/*
-// FlowMonitor
-  void PrintStats(Ptr<FlowMonitor> monitor){
-    double rxBD = 0;
-    std::ofstream THROUGHPUT;
 
-    FlowMonitorHelper flowmonitor;
-    monitor->CheckForLostPackets(Time(0.001));
-
-    Ptr<Ipv4FlowClassifier> classifier = DynamicCast<Ipv4FlowClassifier>(flowmonitor.GetClassifier());
-    std::map<FlowId, FlowMonitor::FlowStats> stats = monitor->GetFlowStats();
-
-    for (std::map<FlowId, FlowMonitor::FlowStats>::const_iterator iter = stats.begin(); iter != stats.end(); ++iter){
-      
-      if (iter->first == 1){
-
-        double Throughput = (iter->second.rxBytes-rxBD) * 8.0 / 1024 / 1024;
-        THROUGHPUT<<Throughput<<"\n";
-        rxBD = iter->second.rxBytes;
-
-        std::cout<<"THROUGHPUT"<<Throughput<<"\n"<<std::endl;
-      }
-    }
-  Simulator::Schedule(Seconds(1.0), &PrintStats, monitor);
-  
-  return;
-  }
-*/
-
-int
+int 
 main (int argc, char *argv[])
 {
   uint16_t dlPort = 1234;
@@ -132,12 +104,10 @@ main (int argc, char *argv[])
   Ipv4AddressHelper ipv4h;
   ipv4h.SetBase ("1.0.0.0", "255.0.0.0");
   Ipv4InterfaceContainer internetIpIfaces = ipv4h.Assign (internetDevices);
-  // interface 0 is localhost, 1 is the p2p device
-  //Ipv4Address remoteHostAddr = internetIpIfaces.GetAddress (1);
 
   Ipv4StaticRoutingHelper ipv4RoutingHelper;
   Ptr<Ipv4StaticRouting> remoteHostStaticRouting = ipv4RoutingHelper.GetStaticRouting (remoteHost->GetObject<Ipv4> ());
-  remoteHostStaticRouting->AddNetworkRouteTo (Ipv4Address ("7.0.0.0"), Ipv4Mask ("255.0.0.0"), Ipv4Address ("3.0.0.0"), 1);
+  remoteHostStaticRouting->AddNetworkRouteTo (Ipv4Address ("7.0.0.0"), Ipv4Mask ("255.0.0.0"), Ipv4Address ("3.0.0.0"), 1, 0);
 
   NodeContainer ueNodes;
   NodeContainer enbNodes;
@@ -187,7 +157,6 @@ main (int argc, char *argv[])
   internet.Install (ueNodes);
   Ipv4InterfaceContainer ueIpIface;
   ueIpIface = epcHelper->AssignUeIpv4Address (NetDeviceContainer (ueLteDevs));
-  //Ipv4Address ueAddr = ueIpIface.GetAddress (1);
 
   // Assign IP address to UEs, and install applications
   Ptr<Node> ueNode = ueNodes.Get (0);
@@ -244,22 +213,23 @@ main (int argc, char *argv[])
   ipv4h.SetBase ("3.0.0.0", "255.0.0.0");
   Ipv4InterfaceContainer staInterface;
   staInterface = ipv4h.Assign (staDevices);  
-  //Ipv4Address staAddr = staInterface.GetAddress (1);
-/*
-  Ptr<Packet> packet = Create<Packet> (payloadSize);
-  Ptr<EpcSgwPgwApplication> epcsgwpgwapp = CreateObject<EpcSgwPgwApplication> ();
-  epcsgwpgwapp.RecvFromTunDevice (packet, Ipv4Address ("3.0.0.1"), Ipv4Address ("1.0.0.2"), 1);
-  remoteHost->AddApplication (epcsgwpgwapp);
-*/
+
+  // Interfaces
+  // interface 0 is localhost, 1 is the p2p device
+  Ipv4Address remoteHostAddr = internetIpIfaces.GetAddress (1);
+  Ipv4Address ueAddr = ueIpIface.GetAddress (1);
+  Ipv4Address staAddr = staInterface.GetAddress (1);  
+
+  // Set of Static Routing
   Ptr<Node> staNode = staNodes.Get (0);
   Ptr<Ipv4StaticRouting> staStaticRouting = ipv4RoutingHelper.GetStaticRouting (staNode->GetObject<Ipv4> ());
-  staStaticRouting->AddHostRouteTo (Ipv4Address ("1.0.0.2"), Ipv4Address ("3.0.0.1"), 1);
+  staStaticRouting->AddHostRouteTo (staAddr, staAddr, 1, 0);
  
   Ptr<Ipv4StaticRouting> apStaticRouting = ipv4RoutingHelper.GetStaticRouting (ueNode->GetObject<Ipv4> ());
-  apStaticRouting->AddHostRouteTo (Ipv4Address ("1.0.0.2"), Ipv4Address ("7.0.0.1"), 2);  
+  apStaticRouting->AddHostRouteTo (staAddr, staAddr, 2, 0);  
 
   Ptr<Ipv4StaticRouting> rhStaticRouting = ipv4RoutingHelper.GetStaticRouting (remoteHost->GetObject<Ipv4> ());
-  rhStaticRouting->AddHostRouteTo (Ipv4Address ("1.0.0.2"), Ipv4Address ("1.0.0.2"), 1);
+  rhStaticRouting->AddHostRouteTo (staAddr, ueAddr, 1, 0);
 
   // Install and start applications on UEs and remote host
   ApplicationContainer clientApps;
