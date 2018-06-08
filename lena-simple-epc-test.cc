@@ -226,10 +226,10 @@ main (int argc, char *argv[])
   staStaticRouting->AddHostRouteTo (staAddr, staAddr, 1, 0);
  
   Ptr<Ipv4StaticRouting> apStaticRouting = ipv4RoutingHelper.GetStaticRouting (ueNode->GetObject<Ipv4> ());
-  apStaticRouting->AddHostRouteTo (staAddr, staAddr, 2, 0);  
+  apStaticRouting->AddHostRouteTo (staAddr, ueAddr, 2, 0);  
 
   Ptr<Ipv4StaticRouting> rhStaticRouting = ipv4RoutingHelper.GetStaticRouting (remoteHost->GetObject<Ipv4> ());
-  rhStaticRouting->AddHostRouteTo (staAddr, ueAddr, 1, 0);
+  rhStaticRouting->AddHostRouteTo (staAddr, remoteHostAddr, 1, 0);
 
   // Install and start applications on UEs and remote host
   ApplicationContainer clientApps;
