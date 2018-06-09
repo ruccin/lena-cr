@@ -221,7 +221,7 @@ main (int argc, char *argv[])
   Ipv4Address staAddr = staInterface.GetAddress (1);  
 
   Ptr<Ipv4L3Protocol> ipL3 = (staNodes.Get (0))->GetObject<Ipv4L3Protocol> ();
-  Ptr<EpcSgwPgwApplication> epcSgwPgwApp = RecvFromTunDevice (Ptr<Packet> packet, remoteHostAddr, staAddr, 17);
+  Ptr<EpcSgwPgwApplication> epcSgwPgwApp = RecvFromTunDevice (ipL3, remoteHostAddr, staAddr, 17);
   remoteHost->AddApplication (epcSgwPgwApp);
 
 /*
