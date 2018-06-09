@@ -220,6 +220,7 @@ main (int argc, char *argv[])
   Ipv4Address ueAddr = ueIpIface.GetAddress (1);
   Ipv4Address staAddr = staInterface.GetAddress (1);  
 
+/*
   // Set of Static Routing
   Ptr<Node> staNode = staNodes.Get (0);
   Ptr<Ipv4StaticRouting> staStaticRouting = ipv4RoutingHelper.GetStaticRouting (staNode->GetObject<Ipv4> ());
@@ -230,7 +231,7 @@ main (int argc, char *argv[])
 
   Ptr<Ipv4StaticRouting> rhStaticRouting = ipv4RoutingHelper.GetStaticRouting (remoteHost->GetObject<Ipv4> ());
   rhStaticRouting->AddHostRouteTo (staAddr, remoteHostAddr, 1, 0);
-
+*/
   // Install and start applications on UEs and remote host
   ApplicationContainer clientApps;
   ApplicationContainer serverApps;
