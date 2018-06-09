@@ -217,8 +217,12 @@ main (int argc, char *argv[])
   // Interfaces
   // interface 0 is localhost, 1 is the p2p device
   Ipv4Address remoteHostAddr = internetIpIfaces.GetAddress (1);
-  //Ipv4Address ueAddr = ueIpIface.GetAddress (1);
-  //Ipv4Address staAddr = staInterface.GetAddress (1);  
+  Ipv4Address ueAddr = ueIpIface.GetAddress (1);
+  Ipv4Address staAddr = staInterface.GetAddress (1);  
+
+  Ptr<Ipv4L3Protocol> ipL3 = (staNodes.Get (0))->GetObject<Ipv4L3Protocol> ();
+  Ptr<EpcSgwPgwApplication> epcSgwPgwApp = RecvFromTunDevice (Ptr<Packet> packet, remoteHostAddr, staAddr, 17);
+  remoteHost->AddApplication (epcSgwPgwApp);
 
 /*
   // Set of Static Routing
@@ -254,12 +258,40 @@ main (int argc, char *argv[])
   lteHelper->EnableTraces ();
   wifiPhy.EnablePcap("lena-simple-epc-test", staDevices);
 
-  FlowMonitorHelper flowmonitor;
+  FlowMonitorHelper flowmon;
   Ptr<FlowMonitor> monitor;
 
-  monitor = flowmonitor.InstallAll ();
-  
+  monitor = flowmon.InstallAll ();
   monitor->SerializeToXmlFile ("flowmo.xml", true, true);
+
+  //Print per flow statistics
+  monitor->CheckForLostPackets ();
+  Ptr<Ipv4FlowClassifier> classifier = DynamicCast<Ipv4FlowClassifier> (flowmon.GetClassifier ());
+  std::map<FlowId, FlowMonitor::FlowStats> stats = monitor->GetFlowStats ();
+
+  AsciiTraceHelper asciiTHFlow;
+  Ptr<OutputStreamWrapper> flowStream = asciiTHFlow.CreateFileStream ("lte01.txt");
+  for (std::map<FlowId, FlowMonitor::FlowStats>::const_iterator i = stats.begin (); i != stats.end (); ++i)
+    {
+          Ipv4FlowClassifier::FiveTuple t = classifier->FindFlow (i->first);
+          *flowStream->GetStream () << " Flow " << i->first << " (" << t.sourceAddress << " -> " << t.destinationAddress << ")" << std::endl;
+          *flowStream->GetStream () << " First packet time: " << i->second.timeFirstRxPacket << std::endl;
+          *flowStream->GetStream () << " Tx Packets: " << i->second.txPackets << std::endl;
+          *flowStream->GetStream () << " Rx Packets: " << i->second.rxPackets << std::endl;
+          uint32_t dropes = 0;
+           for (uint32_t reasonCode = 0; reasonCode < i->second.packetsDropped.size (); reasonCode++)
+           {
+        	   dropes+= i->second.packetsDropped[reasonCode];
+           }
+           *flowStream->GetStream () << " Drop packets: " << dropes << std::endl;
+    }
+
+  for (uint32_t u = 0; u < ueNodes.GetN(); u++)
+  {
+	  Ptr<PacketSink> sink1 = DynamicCast<PacketSink> (clientApps.Get (u));
+	  *flowStream->GetStream () << "Total Bytes Received by sink packet #"<< u << ":" << sink1->GetTotalRx () << std::endl;
+	  std::cout << "Total Bytes Received by sink packet #"<< u << ":" << sink1->GetTotalRx () << std::endl;
+  }
 
   Simulator::Stop(Seconds(simTime));
   //Simulator::Schedule(Seconds(1.0), monitor);
