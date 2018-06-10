@@ -223,18 +223,18 @@ main (int argc, char *argv[])
   // Set of Static Routing
   Ptr<Node> staNode = staNodes.Get (0);
   Ptr<Ipv4StaticRouting> staStaticRouting = ipv4RoutingHelper.GetStaticRouting (staNode->GetObject<Ipv4> ());
-  staStaticRouting->AddHostRouteTo (staAddr, staAddr, 1, 0);
+  staStaticRouting->AddHostRouteTo (remoteHostAddr, ueAddr, 1, 0);
  
   Ptr<Ipv4StaticRouting> apStaticRouting = ipv4RoutingHelper.GetStaticRouting (ueNode->GetObject<Ipv4> ());
-  apStaticRouting->AddHostRouteTo (staAddr, staAddr, 2, 0);  
+  apStaticRouting->AddHostRouteTo (remoteHostAddr, remoteHostAddr, 2, 0);  
 
   Ptr<Ipv4StaticRouting> rhStaticRouting = ipv4RoutingHelper.GetStaticRouting (remoteHost->GetObject<Ipv4> ());
-  rhStaticRouting->AddHostRouteTo (staAddr, ueAddr, 1, 0);
-/*
+  rhStaticRouting->AddHostRouteTo (remoteHostAddr, remoteHostAddr, 1, 0);
+
   Ptr<Ipv4L3Protocol> ipL3 = (ueNodes.Get (0))->GetObject<Ipv4L3Protocol> ();
-  Ptr<EpcSgwPgwApplication> epcSgwPgwApp = RecvFromTunDevice (ipL3, remoteHostAddr, staAddr, 17);
-  remoteHost->AddApplication (epcSgwPgwApp);
-*/
+  Ptr<EpcSgwPgwApplication> epcSgwPgwApp = RecvFromTunDevice (ipL3, staAddr, remoteHostAddr, 17);
+  pgw->AddApplication (epcSgwPgwApp);
+
   // Install and start applications on UEs and remote host
   ApplicationContainer clientApps;
   ApplicationContainer serverApps;
