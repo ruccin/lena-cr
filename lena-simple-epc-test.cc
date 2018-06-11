@@ -226,7 +226,7 @@ main (int argc, char *argv[])
   staStaticRouting->AddHostRouteTo (remoteHostAddr, ueAddr, 1, 0);
  
   Ptr<Ipv4StaticRouting> apStaticRouting = ipv4RoutingHelper.GetStaticRouting (ueNode->GetObject<Ipv4> ());
-  apStaticRouting->AddHostRouteTo (remoteHostAddr, remoteHostAddr, 2, 0);  
+  apStaticRouting->AddHostRouteTo (remoteHostAddr, ueAddr, 2, 0);  
 
   Ptr<Ipv4StaticRouting> rhStaticRouting = ipv4RoutingHelper.GetStaticRouting (remoteHost->GetObject<Ipv4> ());
   rhStaticRouting->AddHostRouteTo (remoteHostAddr, remoteHostAddr, 1, 0);
