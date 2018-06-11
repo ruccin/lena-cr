@@ -231,9 +231,9 @@ main (int argc, char *argv[])
   Ptr<Ipv4StaticRouting> rhStaticRouting = ipv4RoutingHelper.GetStaticRouting (remoteHost->GetObject<Ipv4> ());
   rhStaticRouting->AddHostRouteTo (remoteHostAddr, remoteHostAddr, 1, 0);
 
-  //Ptr<Ipv4L3Protocol> ipL3 = (ueNodes.Get (0))->GetObject<Ipv4L3Protocol> ();
-  //Ptr<EpcSgwPgwApplication> epcSgwPgwApp = RecvFromTunDevice (ipL3, staAddr, remoteHostAddr, 17);
-  //pgw->AddApplication (epcSgwPgwApp);
+  Ptr<Ipv4L3Protocol> ipL3 = (staNodes.Get (0))->GetObject<Ipv4L3Protocol> ();
+  Ptr<EpcSgwPgwApplication> epcSgwPgwApp = RecvFromTunDevice (ipL3, staAddr, remoteHostAddr, 17);
+  pgw->AddApplication (epcSgwPgwApp);
 
   // Install and start applications on UEs and remote host
   ApplicationContainer clientApps;
@@ -286,8 +286,8 @@ main (int argc, char *argv[])
     }
 
   Ptr<PacketSink> sink1 = DynamicCast<PacketSink> (clientApps.Get (0));
-  *flowStream->GetStream () << "Total Bytes Received by sink packet #"<< sink1->GetTotalRx () << std::endl;
-  std::cout << "Total Bytes Received by sink packet #"<< sink1->GetTotalRx () << std::endl;
+  *flowStream->GetStream () << "Total Bytes Received by sink packet #" << sink1->GetTotalRx () << std::endl;
+  std::cout << "Total Bytes Received by sink packet #" << sink1->GetTotalRx () << std::endl;
 
   Simulator::Stop(Seconds(simTime));
   //Simulator::Schedule(Seconds(1.0), monitor);
