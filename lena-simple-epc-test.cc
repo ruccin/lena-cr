@@ -285,12 +285,9 @@ main (int argc, char *argv[])
            *flowStream->GetStream () << " Drop packets: " << dropes << std::endl;
     }
 
-  for (uint32_t u = 0; u < ueNodes.GetN(); u++)
-  {
-	  Ptr<PacketSink> sink1 = DynamicCast<PacketSink> (clientApps.Get (u));
-	  *flowStream->GetStream () << "Total Bytes Received by sink packet #"<< u << ":" << sink1->GetTotalRx () << std::endl;
-	  std::cout << "Total Bytes Received by sink packet #"<< u << ":" << sink1->GetTotalRx () << std::endl;
-  }
+  Ptr<PacketSink> sink1 = DynamicCast<PacketSink> (clientApps.Get (0));
+  *flowStream->GetStream () << "Total Bytes Received by sink packet #"<< u << ":" << sink1->GetTotalRx () << std::endl;
+  std::cout << "Total Bytes Received by sink packet #"<< u << ":" << sink1->GetTotalRx () << std::endl;
 
   Simulator::Stop(Seconds(simTime));
   //Simulator::Schedule(Seconds(1.0), monitor);
