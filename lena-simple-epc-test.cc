@@ -219,7 +219,7 @@ main (int argc, char *argv[])
   // interface 0 is localhost, 1 is the p2p device
   Ipv4Address remoteHostAddr = internetIpIfaces.GetAddress (1);
   //Ipv4Address ueAddr = ueIpIface.GetAddress (1);
-  //Ipv4Address staAddr = staInterface.GetAddress (1);  
+  Ipv4Address staAddr = staInterface.GetAddress (1);  
 /*
   // Set of Static Routing
   Ptr<Node> staNode = staNodes.Get (0);
@@ -234,7 +234,7 @@ main (int argc, char *argv[])
 */
 
   Ptr<Node> staNode = staNodes.Get (0);
-  Ptr<Packet> staPacket = staNode->GetObject<Ipv4> ()->GetObject<Packet> ();
+  Ptr<Packet> staPacket = staNode->GetObject<Ipv4> ();
   Ptr<EpcSgwPgwApplication> epcSgwPgwApp = RecvFromTunDevice (staPacket, staAddr, remoteHostAddr, UdpL4Protocol::PROT_NUMBER);
   pgw->AddApplication (epcSgwPgwApp);
 
