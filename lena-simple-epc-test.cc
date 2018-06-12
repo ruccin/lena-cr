@@ -44,6 +44,7 @@
 #include "ns3/packet-sink-helper.h"
 #include "ns3/flow-monitor-module.h"
 #include "ns3/wifi-module.h"
+#include "ns3/packet.h"
 
 using namespace ns3;
 
@@ -218,8 +219,8 @@ main (int argc, char *argv[])
   // interface 0 is localhost, 1 is the p2p device
   Ipv4Address remoteHostAddr = internetIpIfaces.GetAddress (1);
   //Ipv4Address ueAddr = ueIpIface.GetAddress (1);
-  Ipv4Address staAddr = staInterface.GetAddress (1);  
-
+  //Ipv4Address staAddr = staInterface.GetAddress (1);  
+/*
   // Set of Static Routing
   Ptr<Node> staNode = staNodes.Get (0);
   Ptr<Ipv4StaticRouting> staStaticRouting = ipv4RoutingHelper.GetStaticRouting (staNode->GetObject<Ipv4> ());
@@ -230,13 +231,13 @@ main (int argc, char *argv[])
 
   Ptr<Ipv4StaticRouting> rhStaticRouting = ipv4RoutingHelper.GetStaticRouting (remoteHost->GetObject<Ipv4> ());
   rhStaticRouting->AddHostRouteTo (remoteHostAddr, remoteHostAddr, 1, 0);
-
-
-  Ptr<Packet> staPacket = (staNodes.Get (0))->GetObject<Packet> ();
+*/
+/*
+  Ptr<Packet> staPacket = 
   Ptr<EpcSgwPgwApplication> epcSgwPgwApp = RecvFromTunDevice (staPacket, staAddr, remoteHostAddr, UdpL4Protocol::PROT_NUMBER);
   pgw->AddApplication (epcSgwPgwApp);
-
-
+*/
+/*
   // Install and start applications on UEs and remote host
   ApplicationContainer clientApps;
   ApplicationContainer serverApps;
@@ -252,9 +253,22 @@ main (int argc, char *argv[])
   client.SetAttribute ("MaxBytes", UintegerValue (1000000000));
   client.SetAttribute ("DataRate", DataRateValue (DataRate ("100Mb/s")));
   clientApps.Add (client.Install (staNodes.Get(0))); 
+*/
   
-  serverApps.Start (Seconds (0.01));
-  clientApps.Start (Seconds (0.01));
+  UdpEchoServerHelper echoServer (dlPort);
+
+  ApplicationContainer serverApps = echoServer.Install (remoteHost);
+
+  UdpEchoClientHelper echoClient (remoteHostAddr, dlPort);
+
+  echoClient.SetAttribute ("MaxPackets", UintegerValue (1000));
+  echoClient.SetAttribute ("Interval", TimeValue (Seconds (0.2)));
+  echoClient.SetAttribute ("PacketSize", UintegerValue (1024));
+
+  ApplicationContainer clientApps = echoClient.Install (staNodes.Get(0));
+
+  serverApps.Start (Seconds (0.1));
+  clientApps.Start (Seconds (0.1));
 
   lteHelper->EnableTraces ();
   wifiPhy.EnablePcap("lena-simple-epc-test", staDevices);
