@@ -55,6 +55,69 @@ using namespace ns3;
 
 NS_LOG_COMPONENT_DEFINE ("EpcFirstExample");
 
+class Test : public Application
+{
+  public:
+  Test ();
+  virtual ~Test ();
+
+  void SentAtClient (Ptr<const Packet> p, Ptr<Ipv4> ipv4, uint32_t interface);
+  void ReceivedAtClient (Ptr<const Packet> p, Ptr<Ipv4> ipv4, uint32_t interface);
+  void EnbToPgw (Ptr<Packet> p);
+
+  private:
+  std::list<uint64_t> m_pgwUidRxFrmEnb; //!< list of uids of packets received at pgw from enb
+  //std::list<uint64_t> m_pgwUidRxFrmTun; //!< list of uids of packets received at pgw from tunnel net device
+
+  std::list<Ptr<Packet> > m_clientTxPkts; //!< list of sent packets from client
+  std::list<Ptr<Packet> > m_RemoteHostRxPkts; //!< list of received packets at RemoteHost
+
+};
+
+Test::~Test ()
+{
+}
+
+void Test::SentAtClient (Ptr<const Packet> p, Ptr<Ipv4> ipv4, uint32_t interface)
+{
+  Ipv4Header ipv4Header;
+  p->PeekHeader (ipv4Header);
+  if (ipv4Header.GetNextHeader () == UdpL4Protocol::PROT_NUMBER)
+    {
+      m_clientTxPkts.push_back (p->Copy ());
+    }
+}
+
+void Test::ReceivedAtClient (Ptr<const Packet> p, Ptr<Ipv4> ipv4, uint32_t interface)
+{
+  Ipv4Header ipv4Header;
+  p->PeekHeader (ipv4Header);
+  if (ipv4Header.GetNextHeader () == UdpL4Protocol::PROT_NUMBER)
+    {
+      m_RemoteHostRxPkts.push_back (p->Copy ());
+    }
+}
+
+void Test::EnbToPgw (Ptr<Packet> p)
+{
+  Ipv4Header ipv4Header;
+  p->PeekHeader (ipv4Header);
+  if (ipv4Header.GetNextHeader () == UdpL4Protocol::PROT_NUMBER)
+    {
+      m_pgwUidRxFrmEnb.push_back (p->GetUid ());
+    }
+}
+/*
+void LteIpv6RoutingTestCase::TunToPgw (Ptr<Packet> p)
+{
+  Ipv6Header ipv6Header;
+  p->PeekHeader (ipv6Header);
+  if (ipv6Header.GetNextHeader () == UdpL4Protocol::PROT_NUMBER)
+    {
+      m_pgwUidRxFrmTun.push_back (p->GetUid ());
+    }
+}
+*/
 int 
 main (int argc, char *argv[])
 {
@@ -231,9 +294,24 @@ main (int argc, char *argv[])
   Ptr<Ipv4StaticRouting> rhStaticRouting = ipv4RoutingHelper.GetStaticRouting (remoteHost->GetObject<Ipv4> ());
   rhStaticRouting->AddHostRouteTo (remoteHostAddr, remoteHostAddr, 1, 0);
 
+  SentAtClient
+
+  ReceivedAtClient
+
+
+/*
   Ptr<Ipv4L3Protocol> ipL3 = (staNodes.Get (0))->GetObject<Ipv4L3Protocol> ();
   Ptr<EpcSgwPgwApplication> epcSgwPgwApp = RecvFromTunDevice (ipL3, staAddr, remoteHostAddr, 17);
   pgw->AddApplication (epcSgwPgwApp);
+*/
+  //Set Cllback for Client Sent and Received packets
+  Ptr<Ipv4L3Protocol> ipL3 = (ueNodes.Get (0))->GetObject<Ipv4L3Protocol> ();
+  ipL3->TraceConnectWithoutContext ("Tx", MakeCallback (&Test::SentAtClient));
+  ipL3->TraceConnectWithoutContext ("Rx", MakeCallback (&Test::ReceivedAtClient));
+
+  //Set Callback at SgwPgWApplication of epc to get the packets from enb and from tunnel net device
+  Ptr<Application> appPgw = pgw->GetApplication (0);
+  appPgw->TraceConnectWithoutContext ("RxFromS1u", MakeCallback (&Test::EnbToPgw));
 
   // Install and start applications on UEs and remote host
   ApplicationContainer clientApps;
