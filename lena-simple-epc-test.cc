@@ -232,11 +232,12 @@ main (int argc, char *argv[])
   Ptr<Ipv4StaticRouting> rhStaticRouting = ipv4RoutingHelper.GetStaticRouting (remoteHost->GetObject<Ipv4> ());
   rhStaticRouting->AddHostRouteTo (remoteHostAddr, remoteHostAddr, 1, 0);
 */
-/*
-  Ptr<Packet> staPacket = 
+
+  Ptr<Node> staNode = staNodes.Get (0);
+  Ptr<Packet> staPacket = staNode->GetObject<Ipv4> ()->GetObject<Packet> ();
   Ptr<EpcSgwPgwApplication> epcSgwPgwApp = RecvFromTunDevice (staPacket, staAddr, remoteHostAddr, UdpL4Protocol::PROT_NUMBER);
   pgw->AddApplication (epcSgwPgwApp);
-*/
+
 /*
   // Install and start applications on UEs and remote host
   ApplicationContainer clientApps;
