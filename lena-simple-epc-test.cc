@@ -63,7 +63,7 @@ main (int argc, char *argv[])
   uint16_t numberOfEnbNodes = 1;
   uint16_t numberOfUeNodes = 1;
   uint16_t numberOfStaNodes = 1;
-  uint32_t payloadSize = 1472;
+  //uint32_t payloadSize = 1472;
   double simTime = 30;
   double distance = 4000.0;
   std::string phyRate = "HtMcs7";
