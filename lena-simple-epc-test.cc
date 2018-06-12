@@ -294,16 +294,12 @@ main (int argc, char *argv[])
   Ptr<Ipv4StaticRouting> rhStaticRouting = ipv4RoutingHelper.GetStaticRouting (remoteHost->GetObject<Ipv4> ());
   rhStaticRouting->AddHostRouteTo (remoteHostAddr, remoteHostAddr, 1, 0);
 
-  SentAtClient
-
-  ReceivedAtClient
-
-
 /*
   Ptr<Ipv4L3Protocol> ipL3 = (staNodes.Get (0))->GetObject<Ipv4L3Protocol> ();
   Ptr<EpcSgwPgwApplication> epcSgwPgwApp = RecvFromTunDevice (ipL3, staAddr, remoteHostAddr, 17);
   pgw->AddApplication (epcSgwPgwApp);
 */
+/*
   //Set Cllback for Client Sent and Received packets
   Ptr<Ipv4L3Protocol> ipL3 = (ueNodes.Get (0))->GetObject<Ipv4L3Protocol> ();
   ipL3->TraceConnectWithoutContext ("Tx", MakeCallback (&Test::SentAtClient));
@@ -312,7 +308,7 @@ main (int argc, char *argv[])
   //Set Callback at SgwPgWApplication of epc to get the packets from enb and from tunnel net device
   Ptr<Application> appPgw = pgw->GetApplication (0);
   appPgw->TraceConnectWithoutContext ("RxFromS1u", MakeCallback (&Test::EnbToPgw));
-
+*/
   // Install and start applications on UEs and remote host
   ApplicationContainer clientApps;
   ApplicationContainer serverApps;
