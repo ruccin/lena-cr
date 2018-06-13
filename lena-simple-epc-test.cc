@@ -160,6 +160,7 @@ main (int argc, char *argv[])
   // Assign IP address to UEs, and install applications
   Ptr<Node> ueNode = ueNodes.Get (0);
   // Set the default gateway for the UE
+  Ipv4StaticRoutingHelper ipv4RoutingHelper;
   Ptr<Ipv4StaticRouting> ueStaticRouting = ipv4RoutingHelper.GetStaticRouting (ueNode->GetObject<Ipv4> ());
   ueStaticRouting->SetDefaultRoute (epcHelper->GetUeDefaultGatewayAddress (), 1);
 
@@ -219,8 +220,6 @@ main (int argc, char *argv[])
   //Ipv4Address ueAddr = ueIpIface.GetAddress (1);
   //Ipv4Address staAddr = staInterface.GetAddress (1);  
 
-
-  Ipv4StaticRoutingHelper ipv4RoutingHelper;
 
   //Ptr<Node> staNode = staNodes.Get (0);
 
