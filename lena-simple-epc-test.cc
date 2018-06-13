@@ -282,7 +282,7 @@ main (int argc, char *argv[])
 
   monitor = flowmon.InstallAll ();
   monitor->SerializeToXmlFile ("flowmo.xml", true, true);
-/*
+
   //Print per flow statistics
   monitor->CheckForLostPackets ();
   Ptr<Ipv4FlowClassifier> classifier = DynamicCast<Ipv4FlowClassifier> (flowmon.GetClassifier ());
@@ -308,7 +308,7 @@ main (int argc, char *argv[])
   Ptr<PacketSink> sink1 = DynamicCast<PacketSink> (clientApps.Get (0));
   *flowStream->GetStream () << "Total Bytes Received by sink packet #" << sink1->GetTotalRx () << std::endl;
   std::cout << "Total Bytes Received by sink packet #" << sink1->GetTotalRx () << std::endl;
-*/
+
   Simulator::Stop(Seconds(simTime));
   //Simulator::Schedule(Seconds(1.0), monitor);
   
