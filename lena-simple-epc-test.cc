@@ -151,10 +151,10 @@ main (int argc, char *argv[])
   
   // Install the IP stack on the UEs
   internet.Install (ueNodes);
-  ipv4h.SetBase ("2.0.0.0", "255.0.0.0");
+  //ipv4h.SetBase ("2.0.0.0", "255.0.0.0");
   Ipv4InterfaceContainer ueIpIface;
-  //ueIpIface = epcHelper->AssignUeIpv4Address (NetDeviceContainer (ueLteDevs));
-  ueIpIface = ipv4h.Assign (ueLteDevs);
+  ueIpIface = epcHelper->AssignUeIpv4Address (NetDeviceContainer (ueLteDevs));
+  //ueIpIface = ipv4h.Assign (ueLteDevs);
 
   // Assign IP address to UEs, and install applications
   Ptr<Node> ueNode = ueNodes.Get (0);
@@ -165,10 +165,10 @@ main (int argc, char *argv[])
 
   // Attach one UE per eNodeB
   lteHelper->Attach (ueLteDevs.Get (0), enbLteDevs.Get (0));
-  //Ptr<NetDevice> ueDevice = ueLteDevs.Get (0);
+  Ptr<NetDevice> ueDevice = ueLteDevs.Get (0);
   enum EpsBearer::Qci q = EpsBearer::GBR_GAMING;
   EpsBearer bearer (q);
-  lteHelper->ActivateDataRadioBearer (ueLteDevs, bearer);
+  lteHelper->ActivateDataRadioBearer (ueDevice, bearer);
 
   // WiFi
   WifiHelper wifiHelper;
@@ -223,7 +223,7 @@ main (int argc, char *argv[])
   //Ptr<Node> staNode = staNodes.Get (0);
 
   Ptr<Ipv4StaticRouting> remoteHostStaticRouting = ipv4RoutingHelper.GetStaticRouting (remoteHost->GetObject<Ipv4> ());
-  remoteHostStaticRouting->AddNetworkRouteTo (Ipv4Address ("3.0.0.0"), Ipv4Mask ("255.0.0.0"), Ipv4Address ("2.0.0.1"), 3, 0);
+  remoteHostStaticRouting->AddNetworkRouteTo (Ipv4Address ("3.0.0.0"), Ipv4Mask ("255.0.0.0"), Ipv4Address ("7.0.0.1"), 3, 0);
  
   Ptr<Ipv4StaticRouting> apStaticRouting = ipv4RoutingHelper.GetStaticRouting (ueNode->GetObject<Ipv4> ());
   apStaticRouting->AddNetworkRouteTo (Ipv4Address ("3.0.0.0"), Ipv4Mask ("255.0.0.0"),Ipv4Address ("3.0.0.1"), 3, 0);
