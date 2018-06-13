@@ -253,7 +253,7 @@ main (int argc, char *argv[])
   dlechoClient.SetAttribute ("Interval", TimeValue (Seconds (0.2)));
   dlechoClient.SetAttribute ("PacketSize", UintegerValue (1024));
   clientApps = dlechoClient.Install (staNodes.Get(0));
-  
+
   PacketSinkHelper ulechoServer ("ns3::UdpSocketFactory", (InetSocketAddress (Ipv4Address::GetAny(), 11)));
   serverApps.Add (ulechoServer.Install (staNodes.Get (0))); 
 
@@ -266,8 +266,8 @@ main (int argc, char *argv[])
   serverApps.Start (Seconds (0.01));
   clientApps.Start (Seconds (0.01));
 
-  lteHelper->EnableMacTraces ();
-  lteHelper->EnableRlcTraces ();
+  //lteHelper->EnableMacTraces ();
+  //lteHelper->EnableRlcTraces ();
   wifiPhy.EnablePcap("lena-simple-epc-test", staDevices);
 /*
   FlowMonitorHelper flowmon;
