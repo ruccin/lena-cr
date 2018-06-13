@@ -263,8 +263,8 @@ main (int argc, char *argv[])
   ulechoClient.SetAttribute ("PacketSize", UintegerValue (1024));
   clientApps.Add (ulechoClient.Install (remoteHost));
 
-  serverApps.Start (Seconds (0.1));
-  clientApps.Start (Seconds (0.1));
+  serverApps.Start (Seconds (0.01));
+  clientApps.Start (Seconds (0.01));
 
   lteHelper->EnableMacTraces ();
   lteHelper->EnableRlcTraces ();
