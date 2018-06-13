@@ -168,7 +168,7 @@ main (int argc, char *argv[])
   Ptr<NetDevice> ueDevice = ueLteDevs.Get (0);
   enum EpsBearer::Qci q = EpsBearer::NGBR_VIDEO_TCP_DEFAULT;
   EpsBearer bearer (q);
-  lteHelper->ActivateDedicatedEpsBearer (ueDevice, bearer, tft);
+  lteHelper->ActivateDedicatedEpsBearer (ueDevice, bearer, EpcTft::Default ());
 
   // WiFi
   WifiHelper wifiHelper;
