@@ -259,7 +259,7 @@ main (int argc, char *argv[])
   dlechoClient.SetAttribute ("MaxPackets", UintegerValue (1000));
   dlechoClient.SetAttribute ("Interval", TimeValue (Seconds (0.2)));
   dlechoClient.SetAttribute ("PacketSize", UintegerValue (1024));
-  ApplicationContainer clientApps = dlechoClient.Install (staNodes.Get(0));
+  clientApps = dlechoClient.Install (staNodes.Get(0));
   
   PacketSinkHelper ulechoServer ("ns3::UdpSocketFactory", (InetSocketAddress (Ipv4Address::GetAny(), 11)));
   serverApps.Add (ulechoServer.Install (staNodes.Get (0))); 
