@@ -108,7 +108,7 @@ main (int argc, char *argv[])
 
   Ipv4StaticRoutingHelper ipv4RoutingHelper;
   Ptr<Ipv4StaticRouting> remoteHostStaticRouting = ipv4RoutingHelper.GetStaticRouting (remoteHost->GetObject<Ipv4> ());
-  remoteHostStaticRouting->AddNetworkRouteTo (Ipv4Address ("7.0.0.0"), Ipv4Mask ("255.0.0.0"), Ipv4Address ("3.0.0.0"), 1, 0);
+  remoteHostStaticRouting->AddNetworkRouteTo (Ipv4Address ("7.0.0.0"), Ipv4Mask ("255.0.0.0"), Ipv4Address ("3.0.0.1"), 3, 0);
 
   NodeContainer ueNodes;
   NodeContainer enbNodes;
@@ -166,7 +166,7 @@ main (int argc, char *argv[])
   ueStaticRouting->SetDefaultRoute (epcHelper->GetUeDefaultGatewayAddress (), 1);
 
   // Attach one UE per eNodeB
-  lteHelper->Attach (ueLteDevs.Get(0), enbLteDevs.Get(0));
+  lteHelper->Attach (ueLteDevs.Get (0), enbLteDevs.Get (0));
   Ptr<NetDevice> ueDevice = ueLteDevs.Get (0);
   enum EpsBearer::Qci q = EpsBearer::GBR_GAMING;
   EpsBearer bearer (q);
@@ -201,14 +201,14 @@ main (int argc, char *argv[])
                    "Ssid", SsidValue (ssid));
   
   NetDeviceContainer apDevices;
-  apDevices = wifiHelper.Install (wifiPhy, wifiMac, ueNodes);
+  apDevices = wifiHelper.Install (wifiPhy, wifiMac, ueNodes.Get (0));
 
   // Set of Sta
   wifiMac.SetType ("ns3::StaWifiMac",
                    "Ssid", SsidValue (ssid));
 
   NetDeviceContainer staDevices;
-  staDevices = wifiHelper.Install (wifiPhy, wifiMac, staNodes);
+  staDevices = wifiHelper.Install (wifiPhy, wifiMac, staNodes.Get (0));
 
   internet.Install (staNodes);
   ipv4h.SetBase ("3.0.0.0", "255.0.0.0");
@@ -219,7 +219,7 @@ main (int argc, char *argv[])
   // interface 0 is localhost, 1 is the p2p device
   Ipv4Address remoteHostAddr = internetIpIfaces.GetAddress (1);
   //Ipv4Address ueAddr = ueIpIface.GetAddress (1);
-  Ipv4Address staAddr = staInterface.GetAddress (1);  
+  //Ipv4Address staAddr = staInterface.GetAddress (1);  
 /*
   // Set of Static Routing
   Ptr<Node> staNode = staNodes.Get (0);
@@ -232,11 +232,6 @@ main (int argc, char *argv[])
   Ptr<Ipv4StaticRouting> rhStaticRouting = ipv4RoutingHelper.GetStaticRouting (remoteHost->GetObject<Ipv4> ());
   rhStaticRouting->AddHostRouteTo (remoteHostAddr, remoteHostAddr, 1, 0);
 */
-
-  Ptr<Node> staNode = staNodes.Get (0);
-  Ptr<Packet> staPacket = staNode->GetObject<Ipv4> ();
-  Ptr<EpcSgwPgwApplication> epcSgwPgwApp = RecvFromTunDevice (staPacket, staAddr, remoteHostAddr, UdpL4Protocol::PROT_NUMBER);
-  pgw->AddApplication (epcSgwPgwApp);
 
 /*
   // Install and start applications on UEs and remote host
