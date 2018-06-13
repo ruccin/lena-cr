@@ -216,14 +216,14 @@ main (int argc, char *argv[])
   // Interfaces
   // interface 0 is localhost, 1 is the p2p device
   Ipv4Address remoteHostAddr = internetIpIfaces.GetAddress (1);
-  //Ipv4Address ueAddr = ueIpIface.GetAddress (1);
+  Ipv4Address ueAddr = ueIpIface.GetAddress (1);
   Ipv4Address staAddr = staInterface.GetAddress (1);  
 
 
   //Ptr<Node> staNode = staNodes.Get (0);
 
   Ptr<Ipv4StaticRouting> remoteHostStaticRouting = ipv4RoutingHelper.GetStaticRouting (remoteHost->GetObject<Ipv4> ());
-  remoteHostStaticRouting->AddNetworkRouteTo (Ipv4Address ("3.0.0.0"), Ipv4Mask ("255.0.0.0"), Ipv4Address ("7.0.0.1"), 2, 0);
+  remoteHostStaticRouting->AddNetworkRouteTo (Ipv4Address ("3.0.0.0"), Ipv4Mask ("255.0.0.0"), Ipv4Address ("7.0.0.1"), 1, 0);
  
   Ptr<Ipv4StaticRouting> apStaticRouting = ipv4RoutingHelper.GetStaticRouting (ueNode->GetObject<Ipv4> ());
   apStaticRouting->AddNetworkRouteTo (Ipv4Address ("3.0.0.0"), Ipv4Mask ("255.0.0.0"),Ipv4Address ("3.0.0.1"), 2, 0);
