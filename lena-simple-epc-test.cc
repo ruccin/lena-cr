@@ -106,10 +106,6 @@ main (int argc, char *argv[])
   ipv4h.SetBase ("1.0.0.0", "255.0.0.0");
   Ipv4InterfaceContainer internetIpIfaces = ipv4h.Assign (internetDevices);
 
-  Ipv4StaticRoutingHelper ipv4RoutingHelper;
-  Ptr<Ipv4StaticRouting> remoteHostStaticRouting = ipv4RoutingHelper.GetStaticRouting (remoteHost->GetObject<Ipv4> ());
-  remoteHostStaticRouting->AddNetworkRouteTo (Ipv4Address ("7.0.0.0"), Ipv4Mask ("255.0.0.0"), Ipv4Address ("3.0.0.1"), 3, 0);
-
   NodeContainer ueNodes;
   NodeContainer enbNodes;
   NodeContainer staNodes;
@@ -156,8 +152,10 @@ main (int argc, char *argv[])
   
   // Install the IP stack on the UEs
   internet.Install (ueNodes);
+  ipv4h.SetBase ("2.0.0.0", "255.0.0.0");
   Ipv4InterfaceContainer ueIpIface;
-  ueIpIface = epcHelper->AssignUeIpv4Address (NetDeviceContainer (ueLteDevs));
+  //ueIpIface = epcHelper->AssignUeIpv4Address (NetDeviceContainer (ueLteDevs));
+  ueIpIface = ipv4h.Assign (ueLteDevs);
 
   // Assign IP address to UEs, and install applications
   Ptr<Node> ueNode = ueNodes.Get (0);
@@ -220,18 +218,21 @@ main (int argc, char *argv[])
   Ipv4Address remoteHostAddr = internetIpIfaces.GetAddress (1);
   //Ipv4Address ueAddr = ueIpIface.GetAddress (1);
   //Ipv4Address staAddr = staInterface.GetAddress (1);  
-/*
-  // Set of Static Routing
-  Ptr<Node> staNode = staNodes.Get (0);
-  Ptr<Ipv4StaticRouting> staStaticRouting = ipv4RoutingHelper.GetStaticRouting (staNode->GetObject<Ipv4> ());
-  staStaticRouting->AddHostRouteTo (remoteHostAddr, Ipv4Address ("7.0.0.1"), 1, 0);
+
+
+  Ipv4StaticRoutingHelper ipv4RoutingHelper;
+
+  //Ptr<Node> staNode = staNodes.Get (0);
+
+  Ptr<Ipv4StaticRouting> remoteHostStaticRouting = ipv4RoutingHelper.GetStaticRouting (remoteHost->GetObject<Ipv4> ());
+  remoteHostStaticRouting->AddNetworkRouteTo (Ipv4Address ("7.0.0.0"), Ipv4Mask ("255.0.0.0"), Ipv4Address ("3.0.0.1"), 3, 0);
  
   Ptr<Ipv4StaticRouting> apStaticRouting = ipv4RoutingHelper.GetStaticRouting (ueNode->GetObject<Ipv4> ());
-  apStaticRouting->AddHostRouteTo (remoteHostAddr, Ipv4Address ("7.0.0.1"), 2, 0);  
+  apStaticRouting->AddNetworkRouteTo (Ipv4Address ("3.0.0.0"), Ipv4Mask ("255.0.0.0"), 3, 0);
 
-  Ptr<Ipv4StaticRouting> rhStaticRouting = ipv4RoutingHelper.GetStaticRouting (remoteHost->GetObject<Ipv4> ());
-  rhStaticRouting->AddHostRouteTo (remoteHostAddr, remoteHostAddr, 1, 0);
-*/
+  //Ptr<Ipv4StaticRouting> staStaticRouting = ipv4RoutingHelper.GetStaticRouting (staNode->GetObject<Ipv4> ());
+  //staStaticRouting->AddNetworkRouteTo (Ipv4Address ("7.0.0.0"), Ipv4Mask ("255.0.0.0"), 3, 0);
+  
 
 /*
   // Install and start applications on UEs and remote host
