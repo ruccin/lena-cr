@@ -216,7 +216,7 @@ main (int argc, char *argv[])
   // Interfaces
   // interface 0 is localhost, 1 is the p2p device
   Ipv4Address remoteHostAddr = internetIpIfaces.GetAddress (1);
-  Ipv4Address ueAddr = ueIpIface.GetAddress (1);
+  //Ipv4Address ueAddr = ueIpIface.GetAddress (1);
   Ipv4Address staAddr = staInterface.GetAddress (1);  
 
 
