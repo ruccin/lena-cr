@@ -165,10 +165,10 @@ main (int argc, char *argv[])
 
   // Attach one UE per eNodeB
   lteHelper->Attach (ueLteDevs.Get (0), enbLteDevs.Get (0));
-  Ptr<NetDevice> ueDevice = ueLteDevs.Get (0);
+  //Ptr<NetDevice> ueDevice = ueLteDevs.Get (0);
   enum EpsBearer::Qci q = EpsBearer::GBR_GAMING;
   EpsBearer bearer (q);
-  lteHelper->ActivateDataRadioBearer (ueDevice, bearer);
+  lteHelper->ActivateDataRadioBearer (ueLteDevs, bearer);
 
   // WiFi
   WifiHelper wifiHelper;
