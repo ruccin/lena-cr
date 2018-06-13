@@ -59,7 +59,6 @@ NS_LOG_COMPONENT_DEFINE ("EpcFirstExample");
 int 
 main (int argc, char *argv[])
 {
-  uint16_t dlPort = 1234;
   uint16_t numberOfEnbNodes = 1;
   uint16_t numberOfUeNodes = 1;
   uint16_t numberOfStaNodes = 1;
@@ -169,7 +168,7 @@ main (int argc, char *argv[])
   Ptr<NetDevice> ueDevice = ueLteDevs.Get (0);
   enum EpsBearer::Qci q = EpsBearer::GBR_GAMING;
   EpsBearer bearer (q);
-  lteHelper->ActivateDedicatedEpsBearer (ueDevice, bearer, EpcTft::Default ());
+  lteHelper->ActivateDataRadioBearer (ueDevice, bearer);
 
   // WiFi
   WifiHelper wifiHelper;
@@ -218,16 +217,16 @@ main (int argc, char *argv[])
   // interface 0 is localhost, 1 is the p2p device
   Ipv4Address remoteHostAddr = internetIpIfaces.GetAddress (1);
   //Ipv4Address ueAddr = ueIpIface.GetAddress (1);
-  //Ipv4Address staAddr = staInterface.GetAddress (1);  
+  Ipv4Address staAddr = staInterface.GetAddress (1);  
 
 
   //Ptr<Node> staNode = staNodes.Get (0);
 
   Ptr<Ipv4StaticRouting> remoteHostStaticRouting = ipv4RoutingHelper.GetStaticRouting (remoteHost->GetObject<Ipv4> ());
-  remoteHostStaticRouting->AddNetworkRouteTo (Ipv4Address ("3.0.0.0"), Ipv4Mask ("255.0.0.0"), Ipv4Address ("2.0.0.1"), 2, 0);
+  remoteHostStaticRouting->AddNetworkRouteTo (Ipv4Address ("3.0.0.0"), Ipv4Mask ("255.0.0.0"), Ipv4Address ("2.0.0.1"), 3, 0);
  
   Ptr<Ipv4StaticRouting> apStaticRouting = ipv4RoutingHelper.GetStaticRouting (ueNode->GetObject<Ipv4> ());
-  apStaticRouting->AddNetworkRouteTo (Ipv4Address ("3.0.0.0"), Ipv4Mask ("255.0.0.0"),Ipv4Address ("3.0.0.1"), 2, 0);
+  apStaticRouting->AddNetworkRouteTo (Ipv4Address ("3.0.0.0"), Ipv4Mask ("255.0.0.0"),Ipv4Address ("3.0.0.1"), 3, 0);
 
   //Ptr<Ipv4StaticRouting> staStaticRouting = ipv4RoutingHelper.GetStaticRouting (staNode->GetObject<Ipv4> ());
   //staStaticRouting->AddNetworkRouteTo (Ipv4Address ("3.0.0.0"), Ipv4Mask ("255.0.0.0"), 2, 0);
@@ -250,21 +249,32 @@ main (int argc, char *argv[])
   client.SetAttribute ("DataRate", DataRateValue (DataRate ("100Mb/s")));
   clientApps.Add (client.Install (staNodes.Get(0))); 
 */
+  ApplicationContainer serverApps;
+  ApplicationContainer clientApps;
+
+  PacketSinkHelper dlechoServer ("ns3::UdpSocketFactory", (InetSocketAddress (Ipv4Address::GetAny(), 10)));
+  serverApps.Add (dlechoServer.Install (remoteHost));  
+
+  UdpEchoClientHelper dlechoClient (remoteHostAddr, 10);
+  dlechoClient.SetAttribute ("MaxPackets", UintegerValue (1000));
+  dlechoClient.SetAttribute ("Interval", TimeValue (Seconds (0.2)));
+  dlechoClient.SetAttribute ("PacketSize", UintegerValue (1024));
+  ApplicationContainer clientApps = dlechoClient.Install (staNodes.Get(0));
   
-  UdpEchoServerHelper echoServer (dlPort);
-  ApplicationContainer serverApps = echoServer.Install (remoteHost);
+  PacketSinkHelper ulechoServer ("ns3::UdpSocketFactory", (InetSocketAddress (Ipv4Address::GetAny(), 11)));
+  serverApps.Add (ulechoServer.Install (staNodes.Get (0))); 
 
-  UdpEchoClientHelper echoClient (remoteHostAddr, dlPort);
-  echoClient.SetAttribute ("MaxPackets", UintegerValue (1000));
-  echoClient.SetAttribute ("Interval", TimeValue (Seconds (0.2)));
-  echoClient.SetAttribute ("PacketSize", UintegerValue (1024));
-
-  ApplicationContainer clientApps = echoClient.Install (staNodes.Get(0));
+  UdpEchoClientHelper ulechoClient (staAddr, 11);
+  ulechoClient.SetAttribute ("MaxPackets", UintegerValue (1000));
+  ulechoClient.SetAttribute ("Interval", TimeValue (Seconds (0.2)));
+  ulechoClient.SetAttribute ("PacketSize", UintegerValue (1024));
+  clientApps.Add (ulechoClient.Install (remoteHost));
 
   serverApps.Start (Seconds (0.1));
   clientApps.Start (Seconds (0.1));
 
-  lteHelper->EnableTraces ();
+  lteHelper->EnableMacTraces ();
+  lteHelper->EnableRlcTraces ();
   wifiPhy.EnablePcap("lena-simple-epc-test", staDevices);
 
   FlowMonitorHelper flowmon;
