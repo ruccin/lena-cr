@@ -245,8 +245,8 @@ main (int argc, char *argv[])
   ApplicationContainer serverApps;
   ApplicationContainer clientApps;
 
-  PacketSinkHelper dlechoServer ("ns3::UdpSocketFactory", (InetSocketAddress (Ipv4Address::GetAny(), 10)));
-  serverApps.Add (dlechoServer.Install (remoteHost));  
+  //PacketSinkHelper dlechoServer ("ns3::UdpSocketFactory", (InetSocketAddress (Ipv4Address::GetAny(), 10)));
+  //serverApps.Add (dlechoServer.Install (remoteHost));  
 
   UdpEchoClientHelper dlechoClient (remoteHostAddr, 10);
   dlechoClient.SetAttribute ("MaxPackets", UintegerValue (1000));
@@ -256,13 +256,13 @@ main (int argc, char *argv[])
 
   PacketSinkHelper ulechoServer ("ns3::UdpSocketFactory", (InetSocketAddress (Ipv4Address::GetAny(), 11)));
   serverApps.Add (ulechoServer.Install (staNodes.Get (0))); 
-
+/*
   UdpEchoClientHelper ulechoClient (staAddr, 11);
   ulechoClient.SetAttribute ("MaxPackets", UintegerValue (1000));
   ulechoClient.SetAttribute ("Interval", TimeValue (Seconds (0.2)));
   ulechoClient.SetAttribute ("PacketSize", UintegerValue (1024));
   clientApps.Add (ulechoClient.Install (remoteHost));
-
+*/
   serverApps.Start (Seconds (0.01));
   clientApps.Start (Seconds (0.01));
 
