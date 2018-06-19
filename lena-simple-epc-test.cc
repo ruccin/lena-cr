@@ -262,10 +262,9 @@ main (int argc, char *argv[])
 
   OnOffHelper dlechoClient ("ns3::UdpSocketFactory", Address(InetSocketAddress (ueAddr, 10)));
   dlechoClient.SetAttribute ("PacketSize", UintegerValue (1024));
-  dlechoClient.SetAttribute ("OnTime", StringValue ("ns3::ConstantRandomVariable[Constant=1]"));
-  dlechoClient.SetAttribute ("OffTime", StringValue ("ns3::ConstantRandomVariable[Constant=0]"));
-  dlechoClient.SetAttribute ("MaxBytes", UintegerValue (1000000000));
-  dlechoClient.SetAttribute ("DataRate", DataRateValue (DataRate ("10Mb/s")));
+  dlechoClient.SetAttribute ("OnTime", StringValue ("ns3::ConstantRandomVariable[Constant=0.352]"));
+  dlechoClient.SetAttribute ("OffTime", StringValue ("ns3::ConstantRandomVariable[Constant=0.652]"));
+  dlechoClient.SetAttribute ("DataRate", DataRateValue (DataRate ("320kb/s")));
   clientApps1 = dlechoClient.Install (staNodes.Get(0));
 /*
   PacketSinkHelper ulechoServer ("ns3::UdpSocketFactory", (InetSocketAddress (Ipv4Address::GetAny(), 11)));
