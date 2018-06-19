@@ -278,7 +278,7 @@ main (int argc, char *argv[])
 */
   serverApps.Start (Seconds (0.01));
   clientApps1.Start (Seconds (0.01));
-  clientApps2.Start (Seconds (0.03));
+  clientApps2.Start (Seconds (0.01));
 
   //lteHelper->EnableMacTraces ();
   //lteHelper->EnableRlcTraces ();
