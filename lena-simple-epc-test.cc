@@ -276,7 +276,8 @@ main (int argc, char *argv[])
   clientApps.Add (ulechoClient.Install (remoteHost));
 */
   serverApps.Start (Seconds (0.01));
-  clientApps.Start (Seconds (0.01));
+  clientApps1.Start (Seconds (0.01));
+  clientApps2.Start (Seconds (0.03));
 
   //lteHelper->EnableMacTraces ();
   //lteHelper->EnableRlcTraces ();
