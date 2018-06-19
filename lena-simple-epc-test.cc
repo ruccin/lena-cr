@@ -257,9 +257,6 @@ main (int argc, char *argv[])
   serverApps.Add (dlechoServer.Install (remoteHost));  
 
   UdpEchoClientHelper ulechoClient (remoteHostAddr, 10);
-  ulechoClient.SetAttribute ("MaxPackets", UintegerValue (1000));
-  ulechoClient.SetAttribute ("Interval", TimeValue (Seconds (0.2)));
-  ulechoClient.SetAttribute ("PacketSize", UintegerValue (1024));
   clientApps2.Add (ulechoClient.Install (ueNodes.Get (0)));
 
   UdpEchoClientHelper ulechoClient1 (ueAddr, 10);
