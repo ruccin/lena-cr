@@ -271,8 +271,8 @@ main (int argc, char *argv[])
 
   //lteHelper->EnableMacTraces ();
   //lteHelper->EnableRlcTraces ();
-  wifiPhy.EnablePcap("lena-simple-epc-test", staDevices);
-/*
+  //wifiPhy.EnablePcap("lena-simple-epc-test", staDevices);
+
   FlowMonitorHelper flowmon;
   Ptr<FlowMonitor> monitor;
 
@@ -301,10 +301,10 @@ main (int argc, char *argv[])
            *flowStream->GetStream () << " Drop packets: " << dropes << std::endl;
     }
 
-  Ptr<PacketSink> sink1 = DynamicCast<PacketSink> (clientApps.Get (0));
+  Ptr<PacketSink> sink1 = DynamicCast<PacketSink> (serverApps.Get (0));
   *flowStream->GetStream () << "Total Bytes Received by sink packet #" << sink1->GetTotalRx () << std::endl;
   std::cout << "Total Bytes Received by sink packet #" << sink1->GetTotalRx () << std::endl;
-*/
+
   Simulator::Stop(Seconds(simTime));
   //Simulator::Schedule(Seconds(1.0), monitor);
   
