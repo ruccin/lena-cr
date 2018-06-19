@@ -211,25 +211,25 @@ main (int argc, char *argv[])
   // Interfaces
   // interface 0 is localhost, 1 is the p2p device
   Ipv4Address remoteHostAddr = internetIpIfaces.GetAddress (1);
-  Ipv4Address ueAddr = ueIpIface.GetAddress (1);
+  //Ipv4Address ueAddr = ueIpIface.GetAddress (1);
   //Ipv4Address staAddr = staInterface.GetAddress (2);  
 
   // Assign IP address to UEs, and install applications
   Ptr<Node> ueNode = ueNodes.Get (0);
 
-  Ptr<Ipv4GlobalRouting> remoteHostStaticRouting = ipv4RoutingHelper.GetStaticRouting (remoteHost->GetObject<Ipv4> ());
-  remoteHostStaticRouting->AddNetworkRouteTo (Ipv4Address ("7.0.0.0"), Ipv4Mask ("255.0.0.0"), Ipv4Address ("3.0.0.0"), 2);
-  //remoteHostStaticRouting->AddNetworkRouteTo (Ipv4Address ("3.0.0.0"), Ipv4Mask ("255.0.0.0"), 1);
+  Ptr<Ipv4StaticRouting> remoteHostStaticRouting = ipv4RoutingHelper.GetStaticRouting (remoteHost->GetObject<Ipv4> ());
+  remoteHostStaticRouting->AddNetworkRouteTo (Ipv4Address ("7.0.0.0"), Ipv4Mask ("255.0.0.0"), 1, 0);
+  remoteHostStaticRouting->AddNetworkRouteTo (Ipv4Address ("3.0.0.0"), Ipv4Mask ("255.0.0.0"), 1, 0);
   
   // Set the default gateway for the UE
-  Ptr<Ipv4GlobalRouting> ueStaticRouting = ipv4RoutingHelper.GetStaticRouting (ueNode->GetObject<Ipv4> ());
-  //ueStaticRouting->SetDefaultRoute (epcHelper->GetUeDefaultGatewayAddress (), 1);
-  ueStaticRouting->AddNetworkRouteTo (Ipv4Address ("3.0.0.0"),Ipv4Mask ("255.0.0.0"), 1);
+  Ptr<Ipv4StaticRouting> ueStaticRouting = ipv4RoutingHelper.GetStaticRouting (ueNode->GetObject<Ipv4> ());
+  ueStaticRouting->SetDefaultRoute (epcHelper->GetUeDefaultGatewayAddress (), 1);
+  ueStaticRouting->AddNetworkRouteTo (Ipv4Address ("3.0.0.0"),Ipv4Mask ("255.0.0.0"), 1, 0);
 
   Ptr<Node> staNode = staNodes.Get (0);
-  Ptr<Ipv4GlobalRouting> staStaticRouting = ipv4RoutingHelper.GetStaticRouting (staNode->GetObject<Ipv4> ());
-  staStaticRouting->AddNetworkRouteTo (Ipv4Address ("1.0.0.0"), Ipv4Mask ("255.0.0.0"), Ipv4Address ("7.0.0.0"), 1);
-  //staStaticRouting->AddNetworkRouteTo (Ipv4Address ("1.0.0.0"), Ipv4Mask ("255.0.0.0"), 1);
+  Ptr<Ipv4StaticRouting> staStaticRouting = ipv4RoutingHelper.GetStaticRouting (staNode->GetObject<Ipv4> ());
+  staStaticRouting->AddNetworkRouteTo (Ipv4Address ("7.0.0.0"), Ipv4Mask ("255.0.0.0"), 1, 0);
+  staStaticRouting->AddNetworkRouteTo (Ipv4Address ("1.0.0.0"), Ipv4Mask ("255.0.0.0"), 1, 0);
 
 /*
   // Install and start applications on UEs and remote host
@@ -255,14 +255,14 @@ main (int argc, char *argv[])
   PacketSinkHelper dlechoServer ("ns3::UdpSocketFactory", (InetSocketAddress (Ipv4Address::GetAny(), 10)));
   serverApps.Add (dlechoServer.Install (remoteHost));  
 
-  UdpEchoClientHelper ulechoClient (remoteHostAddr, 10);
-  clientApps2.Add (ulechoClient.Install (ueNodes.Get (0)));
+  //UdpEchoClientHelper dlechoClient (remoteHostAddr, 10);
+  //clientApps2.Add (dlechoClient.Install (ueNodes.Get (0)));
 
-  UdpEchoClientHelper ulechoClient1 (ueAddr, 10);
-  ulechoClient1.SetAttribute ("MaxPackets", UintegerValue (1000));
-  ulechoClient1.SetAttribute ("Interval", TimeValue (Seconds (0.2)));
-  ulechoClient1.SetAttribute ("PacketSize", UintegerValue (1024));
-  clientApps1.Add (ulechoClient1.Install (staNodes.Get (0)));
+  UdpEchoClientHelper dlechoClient1 (remoteHostAddr, 10);
+  dlechoClient1.SetAttribute ("MaxPackets", UintegerValue (1000));
+  dlechoClient1.SetAttribute ("Interval", TimeValue (Seconds (0.2)));
+  dlechoClient1.SetAttribute ("PacketSize", UintegerValue (1024));
+  clientApps1.Add (dlechoClient1.Install (staNodes.Get (0)));
 /*
   OnOffHelper dlechoClient ("ns3::UdpSocketFactory", Address(InetSocketAddress (Ipv4Address::GetAny(), 10)));
   dlechoClient.SetAttribute ("PacketSize", UintegerValue (1024));
