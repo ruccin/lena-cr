@@ -231,7 +231,7 @@ main (int argc, char *argv[])
   Ptr<Node> staNode = staNodes.Get (0);
 
   Ptr<Ipv4StaticRouting> staStaticRouting = Ipv4RoutingHelper.GetStaticRouting (staNode->GetObject<Ipv4> ());
-  staStaticRouting->AddNetworkRouteTo (Ipv4Address ("7.0.0.0"), Ipv4Mask ("255.0.0.0"), Ipv4Address ("1.0.0.0") 2);
+  staStaticRouting->AddNetworkRouteTo (Ipv4Address ("7.0.0.0"), Ipv4Mask ("255.0.0.0"), Ipv4Address ("1.0.0.0"), 2);
   staStaticRouting->AddNetworkRouteTo (Ipv4Address ("1.0.0.0"), Ipv4Mask ("255.0.0.0"), 1);
 
 /*
