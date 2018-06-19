@@ -212,7 +212,7 @@ main (int argc, char *argv[])
   // interface 0 is localhost, 1 is the p2p device
   Ipv4Address remoteHostAddr = internetIpIfaces.GetAddress (1);
   //Ipv4Address ueAddr = ueIpIface.GetAddress (1);
-  //Ipv4Address staAddr = staInterface.GetAddress (2);  
+  Ipv4Address staAddr = staInterface.GetAddress (2);  
 
   //Ptr<Node> staNode = staNodes.Get (0);
 
@@ -251,10 +251,12 @@ main (int argc, char *argv[])
   PacketSinkHelper dlechoServer ("ns3::UdpSocketFactory", (InetSocketAddress (Ipv4Address::GetAny(), 10)));
   serverApps.Add (dlechoServer.Install (remoteHost));  
 
-  UdpEchoClientHelper dlechoClient (remoteHostAddr, 10);
-  dlechoClient.SetAttribute ("MaxPackets", UintegerValue (1000));
-  dlechoClient.SetAttribute ("Interval", TimeValue (Seconds (0.2)));
-  dlechoClient.SetAttribute ("PacketSize", UintegerValue (1024));
+  OnOffHelper dlechoClient ("ns3::UdpSocketFactory", Address(InetSocketAddress (remoteHostAddr, 10)));
+  dlechoClient.SetAttribute ("PacketSize", UintegerValue (1472));
+  dlechoClient.SetAttribute ("OnTime", StringValue ("ns3::ConstantRandomVariable[Constant=1]"));
+  dlechoClient.SetAttribute ("OffTime", StringValue ("ns3::ConstantRandomVariable[Constant=0]"));
+  dlechoClient.SetAttribute ("MaxBytes", UintegerValue (1000000000));
+  dlechoClient.SetAttribute ("DataRate", DataRateValue (DataRate ("10Mb/s")));
   clientApps = dlechoClient.Install (staNodes.Get(0));
 
   PacketSinkHelper ulechoServer ("ns3::UdpSocketFactory", (InetSocketAddress (Ipv4Address::GetAny(), 11)));
