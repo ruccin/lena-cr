@@ -301,7 +301,7 @@ main (int argc, char *argv[])
            *flowStream->GetStream () << " Drop packets: " << dropes << std::endl;
     }
 
-  Ptr<PacketSink> sink1 = DynamicCast<PacketSink> (serverApps.Get (0));
+  Ptr<PacketSink> sink1 = DynamicCast<PacketSink> (clientApps.Get (0));
   *flowStream->GetStream () << "Total Bytes Received by sink packet #" << sink1->GetTotalRx () << std::endl;
   std::cout << "Total Bytes Received by sink packet #" << sink1->GetTotalRx () << std::endl;
 
