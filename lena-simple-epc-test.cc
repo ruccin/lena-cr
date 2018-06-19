@@ -284,8 +284,8 @@ main (int argc, char *argv[])
   clientApps1.Start (Seconds (0.01));
   clientApps2.Start (Seconds (0.01));
 
-  lteHelper->EnableMacTraces ();
-  lteHelper->EnableRlcTraces ();
+  //lteHelper->EnableMacTraces ();
+  //lteHelper->EnableRlcTraces ();
   //wifiPhy.EnablePcap("lena-simple-epc-test", staDevices);
 
   FlowMonitorHelper flowmon;
