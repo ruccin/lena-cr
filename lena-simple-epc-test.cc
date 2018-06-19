@@ -211,7 +211,7 @@ main (int argc, char *argv[])
   // Interfaces
   // interface 0 is localhost, 1 is the p2p device
   Ipv4Address remoteHostAddr = internetIpIfaces.GetAddress (1);
-  //Ipv4Address ueAddr = ueIpIface.GetAddress (1);
+  Ipv4Address ueAddr = ueIpIface.GetAddress (1);
   //Ipv4Address staAddr = staInterface.GetAddress (2);  
 
   // Assign IP address to UEs, and install applications
@@ -262,7 +262,7 @@ main (int argc, char *argv[])
   ulechoClient.SetAttribute ("PacketSize", UintegerValue (1024));
   clientApps2.Add (ulechoClient.Install (ueNodes.Get (0)));
 
-  UdpEchoClientHelper ulechoClient1 (ueNodes, 10);
+  UdpEchoClientHelper ulechoClient1 (ueAddr, 10);
   ulechoClient1.SetAttribute ("MaxPackets", UintegerValue (1000));
   ulechoClient1.SetAttribute ("Interval", TimeValue (Seconds (0.2)));
   ulechoClient1.SetAttribute ("PacketSize", UintegerValue (1024));
