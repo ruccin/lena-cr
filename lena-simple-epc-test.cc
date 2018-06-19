@@ -264,7 +264,7 @@ main (int argc, char *argv[])
   ulechoClient.SetAttribute ("PacketSize", UintegerValue (1024));
   clientApps2.Add (ulechoClient.Install (ueNodes.Get(0)));
 
-  OnOffHelper dlechoClient ("ns3::UdpSocketFactory", Address(InetSocketAddress (ueAddr, 10)));
+  OnOffHelper dlechoClient ("ns3::UdpSocketFactory", Address(InetSocketAddress (Ipv4Address::GetAny(), 10)));
   dlechoClient.SetAttribute ("PacketSize", UintegerValue (1024));
   dlechoClient.SetAttribute ("OnTime", StringValue ("ns3::ConstantRandomVariable[Constant=0.352]"));
   dlechoClient.SetAttribute ("OffTime", StringValue ("ns3::ConstantRandomVariable[Constant=0.652]"));
