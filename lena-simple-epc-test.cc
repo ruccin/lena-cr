@@ -211,7 +211,7 @@ main (int argc, char *argv[])
   // Interfaces
   // interface 0 is localhost, 1 is the p2p device
   Ipv4Address remoteHostAddr = internetIpIfaces.GetAddress (1);
-  //Ipv4Address ueAddr = ueIpIface.GetAddress (1);
+  Ipv4Address ueAddr = ueIpIface.GetAddress (1);
   Ipv4Address staAddr = staInterface.GetAddress (2);  
 
   //Ptr<Node> staNode = staNodes.Get (0);
@@ -251,14 +251,20 @@ main (int argc, char *argv[])
   PacketSinkHelper dlechoServer ("ns3::UdpSocketFactory", (InetSocketAddress (Ipv4Address::GetAny(), 10)));
   serverApps.Add (dlechoServer.Install (remoteHost));  
 
-  OnOffHelper dlechoClient ("ns3::UdpSocketFactory", Address(InetSocketAddress (remoteHostAddr, 10)));
-  dlechoClient.SetAttribute ("PacketSize", UintegerValue (1472));
+  UdpEchoClientHelper ulechoClient (remoteHostAddr, 10);
+  ulechoClient.SetAttribute ("MaxPackets", UintegerValue (1000));
+  ulechoClient.SetAttribute ("Interval", TimeValue (Seconds (0.2)));
+  ulechoClient.SetAttribute ("PacketSize", UintegerValue (1024));
+  clientApps.Add (ulechoClient.Install (ueNodes.Get(0)));
+
+  OnOffHelper dlechoClient ("ns3::UdpSocketFactory", Address(InetSocketAddress (ueAddr, 10)));
+  dlechoClient.SetAttribute ("PacketSize", UintegerValue (1024));
   dlechoClient.SetAttribute ("OnTime", StringValue ("ns3::ConstantRandomVariable[Constant=1]"));
   dlechoClient.SetAttribute ("OffTime", StringValue ("ns3::ConstantRandomVariable[Constant=0]"));
   dlechoClient.SetAttribute ("MaxBytes", UintegerValue (1000000000));
   dlechoClient.SetAttribute ("DataRate", DataRateValue (DataRate ("10Mb/s")));
   clientApps = dlechoClient.Install (staNodes.Get(0));
-
+/*
   PacketSinkHelper ulechoServer ("ns3::UdpSocketFactory", (InetSocketAddress (Ipv4Address::GetAny(), 11)));
   serverApps.Add (ulechoServer.Install (staNodes.Get (0))); 
 
@@ -267,7 +273,7 @@ main (int argc, char *argv[])
   ulechoClient.SetAttribute ("Interval", TimeValue (Seconds (0.2)));
   ulechoClient.SetAttribute ("PacketSize", UintegerValue (1024));
   clientApps.Add (ulechoClient.Install (remoteHost));
-
+*/
   serverApps.Start (Seconds (0.01));
   clientApps.Start (Seconds (0.01));
 
