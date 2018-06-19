@@ -224,7 +224,7 @@ main (int argc, char *argv[])
   // Set the default gateway for the UE
   Ptr<Ipv4StaticRouting> ueStaticRouting = ipv4RoutingHelper.GetStaticRouting (ueNode->GetObject<Ipv4> ());
   ueStaticRouting->SetDefaultRoute (epcHelper->GetUeDefaultGatewayAddress (), 1);
-  ueStaticRouting->AddNetworkRouteTo (Ipv4Address ("3.0.0.0"),Ipv4Mask ("255.0.0.0"), 1, 0);
+  ueStaticRouting->AddNetworkRouteTo (Ipv4Address ("3.0.0.0"),Ipv4Mask ("255.0.0.0"), 2, 0);
 
   Ptr<Node> staNode = staNodes.Get (0);
   Ptr<Ipv4StaticRouting> staStaticRouting = ipv4RoutingHelper.GetStaticRouting (staNode->GetObject<Ipv4> ());
