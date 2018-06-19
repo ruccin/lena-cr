@@ -260,15 +260,21 @@ main (int argc, char *argv[])
   ulechoClient.SetAttribute ("MaxPackets", UintegerValue (1000));
   ulechoClient.SetAttribute ("Interval", TimeValue (Seconds (0.2)));
   ulechoClient.SetAttribute ("PacketSize", UintegerValue (1024));
-  clientApps2.Add (ulechoClient.Install (ueNodes.Get(0)));
+  clientApps2.Add (ulechoClient.Install (ueNodes.Get (0)));
 
+  UdpEchoClientHelper ulechoClient1 (ueNodes, 10);
+  ulechoClient1.SetAttribute ("MaxPackets", UintegerValue (1000));
+  ulechoClient1.SetAttribute ("Interval", TimeValue (Seconds (0.2)));
+  ulechoClient1.SetAttribute ("PacketSize", UintegerValue (1024));
+  clientApps1.Add (ulechoClient1.Install (staNodes.Get (0)));
+/*
   OnOffHelper dlechoClient ("ns3::UdpSocketFactory", Address(InetSocketAddress (Ipv4Address::GetAny(), 10)));
   dlechoClient.SetAttribute ("PacketSize", UintegerValue (1024));
   dlechoClient.SetAttribute ("OnTime", StringValue ("ns3::ConstantRandomVariable[Constant=0.352]"));
   dlechoClient.SetAttribute ("OffTime", StringValue ("ns3::ConstantRandomVariable[Constant=0.652]"));
   dlechoClient.SetAttribute ("DataRate", DataRateValue (DataRate ("320kb/s")));
   clientApps1 = dlechoClient.Install (staNodes.Get(0));
-/*
+
   PacketSinkHelper ulechoServer ("ns3::UdpSocketFactory", (InetSocketAddress (Ipv4Address::GetAny(), 11)));
   serverApps.Add (ulechoServer.Install (staNodes.Get (0))); 
 
@@ -282,8 +288,8 @@ main (int argc, char *argv[])
   clientApps1.Start (Seconds (0.01));
   clientApps2.Start (Seconds (0.01));
 
-  //lteHelper->EnableMacTraces ();
-  //lteHelper->EnableRlcTraces ();
+  lteHelper->EnableMacTraces ();
+  lteHelper->EnableRlcTraces ();
   //wifiPhy.EnablePcap("lena-simple-epc-test", staDevices);
 
   FlowMonitorHelper flowmon;
