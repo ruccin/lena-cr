@@ -246,7 +246,8 @@ main (int argc, char *argv[])
   clientApps.Add (client.Install (staNodes.Get(0))); 
 */
   ApplicationContainer serverApps;
-  ApplicationContainer clientApps;
+  ApplicationContainer clientApps1;
+  ApplicationContainer clientApps2;
 
   PacketSinkHelper dlechoServer ("ns3::UdpSocketFactory", (InetSocketAddress (Ipv4Address::GetAny(), 10)));
   serverApps.Add (dlechoServer.Install (remoteHost));  
@@ -255,7 +256,7 @@ main (int argc, char *argv[])
   ulechoClient.SetAttribute ("MaxPackets", UintegerValue (1000));
   ulechoClient.SetAttribute ("Interval", TimeValue (Seconds (0.2)));
   ulechoClient.SetAttribute ("PacketSize", UintegerValue (1024));
-  clientApps.Add (ulechoClient.Install (ueNodes.Get(0)));
+  clientApps2.Add (ulechoClient.Install (ueNodes.Get(0)));
 
   OnOffHelper dlechoClient ("ns3::UdpSocketFactory", Address(InetSocketAddress (ueAddr, 10)));
   dlechoClient.SetAttribute ("PacketSize", UintegerValue (1024));
@@ -263,7 +264,7 @@ main (int argc, char *argv[])
   dlechoClient.SetAttribute ("OffTime", StringValue ("ns3::ConstantRandomVariable[Constant=0]"));
   dlechoClient.SetAttribute ("MaxBytes", UintegerValue (1000000000));
   dlechoClient.SetAttribute ("DataRate", DataRateValue (DataRate ("10Mb/s")));
-  clientApps = dlechoClient.Install (staNodes.Get(0));
+  clientApps1 = dlechoClient.Install (staNodes.Get(0));
 /*
   PacketSinkHelper ulechoServer ("ns3::UdpSocketFactory", (InetSocketAddress (Ipv4Address::GetAny(), 11)));
   serverApps.Add (ulechoServer.Install (staNodes.Get (0))); 
