@@ -212,7 +212,7 @@ main (int argc, char *argv[])
   // interface 0 is localhost, 1 is the p2p device
   Ipv4Address remoteHostAddr = internetIpIfaces.GetAddress (1);
   Ipv4Address ueAddr = ueIpIface.GetAddress (1);
-  Ipv4Address staAddr = staInterface.GetAddress (2);  
+  //Ipv4Address staAddr = staInterface.GetAddress (2);  
 
   //Ptr<Node> staNode = staNodes.Get (0);
 
@@ -227,6 +227,8 @@ main (int argc, char *argv[])
   Ptr<Ipv4StaticRouting> ueStaticRouting = ipv4RoutingHelper.GetStaticRouting (ueNode->GetObject<Ipv4> ());
   ueStaticRouting->SetDefaultRoute (epcHelper->GetUeDefaultGatewayAddress (), 1);
   ueStaticRouting->AddNetworkRouteTo (Ipv4Address ("3.0.0.0"), Ipv4Mask ("255.0.0.0"), 1);
+
+
 
 /*
   // Install and start applications on UEs and remote host
