@@ -279,10 +279,11 @@ main (int argc, char *argv[])
 
   Ptr<Packet> stapacket = staSocket->Recv ();
 
-  Ptr<EpcSgwPgwApplication> epcSgwPgwApp = EpcSgwPgwApplication::RecvFromTunDevice (stapacket, Ipv4Address ("3.0.0.0"), Ipv4Address ("1.0.0.0"), UdpL4Protocol::PROT_NUMBER);
-  ApplicationContainer recvfroms1usockst = epcSgwPgwApp.RecvFromS1uSocket (staSocket);
+  Ptr<EpcSgwPgwApplication> epcSgwPgwApp = EpcSgwPgwApplication::RecvFromS1uSocket (staSocket);
+  //EpcSgwPgwApplication::RecvFromTunDevice (stapacket, Ipv4Address ("3.0.0.0"), Ipv4Address ("1.0.0.0"), UdpL4Protocol::PROT_NUMBER);
+  //ApplicationContainer recvfroms1usockst = 
   pgw->AddApplication (epcSgwPgwApp);
-  pgw->AddApplication (recvfroms1usockst);  
+  //pgw->AddApplication (recvfroms1usockst);  
 
 /*
   // Install and start applications on UEs and remote host
