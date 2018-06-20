@@ -277,7 +277,7 @@ main (int argc, char *argv[])
   int retval = staSocket->Bind (InetSocketAddress (Ipv4Address::GetAny (), 2152));
   NS_ASSERT (retval == 0);
 
-  Ptr<packet> stapacket = staSocket->Recv ();
+  Ptr<Packet> stapacket = staSocket->Recv ();
 
   Ptr<EpcSgwPgwApplication> epcSgwPgwApp = EpcSgwPgwApplication::RecvFromS1uSocket (stapacket, Ipv4Address ("3.0.0.0"), Ipv4Address ("1.0.0.0"), 17);
   pgw->AddApplication (epcSgwPgwApp);
