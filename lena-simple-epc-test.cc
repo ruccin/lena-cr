@@ -48,6 +48,47 @@
 
 using namespace ns3;
 
+class TestApplication : public app
+{
+  public:
+  TestApplication ();
+  virtual ~TestApplication ();
+
+  void ReceivedAtClient (Ptr<const Packet> p, Ptr<Ipv6> ipv6, uint32_t interface);
+  
+  void EnbToPgw (Ptr<Packet> p);
+
+  private:
+  virtual void DoRun (void);
+
+  std::list<Ptr<Packet> > m_clientRxPkts;
+  std::list<uint64_t> m_pgwUidRxFrmEnb;
+};
+
+TestApplication::~TestApplication ()
+{
+}
+
+void ReceivedAtClient (Ptr<const Packet> p, Ptr<Ipv4> ipv4, uint32_t interface)
+  {
+    Ipv4Header ipv4Header;
+    p->PeekHeader (ipv4Header);
+    if (ipv4Header.GetNextHeader () == UdpL4Protocol::PROT_NUMBER)
+    {
+      m_clientRxPkts.push_back (p->Copy ());
+    }
+  }
+
+void EnbToPgw (Ptr<Packet> p)
+  {
+    Ipv4Header ipv4Header;
+    p->PeekHeader (ipv4Header);
+    if (ipv4Header.GetNextHeader () == UdpL4Protocol::PROT_NUMBER)
+    {
+      m_pgwUidRxFrmEnb.push_back (p->GetUid ());
+    }
+  }
+
 /**
  * Sample simulation script for LTE+EPC. It instantiates several eNodeB,
  * attaches one UE per eNodeB starts a flow for each UE to  and from a remote host.
@@ -224,12 +265,13 @@ main (int argc, char *argv[])
   // Set the default gateway for the UE
   Ptr<Ipv4StaticRouting> ueStaticRouting = ipv4RoutingHelper.GetStaticRouting (ueNode->GetObject<Ipv4> ());
   ueStaticRouting->SetDefaultRoute (epcHelper->GetUeDefaultGatewayAddress (), 1);
-  ueStaticRouting->AddNetworkRouteTo (Ipv4Address ("3.0.0.0"),Ipv4Mask ("255.0.0.0"), 2, 0);
+  ueStaticRouting->AddNetworkRouteTo (Ipv4Address ("3.0.0.0"), Ipv4Mask ("255.0.0.0"), 2, 0);
 
   Ptr<Node> staNode = staNodes.Get (0);
   Ptr<Ipv4StaticRouting> staStaticRouting = ipv4RoutingHelper.GetStaticRouting (staNode->GetObject<Ipv4> ());
   staStaticRouting->AddNetworkRouteTo (Ipv4Address ("7.0.0.0"), Ipv4Mask ("255.0.0.0"), Ipv4Address ("1.0.0.0"), 2, 1);
   //staStaticRouting->AddNetworkRouteTo (Ipv4Address ("1.0.0.0"), Ipv4Mask ("255.0.0.0"), 1, 0);
+
 
 /*
   // Install and start applications on UEs and remote host
@@ -250,7 +292,7 @@ main (int argc, char *argv[])
 */
   ApplicationContainer serverApps;
   ApplicationContainer clientApps1;
-  ApplicationContainer clientApps2;
+  //ApplicationContainer clientApps2;
 
   PacketSinkHelper dlechoServer ("ns3::UdpSocketFactory", (InetSocketAddress (Ipv4Address::GetAny(), 10)));
   serverApps.Add (dlechoServer.Install (remoteHost));  
@@ -281,8 +323,14 @@ main (int argc, char *argv[])
   clientApps.Add (ulechoClient.Install (remoteHost));
 */
   serverApps.Start (Seconds (0.01));
-  clientApps1.Start (Seconds (0.01));
-  clientApps2.Start (Seconds (0.01));
+  clientApps1.Start (Seconds (0.02));
+  //clientApps2.Start (Seconds (0.01));
+
+  Ptr<Ipv4L3Protocol> ipL3 = (staNodes.Get (0))->GetObject<Ipv4L3Protocol> ();
+  ipL3->TraceConnectWithoutContext ("Rx", MakeCallback (&TestApplication::ReceivedAtClient, this));
+
+  Ptr<Application> appPgw = pgw->GetApplication (0);
+  appPgw->TraceConnectWithoutContext ("RxFromS1u", MakeCallback (&TestApplication::EnbToPgw, this));
 
   //lteHelper->EnableMacTraces ();
   //lteHelper->EnableRlcTraces ();
@@ -322,8 +370,6 @@ main (int argc, char *argv[])
 
   Simulator::Stop(Seconds(simTime));
   //Simulator::Schedule(Seconds(1.0), monitor);
-  
-  
   Simulator::Run();
   Simulator::Destroy();
   return 0;
