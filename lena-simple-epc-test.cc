@@ -276,25 +276,11 @@ main (int argc, char *argv[])
   int retval = staSocket->Bind (InetSocketAddress (Ipv4Address::GetAny (), 2152));
   NS_ASSERT (retval == 0);
 
-  m_tunDevice = CreateObject<VirtualNetDevice> ();
-  m_tunDevice->SetAttribute ("Mtu", UintegerValue (30000));
-  m_tunDevice->SetAddress (Mac48Address::Allocate ()); 
-
-  staNode->AddDevice (m_tunDevice);
-  NetDeviceContainer tunDeviceContainer;
-  tunDeviceContainer.Add (m_tunDevice);
-
-  Ipv4InterfaceContainer tunDeviceIpv4IfContainer = AssignUeIpv4Address (tunDeviceContainer); 
-
-  m_sgwPgwApp = CreateObject<EpcSgwPgwApplication> (m_tunDevice, staSocket);
+  m_sgwPgwApp = CreateObject<EpcSgwPgwApplication> (pgw, staSocket);
 
   staNode->AddApplication (m_sgwPgwApp);
 
-  m_tunDevice->SetSendCallback (MakeCallback (&EpcSgwPgwApplication::RecvFromTunDevice, m_sgwPgwApp));
-
-  pgw->AddApplication (m_sgwPgwApp);
   pgw->SetSendCallback (MakeCallback (&EpcSgwPgwApplication::RecvFromTunDevice, m_sgwPgwApp));
-
 
 /*
   // Install and start applications on UEs and remote host
