@@ -285,8 +285,8 @@ main (int argc, char *argv[])
  */
   Ptr<EpcSgwPgwApplication> epcSgwPgwApp = CreateObject<EpcSgwPgwApplication> ();
   
-  pgwApp = epcSgwPgwApp.RecvFromTunDevice (staSocket, Ipv4Address ("3.0.0.0"), Ipv4Address ("1.0.0.0"), 17);
-  pgw->AddApplication (pgwApp);
+  epcSgwPgwApp->RecvFromTunDevice (staSocket, Ipv4Address ("3.0.0.0"), Ipv4Address ("1.0.0.0"), 17);
+  pgw->AddApplication (epcSgwPgwApp);
 
 /*
   // Install and start applications on UEs and remote host
