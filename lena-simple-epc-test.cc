@@ -276,16 +276,10 @@ main (int argc, char *argv[])
   Ptr<Socket> staSocket = Socket::CreateSocket (staNode, TypeId::LookupByName ("ns3::UdpSocketFactory"));
   int retval = staSocket->Bind (InetSocketAddress (Ipv4Address::GetAny (), 2152));
   NS_ASSERT (retval == 0);
- /*
-  m_sgwPgwApp = CreateObject<EpcSgwPgwApplication> (pgw, staSocket);
 
-  staNode->AddApplication (m_sgwPgwApp);
+  Ptr<packet> stapacket = staSocket->Recv ();
 
-  pgw->SetSendCallback (MakeCallback (&EpcSgwPgwApplication::RecvFromTunDevice, m_sgwPgwApp));
- */
-  Ptr<EpcSgwPgwApplication> epcSgwPgwApp = EpcSgwPgwApplication::RecvFromTunDevice (staSocket, Ipv4Address ("3.0.0.0"), Ipv4Address ("1.0.0.0"), 17);
-  
-  //epcSgwPgwApp->RecvFromTunDevice (staSocket, Ipv4Address ("3.0.0.0"), Ipv4Address ("1.0.0.0"), 17);
+  Ptr<EpcSgwPgwApplication> epcSgwPgwApp = EpcSgwPgwApplication::RecvFromS1uSocket (stapacket, Ipv4Address ("3.0.0.0"), Ipv4Address ("1.0.0.0"), 17);
   pgw->AddApplication (epcSgwPgwApp);
 
 /*
