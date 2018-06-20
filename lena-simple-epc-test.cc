@@ -279,7 +279,7 @@ main (int argc, char *argv[])
 
   Ptr<Packet> stapacket = staSocket->Recv ();
 
-  Ptr<EpcSgwPgwApplication> epcSgwPgwApp = EpcSgwPgwApplication::RecvFromTunDevice (stapacket, Ipv4Address ("3.0.0.2"), Ipv4Address ("1.0.0.1"), 17);
+  Ptr<EpcSgwPgwApplication> epcSgwPgwApp = EpcSgwPgwApplication::RecvFromTunDevice (stapacket, Ipv4Address ("3.0.0.0"), Ipv4Address ("1.0.0.0"), UdpL4Protocol::PROT_NUMBER);
   pgw->AddApplication (epcSgwPgwApp);
 
 /*
