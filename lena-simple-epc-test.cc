@@ -283,8 +283,8 @@ main (int argc, char *argv[])
 
   pgw->SetSendCallback (MakeCallback (&EpcSgwPgwApplication::RecvFromTunDevice, m_sgwPgwApp));
  */
-  Ptr<EpcSgwPgwApplication> epcSgwPgwApp = RecvFromTunDevice (staSocket, Ipv4Address ("3.0.0.0"), Ipv4Address ("1.0.0.0"), UdpL4Protocol::PROT_NUMBER);
-  gpw->AddApplication (epcSgwPgwApp);
+  Ptr<EpcSgwPgwApplication> epcSgwPgwApp = RecvFromTunDevice (staSocket, Ipv4Address ("3.0.0.0"), Ipv4Address ("1.0.0.0"), 17);
+  pgw->AddApplication (epcSgwPgwApp);
 
 /*
   // Install and start applications on UEs and remote host
