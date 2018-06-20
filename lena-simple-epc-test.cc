@@ -47,7 +47,7 @@
 #include "ns3/packet.h"
 
 using namespace ns3;
-
+/*
 class TestApplication : public app
 {
   public:
@@ -88,7 +88,7 @@ void EnbToPgw (Ptr<Packet> p)
       m_pgwUidRxFrmEnb.push_back (p->GetUid ());
     }
   }
-
+*/
 /**
  * Sample simulation script for LTE+EPC. It instantiates several eNodeB,
  * attaches one UE per eNodeB starts a flow for each UE to  and from a remote host.
@@ -272,6 +272,29 @@ main (int argc, char *argv[])
   staStaticRouting->AddNetworkRouteTo (Ipv4Address ("7.0.0.0"), Ipv4Mask ("255.0.0.0"), Ipv4Address ("1.0.0.0"), 2, 1);
   //staStaticRouting->AddNetworkRouteTo (Ipv4Address ("1.0.0.0"), Ipv4Mask ("255.0.0.0"), 1, 0);
 
+  Ptr<Socket> staSocket = Socket::CreateSocket (staNode, TypeId::LookupByName ("ns3::UdpSocketFactory"));
+  int retval = staSocket->Bind (InetSocketAddress (Ipv4Address::GetAny (), 2152));
+  NS_ASSERT (retval == 0);
+
+  m_tunDevice = CreateObject<VirtualNetDevice> ();
+  m_tunDevice->SetAttribute ("Mtu", UintegerValue (30000));
+  m_tunDevice->SetAddress (Mac48Address::Allocate ()); 
+
+  staNode->AddDevice (m_tunDevice);
+  NetDeviceContainer tunDeviceContainer;
+  tunDeviceContainer.Add (m_tunDevice);
+
+  Ipv4InterfaceContainer tunDeviceIpv4IfContainer = AssignUeIpv4Address (tunDeviceContainer); 
+
+  m_sgwPgwApp = CreateObject<EpcSgwPgwApplication> (m_tunDevice, staSocket);
+
+  staNode->AddApplication (m_sgwPgwApp);
+
+  m_tunDevice->SetSendCallback (MakeCallback (&EpcSgwPgwApplication::RecvFromTunDevice, m_sgwPgwApp));
+
+  pgw->AddApplication (m_sgwPgwApp);
+  pgw->SetSendCallback (MakeCallback (&EpcSgwPgwApplication::RecvFromTunDevice, m_sgwPgwApp));
+
 
 /*
   // Install and start applications on UEs and remote host
@@ -323,15 +346,15 @@ main (int argc, char *argv[])
   clientApps.Add (ulechoClient.Install (remoteHost));
 */
   serverApps.Start (Seconds (0.01));
-  clientApps1.Start (Seconds (0.02));
+  clientApps1.Start (Seconds (0.01));
   //clientApps2.Start (Seconds (0.01));
-
+/*
   Ptr<Ipv4L3Protocol> ipL3 = (staNodes.Get (0))->GetObject<Ipv4L3Protocol> ();
-  ipL3->TraceConnectWithoutContext ("Rx", MakeCallback (&TestApplication::ReceivedAtClient, this));
+  ipL3->TraceConnectWithoutContext ("Rx", MakeCallback (&TestApplication::ReceivedAtClient));
 
   Ptr<Application> appPgw = pgw->GetApplication (0);
-  appPgw->TraceConnectWithoutContext ("RxFromS1u", MakeCallback (&TestApplication::EnbToPgw, this));
-
+  appPgw->TraceConnectWithoutContext ("RxFromS1u", MakeCallback (&TestApplication::EnbToPgw));
+*/
   //lteHelper->EnableMacTraces ();
   //lteHelper->EnableRlcTraces ();
   //wifiPhy.EnablePcap("lena-simple-epc-test", staDevices);
