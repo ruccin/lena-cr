@@ -283,9 +283,9 @@ main (int argc, char *argv[])
 
   pgw->SetSendCallback (MakeCallback (&EpcSgwPgwApplication::RecvFromTunDevice, m_sgwPgwApp));
  */
-  Ptr<EpcSgwPgwApplication> epcSgwPgwApp = CreateObject<EpcSgwPgwApplication> ();
+  Ptr<EpcSgwPgwApplication> epcSgwPgwApp = EpcSgwPgwApplication::RecvFromTunDevice (staSocket, Ipv4Address ("3.0.0.0"), Ipv4Address ("1.0.0.0"), 17);
   
-  epcSgwPgwApp->RecvFromTunDevice (staSocket, Ipv4Address ("3.0.0.0"), Ipv4Address ("1.0.0.0"), 17);
+  //epcSgwPgwApp->RecvFromTunDevice (staSocket, Ipv4Address ("3.0.0.0"), Ipv4Address ("1.0.0.0"), 17);
   pgw->AddApplication (epcSgwPgwApp);
 
 /*
