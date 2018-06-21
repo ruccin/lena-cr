@@ -106,7 +106,7 @@ main (int argc, char *argv[])
   uint16_t numberOfStaNodes = 1;
   //uint32_t payloadSize = 1472;
   double simTime = 30;
-  double distance = 4000.0;
+  double distance = 60;
   std::string phyRate = "HtMcs7";
 
   // Command line arguments
@@ -158,9 +158,9 @@ main (int argc, char *argv[])
 
   // Install Mobility Model
   Ptr<ListPositionAllocator> positionAlloc = CreateObject<ListPositionAllocator> ();
+  positionAlloc->Add (Vector (distance * 6, 0.0, 0.0));
+  positionAlloc->Add (Vector (distance * 2, 0.0, 0.0));
   positionAlloc->Add (Vector (distance, 0.0, 0.0));
-  positionAlloc->Add (Vector (distance * 0.161, 0.0, 0.0));
-  positionAlloc->Add (Vector (distance * 0.334, 0.0, 0.0));
 
   MobilityHelper mobility;
   mobility.SetMobilityModel("ns3::ConstantPositionMobilityModel");
@@ -273,16 +273,14 @@ main (int argc, char *argv[])
   staStaticRouting->AddNetworkRouteTo (Ipv4Address ("7.0.0.0"), Ipv4Mask ("255.0.0.0"), Ipv4Address ("1.0.0.0"), 2);
   //staStaticRouting->AddNetworkRouteTo (Ipv4Address ("1.0.0.0"), Ipv4Mask ("255.0.0.0"), 1, 0);
 
-  Ptr<Socket> staSocket = Socket::CreateSocket (staNode, TypeId::LookupByName ("ns3::UdpSocketFactory"));
-  int retval = staSocket->Bind (InetSocketAddress (Ipv4Address::GetAny (), 2152));
-  NS_ASSERT (retval == 0);
 
-  Ptr<Packet> stapacket = staSocket->Recv ();
 
-  Ptr<EpcSgwPgwApplication> epcSgwPgwApp = EpcSgwPgwApplication::RecvFromS1uSocket (staSocket);
+  //Ptr<Packet> stapacket = staSocket->Recv ();
+
+  
   //EpcSgwPgwApplication::RecvFromTunDevice (stapacket, Ipv4Address ("3.0.0.0"), Ipv4Address ("1.0.0.0"), UdpL4Protocol::PROT_NUMBER);
   //ApplicationContainer recvfroms1usockst = 
-  pgw->AddApplication (epcSgwPgwApp);
+
   //pgw->AddApplication (recvfroms1usockst);  
 
 /*
@@ -303,8 +301,8 @@ main (int argc, char *argv[])
   clientApps.Add (client.Install (staNodes.Get(0))); 
 */
   ApplicationContainer serverApps;
-  ApplicationContainer clientApps1;
-  //ApplicationContainer clientApps2;
+  ApplicationContainer clientApps;
+
 
   PacketSinkHelper dlechoServer ("ns3::UdpSocketFactory", (InetSocketAddress (Ipv4Address::GetAny(), 10)));
   serverApps.Add (dlechoServer.Install (remoteHost));  
@@ -316,7 +314,7 @@ main (int argc, char *argv[])
   dlechoClient1.SetAttribute ("MaxPackets", UintegerValue (1000));
   dlechoClient1.SetAttribute ("Interval", TimeValue (Seconds (0.2)));
   dlechoClient1.SetAttribute ("PacketSize", UintegerValue (1024));
-  clientApps1.Add (dlechoClient1.Install (staNodes.Get (0)));
+  clientApps.Add (dlechoClient1.Install (staNodes.Get (0)));
 /*
   OnOffHelper dlechoClient ("ns3::UdpSocketFactory", Address(InetSocketAddress (Ipv4Address::GetAny(), 10)));
   dlechoClient.SetAttribute ("PacketSize", UintegerValue (1024));
@@ -335,8 +333,11 @@ main (int argc, char *argv[])
   clientApps.Add (ulechoClient.Install (remoteHost));
 */
   serverApps.Start (Seconds (0.01));
-  clientApps1.Start (Seconds (0.01));
-  //clientApps2.Start (Seconds (0.01));
+  clientApps.Start (Seconds (0.01));
+
+  Ptr<Socket> staSocket = Socket::CreateSocket (staNode, TypeId::LookupByName ("ns3::UdpSocketFactory"));
+  Ptr<EpcSgwPgwApplication> epcSgwPgwApp = EpcSgwPgwApplication::RecvFromS1uSocket (staSocket);
+  pgw->AddApplication (epcSgwPgwApp);
 /*
   Ptr<Ipv4L3Protocol> ipL3 = (staNodes.Get (0))->GetObject<Ipv4L3Protocol> ();
   ipL3->TraceConnectWithoutContext ("Rx", MakeCallback (&TestApplication::ReceivedAtClient));
