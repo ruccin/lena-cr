@@ -319,7 +319,7 @@ main (int argc, char *argv[])
   clientApps.Start (Seconds (0.01));
 
   Ptr<Socket> staSocket = Socket::CreateSocket (staNode, TypeId::LookupByName ("ns3::UdpSocketFactory"));
-  //Ptr<Packet> stapacket = staSocket->Recv ();
+  Ptr<Packet> stapacket = staSocket->Recv ();
   
   Ptr<EpcSgwPgwApplication> epcSgwPgwApp = EpcSgwPgwApplication::RecvFromTunDevice (stapacket, 
                                                                                     Ipv4Address ("3.0.0.0"), 
