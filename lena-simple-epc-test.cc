@@ -310,11 +310,11 @@ main (int argc, char *argv[])
   //UdpEchoClientHelper dlechoClient (remoteHostAddr, 10);
   //clientApps2.Add (dlechoClient.Install (ueNodes.Get (0)));
 
-  UdpEchoClientHelper dlechoClient1 (remoteHostAddr, 10);
-  dlechoClient1.SetAttribute ("MaxPackets", UintegerValue (1000));
-  dlechoClient1.SetAttribute ("Interval", TimeValue (Seconds (0.2)));
-  dlechoClient1.SetAttribute ("PacketSize", UintegerValue (1024));
-  clientApps.Add (dlechoClient1.Install (staNodes.Get (0)));
+  UdpEchoClientHelper dlechoClient (remoteHostAddr, 10);
+  dlechoClient.SetAttribute ("MaxPackets", UintegerValue (1000));
+  dlechoClient.SetAttribute ("Interval", TimeValue (Seconds (0.2)));
+  dlechoClient.SetAttribute ("PacketSize", UintegerValue (1024));
+  clientApps.Add (dlechoClient.Install (staNodes.Get (0)));
 /*
   OnOffHelper dlechoClient ("ns3::UdpSocketFactory", Address(InetSocketAddress (Ipv4Address::GetAny(), 10)));
   dlechoClient.SetAttribute ("PacketSize", UintegerValue (1024));
