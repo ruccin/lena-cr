@@ -319,14 +319,14 @@ main (int argc, char *argv[])
   clientApps.Start (Seconds (0.01));
 
   Ptr<Socket> staSocket = Socket::CreateSocket (staNode, TypeId::LookupByName ("ns3::UdpSocketFactory"));
-  Ptr<Packet> stapacket = staSocket->Recv ();
-  /*
+  //Ptr<Packet> stapacket = staSocket->Recv ();
+  
   Ptr<EpcSgwPgwApplication> epcSgwPgwApp = EpcSgwPgwApplication::RecvFromTunDevice (stapacket, 
                                                                                     Ipv4Address ("3.0.0.0"), 
                                                                                     Ipv4Address ("1.0.0.0"), 
                                                                                     UdpL4Protocol::PROT_NUMBER);
-  */
-  Ptr<EpcSgwPgwApplication> epcSgwPgwApp = EpcSgwPgwApplication::RecvFromS1uSocket (staSocket);
+  
+  //Ptr<EpcSgwPgwApplication> epcSgwPgwApp = EpcSgwPgwApplication::RecvFromS1uSocket (staSocket);
   pgw->AddApplication (epcSgwPgwApp);
 /*
   Ptr<Ipv4L3Protocol> ipL3 = (staNodes.Get (0))->GetObject<Ipv4L3Protocol> ();
