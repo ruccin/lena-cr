@@ -253,40 +253,34 @@ main (int argc, char *argv[])
   // Interfaces
   // interface 0 is localhost, 1 is the p2p device
   Ipv4Address remoteHostAddr = internetIpIfaces.GetAddress (1);
-  //Ipv4Address ueAddr = ueIpIface.GetAddress (1);
-  //Ipv4Address staAddr = staInterface.GetAddress (2);  
+  Ipv4Address ueAddr = ueIpIface.GetAddress (0);
+  Ipv4Address staAddr = staInterface.GetAddress (0);  
 
   // Assign IP address to UEs, and install applications
   Ptr<Node> ueNode = ueNodes.Get (0);
   Ptr<Node> staNode = staNodes.Get (0);
-  // Set the default gateway for the UE
+
   Ptr<Ipv4StaticRouting> ueStaticRouting = ipv4RoutingHelper.GetStaticRouting (ueNode->GetObject<Ipv4> ());
   ueStaticRouting->SetDefaultRoute (epcHelper->GetUeDefaultGatewayAddress (), 1);
-  ueStaticRouting->AddNetworkRouteTo (Ipv4Address ("3.0.0.0"), Ipv4Mask ("255.0.0.0"), 2);
+  ueStaticRouting->AddNetworkRouteTo (Ipv4Address ("3.0.0.0"), Ipv4Mask ("255.0.0.0"), staAddr, 2);
 
   Ptr<Ipv4StaticRouting> remoteHostStaticRouting = ipv4RoutingHelper.GetStaticRouting (remoteHost->GetObject<Ipv4> ());
-  remoteHostStaticRouting->AddNetworkRouteTo (Ipv4Address ("7.0.0.0"), Ipv4Mask ("255.0.0.0"), Ipv4Address ("3.0.0.0"), 2);
+  remoteHostStaticRouting->AddNetworkRouteTo (Ipv4Address ("7.0.0.0"), Ipv4Mask ("255.0.0.0"), staAddr, 2);
 
   Ptr<Ipv4StaticRouting> staStaticRouting = ipv4RoutingHelper.GetStaticRouting (staNode->GetObject<Ipv4> ());
-  staStaticRouting->AddNetworkRouteTo (Ipv4Address ("7.0.0.0"), Ipv4Mask ("255.0.0.0"), Ipv4Address ("1.0.0.0"), 2);
+  staStaticRouting->AddNetworkRouteTo (Ipv4Address ("7.0.0.0"), Ipv4Mask ("255.0.0.0"), remoteHostAddr, 2);
 
-/*
-  // Install and start applications on UEs and remote host
-  ApplicationContainer clientApps;
-  ApplicationContainer serverApps;
+  Ptr<Socket> staSocket = Socket::CreateSocket (staNode, TypeId::LookupByName ("ns3::UdpSocketFactory"));
+  Ptr<Packet> stapacket = staSocket->Recv ();
+  
+  Ptr<EpcSgwPgwApplication> epcSgwPgwApp = EpcSgwPgwApplication::RecvFromTunDevice (stapacket, 
+                                                                                    staNode, 
+                                                                                    remoteHostAddr, 
+                                                                                    UdpL4Protocol::PROT_NUMBER);
+  
+  //Ptr<EpcSgwPgwApplication> epcSgwPgwApp = EpcSgwPgwApplication::RecvFromS1uSocket (staSocket);
+  pgw->AddApplication (epcSgwPgwApp);
 
-  PacketSinkHelper server ("ns3::UdpSocketFactory", (InetSocketAddress (Ipv4Address::GetAny(), dlPort)));
-  serverApps.Add (server.Install (remoteHost));
-
-  OnOffHelper client ("ns3::UdpSocketFactory", Address(InetSocketAddress (remoteHostAddr, dlPort)));
-  client.SetAttribute ("PacketSize", UintegerValue (payloadSize));
-  client.SetAttribute ("OnTime", StringValue ("ns3::ConstantRandomVariable[Constant=1]"));
-  client.SetAttribute ("OffTime", StringValue ("ns3::ConstantRandomVariable[Constant=0]"));
-  //client.SetAttribute ("PacketSize", UintegerValue (1024));
-  client.SetAttribute ("MaxBytes", UintegerValue (1000000000));
-  client.SetAttribute ("DataRate", DataRateValue (DataRate ("100Mb/s")));
-  clientApps.Add (client.Install (staNodes.Get(0))); 
-*/
   ApplicationContainer serverApps;
   ApplicationContainer clientApps;
 
@@ -317,17 +311,6 @@ main (int argc, char *argv[])
 */
   serverApps.Start (Seconds (0.01));
   clientApps.Start (Seconds (0.01));
-
-  Ptr<Socket> staSocket = Socket::CreateSocket (staNode, TypeId::LookupByName ("ns3::UdpSocketFactory"));
-  Ptr<Packet> stapacket = staSocket->Recv ();
-  
-  Ptr<EpcSgwPgwApplication> epcSgwPgwApp = EpcSgwPgwApplication::RecvFromTunDevice (stapacket, 
-                                                                                    Ipv4Address ("3.0.0.0"), 
-                                                                                    Ipv4Address ("1.0.0.0"), 
-                                                                                    UdpL4Protocol::PROT_NUMBER);
-  
-  //Ptr<EpcSgwPgwApplication> epcSgwPgwApp = EpcSgwPgwApplication::RecvFromS1uSocket (staSocket);
-  pgw->AddApplication (epcSgwPgwApp);
 /*
   Ptr<Ipv4L3Protocol> ipL3 = (staNodes.Get (0))->GetObject<Ipv4L3Protocol> ();
   ipL3->TraceConnectWithoutContext ("Rx", MakeCallback (&TestApplication::ReceivedAtClient));
