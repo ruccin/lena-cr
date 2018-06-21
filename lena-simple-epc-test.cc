@@ -275,10 +275,10 @@ main (int argc, char *argv[])
 
 
 
-  //Ptr<Packet> stapacket = staSocket->Recv ();
+  //
 
   
-  //EpcSgwPgwApplication::RecvFromTunDevice (stapacket, Ipv4Address ("3.0.0.0"), Ipv4Address ("1.0.0.0"), UdpL4Protocol::PROT_NUMBER);
+  //
   //ApplicationContainer recvfroms1usockst = 
 
   //pgw->AddApplication (recvfroms1usockst);  
@@ -303,12 +303,8 @@ main (int argc, char *argv[])
   ApplicationContainer serverApps;
   ApplicationContainer clientApps;
 
-
   PacketSinkHelper dlechoServer ("ns3::UdpSocketFactory", (InetSocketAddress (Ipv4Address::GetAny(), 10)));
   serverApps.Add (dlechoServer.Install (remoteHost));  
-
-  //UdpEchoClientHelper dlechoClient (remoteHostAddr, 10);
-  //clientApps2.Add (dlechoClient.Install (ueNodes.Get (0)));
 
   UdpEchoClientHelper dlechoClient (remoteHostAddr, 10);
   dlechoClient.SetAttribute ("MaxPackets", UintegerValue (1000));
@@ -336,7 +332,12 @@ main (int argc, char *argv[])
   clientApps.Start (Seconds (0.01));
 
   Ptr<Socket> staSocket = Socket::CreateSocket (staNode, TypeId::LookupByName ("ns3::UdpSocketFactory"));
-  Ptr<EpcSgwPgwApplication> epcSgwPgwApp = EpcSgwPgwApplication::RecvFromS1uSocket (staSocket);
+  Ptr<Packet> stapacket = staSocket->Recv ();
+  Ptr<EpcSgwPgwApplication> epcSgwPgwApp = EpcSgwPgwApplication::RecvFromTunDevice (stapacket, 
+                                                                                    Ipv4Address ("3.0.0.0"), 
+                                                                                    Ipv4Address ("1.0.0.0"), 
+                                                                                    UdpL4Protocol::PROT_NUMBER);
+  //Ptr<EpcSgwPgwApplication> epcSgwPgwApp = EpcSgwPgwApplication::RecvFromS1uSocket (staSocket);
   pgw->AddApplication (epcSgwPgwApp);
 /*
   Ptr<Ipv4L3Protocol> ipL3 = (staNodes.Get (0))->GetObject<Ipv4L3Protocol> ();
