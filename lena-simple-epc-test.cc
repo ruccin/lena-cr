@@ -274,8 +274,8 @@ main (int argc, char *argv[])
   Ptr<Packet> stapacket = staSocket->Recv ();
   
   Ptr<EpcSgwPgwApplication> epcSgwPgwApp = EpcSgwPgwApplication::RecvFromTunDevice (stapacket, 
-                                                                                    staNode, 
-                                                                                    remoteHostAddr, 
+                                                                                    Ipv4Address ("3.0.0.0"), 
+                                                                                    Ipv4Address ("1.0.0.0"), 
                                                                                     UdpL4Protocol::PROT_NUMBER);
   
   //Ptr<EpcSgwPgwApplication> epcSgwPgwApp = EpcSgwPgwApplication::RecvFromS1uSocket (staSocket);
