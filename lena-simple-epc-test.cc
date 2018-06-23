@@ -176,7 +176,7 @@ main (int argc, char *argv[])
   list.Add (ipv4RoutingHelper, 0);
   list.Add (olsr, 10);
 
-  interninternet_olsret.SetRoutingHelper (list);
+  internet_olsr.SetRoutingHelper (list);
   internet_olsr.Install (remoteHostContainer);
   //internet.Install (pgw);
 
@@ -316,7 +316,7 @@ main (int argc, char *argv[])
   Ptr<Socket> recvSink = Socket::CreateSocket (ueNodes.Get (0), tid);
   InetSocketAddress local = InetSocketAddress (Ipv4Address::GetAny (), 80);
   recvSink->Bind (local);
-  recvSink>SetRecvCallback (MakeCallback (&ReceivePacket));
+  recvSink->SetRecvCallback (MakeCallback (&ReceivePacket));
 
   Ptr<Socket> source = Socket::CreateSocket (staNodes.Get (0), tid);
   InetSocketAddress remote = InetSocketAddress (remoteHostAddr, 80);
@@ -437,8 +437,8 @@ main (int argc, char *argv[])
   *flowStream->GetStream () << "Total Bytes Received by sink packet #" << sink1->GetTotalRx () << std::endl;
   std::cout << "Total Bytes Received by sink packet #" << sink1->GetTotalRx () << std::endl;
 */
-  wifiPhy->EnablePcap ("olsr-hna-sta", staDevices);
-  wifiPhy->EnablePcap ("olsr-hna-ap", apDevices);
+  wifiPhy.EnablePcap ("olsr-hna-sta", staDevices);
+  wifiPhy.EnablePcap ("olsr-hna-ap", apDevices);
 
   Simulator::ScheduleWithContext (source->GetNode ()->GetId (), Seconds (20.0), &GenerateTraffic, source, packetSize, numPackets, interPacketInterval);
   Simulator::Stop(Seconds(simTime));
