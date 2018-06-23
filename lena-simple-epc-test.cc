@@ -48,6 +48,13 @@
 #include "ns3/socket.h"
 
 using namespace ns3;
+
+//
+//
+// staNode --- (wifi) --- ueNode --- (LTE) --- eNB --- pgw --- (p2p) --- remoteHost
+//
+//
+
 /*
 class TestApplication : public app
 {
@@ -95,6 +102,23 @@ void EnbToPgw (Ptr<Packet> p)
  * attaches one UE per eNodeB starts a flow for each UE to  and from a remote host.
  * It also  starts yet another flow between each UE pair.
  */
+void ReceivePacket (Ptr<Socket> socket)
+{
+  NS_LOG_UNCOND ("Received one packet");
+}
+
+static void GenerateTraffic (Ptr<Socket> socket, uint32_t pktSize, uint32_t pktCount, Time pktInterval)
+{
+  if (pktCount > 0)
+  {
+    socket->Send (Create<Packet> (pktSize));
+    Simulator::Schedule (pktInterval, &GenerateTraffic, socket, pktSize, pktCount - 1, pktInterval);
+  }
+  else
+  {
+    socket->Close ();
+  }
+}
 
 NS_LOG_COMPONENT_DEFINE ("EpcFirstExample");
 
@@ -107,7 +131,10 @@ main (int argc, char *argv[])
   //uint32_t payloadSize = 1472;
   double simTime = 30;
   double distance = 60;
-  std::string phyRate = "HtMcs7";
+  double interval = 1.0;
+  uint32_t packetSize = 1000; // bytes
+  uint32_t numPackets = 1;
+  //std::string phyRate = "HtMcs7";
 
   // Command line arguments
   CommandLine cmd;
@@ -117,6 +144,8 @@ main (int argc, char *argv[])
   cmd.AddValue("simTime", "Total duration of the simulation [s])", simTime);
   cmd.AddValue("distance", "Distance between eNBs [m]", distance);
   cmd.Parse(argc, argv);
+
+  Time interPacketInterval = Seconds (interval);
 
   Ptr<LteHelper> lteHelper = CreateObject<LteHelper> ();
   Ptr<PointToPointEpcHelper> epcHelper = CreateObject<PointToPointEpcHelper> ();
@@ -135,7 +164,20 @@ main (int argc, char *argv[])
   remoteHostContainer.Create (1);
   Ptr<Node> remoteHost = remoteHostContainer.Get (0);
   InternetStackHelper internet;
+
+  // Create a olsr
+  OlsrHelper olsr;
+  olsr.ExcludeInterface (remoteHost, 2);
+  Ipv4StaticRoutingHelper ipv4RoutingHelper;
+ 
+  Ipv4ListRoutingHelper list;
+  list.Add (ipv4RoutingHelper, 0);
+  list.Add (olsr, 10);
+
+  internet.SetRoutingHelper (list);
+  internet.Install (staNodes);
   internet.Install (remoteHostContainer);
+  //internet.Install (pgw);
 
   // Create the Internet
   PointToPointHelper p2ph;
@@ -143,11 +185,10 @@ main (int argc, char *argv[])
   p2ph.SetDeviceAttribute ("Mtu", UintegerValue (1500));
   p2ph.SetChannelAttribute ("Delay", TimeValue (Seconds (0.010)));
   NetDeviceContainer internetDevices = p2ph.Install (pgw, remoteHost);
+
   Ipv4AddressHelper ipv4h;
   ipv4h.SetBase ("1.0.0.0", "255.0.0.0");
   Ipv4InterfaceContainer internetIpIfaces = ipv4h.Assign (internetDevices);
-
-  Ipv4StaticRoutingHelper ipv4RoutingHelper;
 
   NodeContainer ueNodes;
   NodeContainer enbNodes;
@@ -207,6 +248,11 @@ main (int argc, char *argv[])
   EpsBearer bearer (q);
   lteHelper->ActivateDedicatedEpsBearer (ueDevice, bearer, EpcTft::Default ());
 
+  Config::SetDefault ("ns3::WifiRemoteStationManager::FragmentationThreshold", StringValue ("2200"));
+  Config::SetDefault ("ns3::WifiRemoteStationManager::RtsCtsThreshold", StringValue ("2200"));
+  Config::SetDefault ("ns3::WifiRemoteStationManager::NonUnicastMode",
+                      StringValue ("DsssRate1Mbps"));
+
   // WiFi
   WifiHelper wifiHelper;
   wifiHelper.SetStandard (WIFI_PHY_STANDARD_80211n_5GHZ);
@@ -228,8 +274,8 @@ main (int argc, char *argv[])
   wifiPhy.Set ("EnergyDetectionThreshold", DoubleValue (-79 + 3));
   wifiPhy.SetErrorRateModel ("ns3::YansErrorRateModel");
   wifiHelper.SetRemoteStationManager ("ns3::ConstantRateWifiManager",
-                                      "DataMode", StringValue (phyRate),
-                                      "ControlMode", StringValue ("HtMcs0"));
+                                      "DataMode", StringValue ("DsssRate1Mbps"),
+                                      "ControlMode", StringValue ("DsssRate1Mbps"));
   // Set of Ap
   Ssid ssid = Ssid ("network");
   wifiMac.SetType ("ns3::ApWifiMac",
@@ -245,7 +291,6 @@ main (int argc, char *argv[])
   NetDeviceContainer staDevices;
   staDevices = wifiHelper.Install (wifiPhy, wifiMac, staNodes.Get (0));
 
-  internet.Install (staNodes);
   ipv4h.SetBase ("3.0.0.0", "255.0.0.0");
   Ipv4InterfaceContainer staInterface;
   staInterface = ipv4h.Assign (staDevices);  
@@ -253,8 +298,8 @@ main (int argc, char *argv[])
   // Interfaces
   // interface 0 is localhost, 1 is the p2p device
   Ipv4Address remoteHostAddr = internetIpIfaces.GetAddress (1);
-  Ipv4Address ueAddr = ueIpIface.GetAddress (0);
-  Ipv4Address staAddr = staInterface.GetAddress (0);  
+  //Ipv4Address ueAddr = ueIpIface.GetAddress (0);
+  //Ipv4Address staAddr = staInterface.GetAddress (0);  
 
   // Assign IP address to UEs, and install applications
   Ptr<Node> ueNode = ueNodes.Get (0);
@@ -262,8 +307,40 @@ main (int argc, char *argv[])
 
   Ptr<Ipv4StaticRouting> ueStaticRouting = ipv4RoutingHelper.GetStaticRouting (ueNode->GetObject<Ipv4> ());
   ueStaticRouting->SetDefaultRoute (epcHelper->GetUeDefaultGatewayAddress (), 1);
-  ueStaticRouting->AddNetworkRouteTo (Ipv4Address ("3.0.0.0"), Ipv4Mask ("255.0.0.0"), staAddr, 2);
+  //ueStaticRouting->AddNetworkRouteTo (Ipv4Address ("3.0.0.0"), Ipv4Mask ("255.0.0.0"), staAddr, 2);
+  
+  TypeId tid = TypeId::LookupByName ("ns3::UdpSocketFactory");
+  Ptr<Socket> recvSink = Socket::CreateSocket (ueNodes.Get (0), tid);
+  InetSocketAddress local = InetSocketAddress (Ipv4Address::GetAny (), 80);
+  recvSink->Bind (local);
+  recvSink>SetRecvCallback (MakeCallback (&ReceivePacket));
 
+  Ptr<Socket> source = Socket::CreateSocket (staNodes.Get (0), tid);
+  InetSocketAddress remote = InetSocketAddress (remoteHostAddr, 80);
+  source->Connect (remote);
+
+  Ptr<Ipv4> stack = remoteHost->GetObject<Ipv4> ();
+  Ptr<Ipv4RoutingProtocol> rp_Gw = (stack->GetRoutingProtocol ());
+  Ptr<Ipv4ListRouting> Irp_Gw = DynamicCast<Ipv4ListRouting>(rp_Gw);
+
+  Ptr<olsr::RoutingProtocol> olsrrp_Gw;
+
+  for (uint32_t i = 0; i < Irp_Gw->GetNRoutingProtocols (); i++)
+  {
+    int16_t priority;
+    Ptr<Ipv4RoutingProtocol> temp = Irp_Gw->GetRoutingProtocol (i, priority);
+    if (DynamicCast<olsr::RoutingProtocol> (temp))
+    {
+      olsrrp_Gw = DynamicCast<olsr::RoutingProtocol> (temp);
+    }
+  }
+
+  Ptr<Ipv4StaticRouting> hnaEntries = Create<Ipv4StaticRouting> ();
+  hnaEntries->AddNetworkRouteTo (Ipv4Address ("7.0.0.0"), Ipv4Mask ("255.0.0.0"), 2);
+  olsrrp_Gw->SetRoutingTableAssociation (hnaEntries);
+  
+
+/*
   Ptr<Ipv4StaticRouting> remoteHostStaticRouting = ipv4RoutingHelper.GetStaticRouting (remoteHost->GetObject<Ipv4> ());
   remoteHostStaticRouting->AddNetworkRouteTo (Ipv4Address ("7.0.0.0"), Ipv4Mask ("255.0.0.0"), staAddr, 2);
 
@@ -280,7 +357,8 @@ main (int argc, char *argv[])
   
   //Ptr<EpcSgwPgwApplication> epcSgwPgwApp = EpcSgwPgwApplication::RecvFromS1uSocket (staSocket);
   pgw->AddApplication (epcSgwPgwApp);
-
+*/
+/*
   ApplicationContainer serverApps;
   ApplicationContainer clientApps;
 
@@ -292,7 +370,8 @@ main (int argc, char *argv[])
   dlechoClient.SetAttribute ("Interval", TimeValue (Seconds (0.2)));
   dlechoClient.SetAttribute ("PacketSize", UintegerValue (1024));
   clientApps.Add (dlechoClient.Install (staNodes.Get (0)));
-/*
+  
+
   OnOffHelper dlechoClient ("ns3::UdpSocketFactory", Address(InetSocketAddress (Ipv4Address::GetAny(), 10)));
   dlechoClient.SetAttribute ("PacketSize", UintegerValue (1024));
   dlechoClient.SetAttribute ("OnTime", StringValue ("ns3::ConstantRandomVariable[Constant=0.352]"));
@@ -308,9 +387,10 @@ main (int argc, char *argv[])
   ulechoClient.SetAttribute ("Interval", TimeValue (Seconds (0.2)));
   ulechoClient.SetAttribute ("PacketSize", UintegerValue (1024));
   clientApps.Add (ulechoClient.Install (remoteHost));
-*/
+
   serverApps.Start (Seconds (0.01));
   clientApps.Start (Seconds (0.01));
+  */
 /*
   Ptr<Ipv4L3Protocol> ipL3 = (staNodes.Get (0))->GetObject<Ipv4L3Protocol> ();
   ipL3->TraceConnectWithoutContext ("Rx", MakeCallback (&TestApplication::ReceivedAtClient));
@@ -321,7 +401,7 @@ main (int argc, char *argv[])
   //lteHelper->EnableMacTraces ();
   //lteHelper->EnableRlcTraces ();
   //wifiPhy.EnablePcap("lena-simple-epc-test", staDevices);
-
+/*
   FlowMonitorHelper flowmon;
   Ptr<FlowMonitor> monitor;
 
@@ -353,7 +433,11 @@ main (int argc, char *argv[])
   Ptr<PacketSink> sink1 = DynamicCast<PacketSink> (serverApps.Get (0));
   *flowStream->GetStream () << "Total Bytes Received by sink packet #" << sink1->GetTotalRx () << std::endl;
   std::cout << "Total Bytes Received by sink packet #" << sink1->GetTotalRx () << std::endl;
+*/
+  wifiPhy->EnablePcap ("olsr-hna-sta", staDevices);
+  wifiPhy->EnablePcap ("olsr-hna-ap", apDevices);
 
+  Simulator::ScheduleWithContext (source->GetNode ()->GetId (), Seconds (20.0), &GenerateTraffic, source, packetSize, numPackets, interPacketInterval);
   Simulator::Stop(Seconds(simTime));
   //Simulator::Schedule(Seconds(1.0), monitor);
   Simulator::Run();
