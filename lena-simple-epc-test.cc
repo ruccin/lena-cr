@@ -46,6 +46,8 @@
 #include "ns3/wifi-module.h"
 #include "ns3/packet.h"
 #include "ns3/socket.h"
+#include "ns3/olsr-routing-protocol.h"
+#include "ns3/olsr-helper.h"
 
 using namespace ns3;
 
