@@ -165,7 +165,7 @@ main (int argc, char *argv[])
   NodeContainer remoteHostContainer;
   remoteHostContainer.Create (1);
   Ptr<Node> remoteHost = remoteHostContainer.Get (0);
-  InternetStackHelper internet;
+  InternetStackHelper internet_olsr;
 
   // Create a olsr
   OlsrHelper olsr;
@@ -176,9 +176,8 @@ main (int argc, char *argv[])
   list.Add (ipv4RoutingHelper, 0);
   list.Add (olsr, 10);
 
-  internet.SetRoutingHelper (list);
-  internet.Install (staNodes);
-  internet.Install (remoteHostContainer);
+  interninternet_olsret.SetRoutingHelper (list);
+  internet_olsr.Install (remoteHostContainer);
   //internet.Install (pgw);
 
   // Create the Internet
@@ -237,6 +236,7 @@ main (int argc, char *argv[])
   uePhy->SetAttribute ("NoiseFigure", DoubleValue (9.0));
   
   // Install the IP stack on the UEs
+  InternetStackHelper internet;
   internet.Install (ueNodes);
   //ipv4h.SetBase ("2.0.0.0", "255.0.0.0");
   Ipv4InterfaceContainer ueIpIface;
@@ -293,6 +293,7 @@ main (int argc, char *argv[])
   NetDeviceContainer staDevices;
   staDevices = wifiHelper.Install (wifiPhy, wifiMac, staNodes.Get (0));
 
+  internet_olsr.Install (staNodes);
   ipv4h.SetBase ("3.0.0.0", "255.0.0.0");
   Ipv4InterfaceContainer staInterface;
   staInterface = ipv4h.Assign (staDevices);  
