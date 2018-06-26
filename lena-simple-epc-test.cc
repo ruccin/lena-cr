@@ -325,7 +325,7 @@ main (int argc, char *argv[])
   UdpServerHelper ueserver (80);
   serverApps.Add (ueserver.Install (ueNodes));
 
-  UdpServerHelper rhserver (80);
+  UdpServerHelper rhserver (81);
   serverApps.Add (rhserver.Install (remoteHost));
 
   serverApps.Start (Seconds (1));
@@ -340,10 +340,10 @@ main (int argc, char *argv[])
   clientApps.Start (Seconds (1));
   clientApps.Stop (Seconds (6.0));
 
-  UdpClientHelper uclient (internetIpIfaces.GetAddress (1), 80);
+  UdpClientHelper uclient (internetIpIfaces.GetAddress (1), 81);
   uclient.SetAttribute ("MaxPackets", UintegerValue (4294967295u));
   uclient.SetAttribute ("Interval", TimeValue (Time ("0.00002"))); //packets/s
-  uclient.SetAttribute ("PacketSize", UintegerValue (payloadSize));
+  uclient.SetAttribute ("PacketSize", UintegerValue (1024));
   clientApps.Add (uclient.Install (ueNodes));
 
   clientApps.Start (Seconds (6.1));
