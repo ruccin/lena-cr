@@ -130,8 +130,8 @@ main (int argc, char *argv[])
   uint16_t numberOfEnbNodes = 1;
   uint16_t numberOfUeNodes = 1;
   uint16_t numberOfStaNodes = 1;
-  //uint32_t payloadSize = 1472;
-  double simTime = 30;
+  uint32_t payloadSize = 1472;
+  double simTime = 12;
   double distance = 60;
   double interval = 1.0;
   uint32_t packetSize = 1000; // bytes
@@ -200,8 +200,8 @@ main (int argc, char *argv[])
 
   // Install Mobility Model
   Ptr<ListPositionAllocator> positionAlloc = CreateObject<ListPositionAllocator> ();
-  positionAlloc->Add (Vector (distance * 6, 0.0, 0.0));
-  positionAlloc->Add (Vector (distance * 2, 0.0, 0.0));
+  positionAlloc->Add (Vector (distance * 60, 0.0, 0.0));
+  positionAlloc->Add (Vector (distance * 20, 0.0, 0.0));
   positionAlloc->Add (Vector (distance, 0.0, 0.0));
 
   MobilityHelper mobility;
@@ -210,6 +210,8 @@ main (int argc, char *argv[])
   mobility.Install(enbNodes);
   mobility.Install(ueNodes);
   mobility.Install(staNodes);
+
+//Start Set of Lte
 
   // Install LTE Devices to the nodes
   NetDeviceContainer enbLteDevs = lteHelper->InstallEnbDevice (enbNodes);
@@ -238,10 +240,8 @@ main (int argc, char *argv[])
   // Install the IP stack on the UEs
   InternetStackHelper internet;
   internet.Install (ueNodes);
-  //ipv4h.SetBase ("2.0.0.0", "255.0.0.0");
   Ipv4InterfaceContainer ueIpIface;
   ueIpIface = epcHelper->AssignUeIpv4Address (NetDeviceContainer (ueLteDevs));
-  //ueIpIface = ipv4h.Assign (ueLteDevs);
 
   // Attach one UE per eNodeB
   lteHelper->Attach (ueLteDevs.Get (0), enbLteDevs.Get (0));
@@ -250,12 +250,14 @@ main (int argc, char *argv[])
   EpsBearer bearer (q);
   lteHelper->ActivateDedicatedEpsBearer (ueDevice, bearer, EpcTft::Default ());
 
+//End Set of Lte
+
+//Start Set of WiF
   Config::SetDefault ("ns3::WifiRemoteStationManager::FragmentationThreshold", StringValue ("2200"));
   Config::SetDefault ("ns3::WifiRemoteStationManager::RtsCtsThreshold", StringValue ("2200"));
   Config::SetDefault ("ns3::WifiRemoteStationManager::NonUnicastMode",
                       StringValue ("DsssRate1Mbps"));
 
-  // WiFi
   WifiHelper wifiHelper;
   wifiHelper.SetStandard (WIFI_PHY_STANDARD_80211n_5GHZ);
   WifiMacHelper wifiMac;
@@ -280,38 +282,76 @@ main (int argc, char *argv[])
                                       "ControlMode", StringValue ("DsssRate1Mbps"));
   // Set of Ap
   Ssid ssid = Ssid ("network");
+  wifiPhy.Set ("ChannelNumber", UintegerValue (36));
   wifiMac.SetType ("ns3::ApWifiMac",
                    "Ssid", SsidValue (ssid));
   
   NetDeviceContainer apDevices;
-  apDevices = wifiHelper.Install (wifiPhy, wifiMac, ueNodes.Get (0));
+  apDevices = wifiHelper.Install (wifiPhy, wifiMac, ueNodes);
 
   // Set of Sta
   wifiMac.SetType ("ns3::StaWifiMac",
-                   "Ssid", SsidValue (ssid));
+                   "Ssid", SsidValue (ssid),
+                   "EnableBeaconJitter", BooleanValue (false));
 
   NetDeviceContainer staDevices;
-  staDevices = wifiHelper.Install (wifiPhy, wifiMac, staNodes.Get (0));
+  staDevices = wifiHelper.Install (wifiPhy, wifiMac, staNodes);
 
   internet_olsr.Install (staNodes);
-  ipv4h.SetBase ("3.0.0.0", "255.0.0.0");
+
+  Ipv4AddressHelper ipv4w;
+  ipv4w.SetBase ("3.0.0.0", "255.0.0.0");
+  
   Ipv4InterfaceContainer staInterface;
-  staInterface = ipv4h.Assign (staDevices);  
+  staInterface = ipv4w.Assign (staDevices);  
+//End Set of Wifi
 
   // Interfaces
   // interface 0 is localhost, 1 is the p2p device
-  Ipv4Address remoteHostAddr = internetIpIfaces.GetAddress (1);
+  //Ipv4Address remoteHostAddr = internetIpIfaces.GetAddress (1);
   //Ipv4Address ueAddr = ueIpIface.GetAddress (0);
   //Ipv4Address staAddr = staInterface.GetAddress (0);  
 
   // Assign IP address to UEs, and install applications
   Ptr<Node> ueNode = ueNodes.Get (0);
-  Ptr<Node> staNode = staNodes.Get (0);
+  //Ptr<Node> staNode = staNodes.Get (0);
 
   Ptr<Ipv4StaticRouting> ueStaticRouting = ipv4RoutingHelper.GetStaticRouting (ueNode->GetObject<Ipv4> ());
-  ueStaticRouting->SetDefaultRoute (epcHelper->GetUeDefaultGatewayAddress (), 1);
+  ueStaticRouting->SetDefaultRoute (epcHelper->GetUeDefaultGatewayAddress (), 1, 0);
   //ueStaticRouting->AddNetworkRouteTo (Ipv4Address ("3.0.0.0"), Ipv4Mask ("255.0.0.0"), staAddr, 2);
   
+  ApplicationContainer serverApps;
+  ApplicationContainer clientApps;
+
+  UdpServerHelper ueserver (80);
+  serverApps.Add (ueserver.Install (ueNodes));
+
+  UdpServerHelper rhserver (81);
+  serverApps.Add (rhserver.Install (remoteHost));
+
+  serverApps.Start (Seconds (1));
+  serverApps.Stop (Seconds (simTime));
+
+  UdpClientHelper wificlient (ueIpIface.GetAddress (0), 80);
+  wificlient.SetAttribute ("MaxPackets", UintegerValue (4294967295u));
+  wificlient.SetAttribute ("Interval", TimeValue (Time ("0.00002"))); //packets/s
+  wificlient.SetAttribute ("PacketSize", UintegerValue (payloadSize));
+  clientApps.Add (wificlient.Install (staNodes));
+
+  clientApps.Start (Seconds (1));
+  clientApps.Stop (Seconds (6.0));
+
+  UdpClientHelper uclient (internetIpIfaces.GetAddress (1), 81);
+  uclient.SetAttribute ("MaxPackets", UintegerValue (4294967295u));
+  uclient.SetAttribute ("Interval", TimeValue (Time ("0.00002"))); //packets/s
+  uclient.SetAttribute ("PacketSize", UintegerValue (payloadSize));
+  clientApps.Add (uclient.Install (ueNodes));
+
+  clientApps.Start (Seconds (6.1));
+  clientApps.Stop (Seconds (simTime));
+
+//
+
   TypeId tid = TypeId::LookupByName ("ns3::UdpSocketFactory");
   Ptr<Socket> recvSink = Socket::CreateSocket (ueNodes.Get (0), tid);
   InetSocketAddress local = InetSocketAddress (Ipv4Address::GetAny (), 80);
@@ -319,7 +359,7 @@ main (int argc, char *argv[])
   recvSink->SetRecvCallback (MakeCallback (&ReceivePacket));
 
   Ptr<Socket> source = Socket::CreateSocket (staNodes.Get (0), tid);
-  InetSocketAddress remote = InetSocketAddress (remoteHostAddr, 80);
+  InetSocketAddress remote = InetSocketAddress (internetIpIfaces.GetAddress (1), 80);
   source->Connect (remote);
 
   Ptr<Ipv4> stack = remoteHost->GetObject<Ipv4> ();
@@ -339,9 +379,12 @@ main (int argc, char *argv[])
   }
 
   Ptr<Ipv4StaticRouting> hnaEntries = Create<Ipv4StaticRouting> ();
-  hnaEntries->AddNetworkRouteTo (Ipv4Address ("7.0.0.0"), Ipv4Mask ("255.0.0.0"), 2);
+  hnaEntries->AddNetworkRouteTo (Ipv4Address ("7.0.0.0"), Ipv4Mask ("255.0.0.0"), 1);
   olsrrp_Gw->SetRoutingTableAssociation (hnaEntries);
   
+  uint64_t totalPacketsThrough = DynamicCast<UdpServer> (serverApps.Get (0))->GetReceived ();
+  double throughput = totalPacketsThrough * payloadSize * 8 / (simTime * 1000000.0);
+  std::cout << "Throughput: " << throughput << " Mbit/s" << '\n';
 
 /*
   Ptr<Ipv4StaticRouting> remoteHostStaticRouting = ipv4RoutingHelper.GetStaticRouting (remoteHost->GetObject<Ipv4> ());
