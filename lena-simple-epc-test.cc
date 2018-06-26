@@ -291,8 +291,7 @@ main (int argc, char *argv[])
 
   // Set of Sta
   wifiMac.SetType ("ns3::StaWifiMac",
-                   "Ssid", SsidValue (ssid),
-                   "EnableBeaconJitter", BooleanValue (false));
+                   "Ssid", SsidValue (ssid));
 
   NetDeviceContainer staDevices;
   staDevices = wifiHelper.Install (wifiPhy, wifiMac, staNodes);
