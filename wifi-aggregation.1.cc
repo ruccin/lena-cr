@@ -134,12 +134,12 @@ int main (int argc, char *argv[])
   phy.Set ("ChannelNumber", UintegerValue (36));
   mac.SetType ("ns3::StaWifiMac",
                "Ssid", SsidValue (ssid));
-  staDeviceA = wifi.Install (phy, mac, wifiStaNodes.Get (0));
+  staDeviceA = wifiHelper.Install (phy, mac, wifiStaNodes.Get (0));
 
   mac.SetType ("ns3::ApWifiMac",
                "Ssid", SsidValue (ssid),
                "EnableBeaconJitter", BooleanValue (false));
-  apDeviceA = wifi.Install (phy, mac, wifiApNodes.Get (0));
+  apDeviceA = wifiHelper.Install (phy, mac, wifiApNodes.Get (0));
 
   //Network B
   ssid = Ssid ("network-B");
@@ -148,12 +148,12 @@ int main (int argc, char *argv[])
                "Ssid", SsidValue (ssid),
                "BE_MaxAmpduSize", UintegerValue (0)); //Disable A-MPDU
 
-  staDeviceB = wifi.Install (phy, mac, wifiStaNodes.Get (1));
+  staDeviceB = wifiHelper.Install (phy, mac, wifiStaNodes.Get (1));
 
   mac.SetType ("ns3::ApWifiMac",
                "Ssid", SsidValue (ssid),
                "EnableBeaconJitter", BooleanValue (false));
-  apDeviceB = wifi.Install (phy, mac, wifiApNodes.Get (1));
+  apDeviceB = wifiHelper.Install (phy, mac, wifiApNodes.Get (1));
 
   //Network C
   ssid = Ssid ("network-C");
@@ -163,12 +163,12 @@ int main (int argc, char *argv[])
                "BE_MaxAmpduSize", UintegerValue (0), //Disable A-MPDU
                "BE_MaxAmsduSize", UintegerValue (7935)); //Enable A-MSDU with the highest maximum size allowed by the standard (7935 bytes)
 
-  staDeviceC = wifi.Install (phy, mac, wifiStaNodes.Get (2));
+  staDeviceC = wifiHelper.Install (phy, mac, wifiStaNodes.Get (2));
 
   mac.SetType ("ns3::ApWifiMac",
                "Ssid", SsidValue (ssid),
                "EnableBeaconJitter", BooleanValue (false));
-  apDeviceC = wifi.Install (phy, mac, wifiApNodes.Get (2));
+  apDeviceC = wifiHelper.Install (phy, mac, wifiApNodes.Get (2));
 
   //Network D
   ssid = Ssid ("network-D");
@@ -178,12 +178,12 @@ int main (int argc, char *argv[])
                "BE_MaxAmpduSize", UintegerValue (32768), //Enable A-MPDU with a smaller size than the default one
                "BE_MaxAmsduSize", UintegerValue (3839)); //Enable A-MSDU with the smallest maximum size allowed by the standard (3839 bytes)
 
-  staDeviceD = wifi.Install (phy, mac, wifiStaNodes.Get (3));
+  staDeviceD = wifiHelper.Install (phy, mac, wifiStaNodes.Get (3));
 
   mac.SetType ("ns3::ApWifiMac",
                "Ssid", SsidValue (ssid),
                "EnableBeaconJitter", BooleanValue (false));
-  apDeviceD = wifi.Install (phy, mac, wifiApNodes.Get (3));
+  apDeviceD = wifiHelper.Install (phy, mac, wifiApNodes.Get (3));
 
   /* Setting mobility model */
   MobilityHelper mobility;
