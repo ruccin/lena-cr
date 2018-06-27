@@ -118,11 +118,11 @@ void InstallApplications (Args args)
   UdpClientHelper dlClient (args.ueIpIface.GetAddress (0, 1), dlPort);
   dlClient.SetAttribute ("Interval", TimeValue (MilliSeconds(args.interPacketInterval)));
   dlClient.SetAttribute ("MaxPackets", UintegerValue (args.maxPackets));
-  dlClient.SetAttribute ("PacketSize", UintegerValue (100));
+  dlClient.SetAttribute ("PacketSize", UintegerValue (1024));
   UdpClientHelper ulClient (args.remoteHostAddr, ulPort);
   ulClient.SetAttribute ("Interval", TimeValue (MilliSeconds(args.interPacketInterval)));
   ulClient.SetAttribute ("MaxPackets", UintegerValue(args.maxPackets));
-  ulClient.SetAttribute ("PacketSize", UintegerValue (100));
+  ulClient.SetAttribute ("PacketSize", UintegerValue (1024));
 
   clientApps.Add (dlClient.Install (args.remoteHost));
   clientApps.Add (ulClient.Install (args.ueNode));
