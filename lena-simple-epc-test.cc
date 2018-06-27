@@ -134,8 +134,8 @@ main (int argc, char *argv[])
   double simTime = 12;
   double distance = 60;
   double interval = 1.0;
-  uint32_t packetSize = 1000; // bytes
-  uint32_t numPackets = 1;
+  //uint32_t packetSize = 1000; // bytes
+  //uint32_t numPackets = 1;
   //std::string phyRate = "HtMcs7";
 
   // Command line arguments
@@ -349,9 +349,6 @@ main (int argc, char *argv[])
   clientApps.Add (wificlient.Install (staNodes));
 
   clientApps.Start (Seconds (0.1));
-
-
-
   clientApps.Stop (Seconds (6.0));
 
   UdpClientHelper uclient (internetIpIfaces.GetAddress (1), 81);
@@ -493,8 +490,8 @@ main (int argc, char *argv[])
   *flowStream->GetStream () << "Total Bytes Received by sink packet #" << sink1->GetTotalRx () << std::endl;
   std::cout << "Total Bytes Received by sink packet #" << sink1->GetTotalRx () << std::endl;
 */
-  wifiPhy.EnablePcap ("olsr-hna-sta", staDevices);
-  wifiPhy.EnablePcap ("olsr-hna-ap", apDevices);
+  phy.EnablePcap ("olsr-hna-sta", staDevices);
+  phy.EnablePcap ("olsr-hna-ap", apDevices);
 
   //Simulator::ScheduleWithContext (source->GetNode ()->GetId (), Seconds (20.0), &GenerateTraffic, source, packetSize, numPackets, interPacketInterval);
   Simulator::Stop(Seconds(simTime));
