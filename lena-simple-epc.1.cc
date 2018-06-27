@@ -184,18 +184,21 @@ main (int argc, char *argv[])
   // Install and start applications on UEs and remote host
   uint16_t dlPort = 1234;
   uint16_t ulPort = 2000;
-  uint16_t otherPort = 3000;
+  //uint16_t otherPort = 3000;
   ApplicationContainer clientApps;
   ApplicationContainer serverApps;
   for (uint32_t u = 0; u < ueNodes.GetN (); ++u)
     {
       ++ulPort;
-      ++otherPort;
-      PacketSinkHelper dlPacketSinkHelper ("ns3::UdpSocketFactory", InetSocketAddress (Ipv4Address::GetAny (), dlPort));
-      PacketSinkHelper ulPacketSinkHelper ("ns3::UdpSocketFactory", InetSocketAddress (Ipv4Address::GetAny (), ulPort));
+      //++otherPort;
+      //PacketSinkHelper dlPacketSinkHelper ("ns3::UdpSocketFactory", InetSocketAddress (Ipv4Address::GetAny (), dlPort));
+      //PacketSinkHelper ulPacketSinkHelper ("ns3::UdpSocketFactory", InetSocketAddress (Ipv4Address::GetAny (), ulPort));
       //PacketSinkHelper packetSinkHelper ("ns3::UdpSocketFactory", InetSocketAddress (Ipv4Address::GetAny (), otherPort));
-      serverApps.Add (dlPacketSinkHelper.Install (ueNodes.Get(u)));
-      serverApps.Add (ulPacketSinkHelper.Install (staNodes.Get(0)));
+
+      UdpServerHelper dlServer (dlPort);
+      UdpServerHelper ulServer (ulPort);
+      serverApps.Add (dlServer.Install (ueNodes.Get(u)));
+      serverApps.Add (ulServer.Install (staNodes.Get(0)));
       //serverApps.Add (packetSinkHelper.Install (staNodes.Get(0)));
 
       UdpClientHelper dlClient (ueIpIface.GetAddress (u), dlPort);
@@ -231,7 +234,7 @@ main (int argc, char *argv[])
   // Uncomment to enable PCAP tracing
   //p2ph.EnablePcapAll("lena-epc-first");
 
-  uint64_t totalPacketsThrough = DynamicCast<PacketSink> (serverApps.Get (0))->GetReceived ();
+  uint64_t totalPacketsThrough = DynamicCast<UdpServer> (serverApps.Get (0))->GetReceived ();
   double throughput = totalPacketsThrough * payloadSize * 8 / (simTime * 1000000.0);
   std::cout << "Throughput: " << throughput << " Mbit/s" << '\n';
 
