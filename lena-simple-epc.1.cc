@@ -29,6 +29,7 @@
 #include "ns3/applications-module.h"
 #include "ns3/point-to-point-helper.h"
 #include "ns3/config-store.h"
+#include "ns3/wifi-module.h"
 //#include "ns3/gtk-config-store.h"
 
 using namespace ns3;
@@ -221,8 +222,9 @@ main (int argc, char *argv[])
         {
           clientApps.Add (client.Install (ueNodes.Get(0)));
         }
+      */
     }
-    */
+    
   serverApps.Start (Seconds (0.01));
   clientApps.Start (Seconds (0.01));
   lteHelper->EnableTraces ();
