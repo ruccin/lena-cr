@@ -134,13 +134,15 @@ void InstallApplications (Args args)
   FlowMonitorHelper flowmon;
   Ptr<FlowMonitor> monitor = flowmon.InstallAll ();
 
-    //Print per flow statistics
+
+  //Print per flow statistics
   monitor->CheckForLostPackets ();
   Ptr<Ipv4FlowClassifier> classifier = DynamicCast<Ipv4FlowClassifier> (flowmon.GetClassifier ());
   std::map<FlowId, FlowMonitor::FlowStats> stats = monitor->GetFlowStats ();
 
   AsciiTraceHelper asciiTHFlow;
   Ptr<OutputStreamWrapper> flowStream = asciiTHFlow.CreateFileStream ("lte01.txt");
+/*
   for (std::map<FlowId, FlowMonitor::FlowStats>::const_iterator i = stats.begin (); i != stats.end (); ++i)
     {
           Ipv4FlowClassifier::FiveTuple t = classifier->FindFlow (i->first);
@@ -163,7 +165,7 @@ void InstallApplications (Args args)
 	Ptr<PacketSink> sink2 = DynamicCast<PacketSink> (serverApps.Get (1));
 	*flowStream->GetStream () << "Total Bytes Received by sink packet #"<< ":" << sink2->GetTotalRx () << std::endl;
 	std::cout << "Total Bytes Received by sink packet #"<< ":" << sink2->GetTotalRx () << std::endl;
-
+*/
 }
 
 void PrintNodesInfo (Ptr<PointToPointEpc6Pmipv6Helper> epcHelper, NodeContainer nodes)
