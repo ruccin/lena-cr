@@ -159,7 +159,7 @@ main (int argc, char *argv[])
   wifi.SetRemoteStationManager ("ns3::ConstantRateWifiManager", "DataMode", StringValue ("HtMcs7"), "ControlMode", StringValue ("HtMcs0"));
   WifiMacHelper mac;
 
-  NetDeviceContainer staDevice;
+  NetDeviceContainer staDeviceA, apDeviceA;
   Ssid ssid;
 
   ssid = Ssid ("network-A");
