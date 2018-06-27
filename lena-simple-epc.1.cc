@@ -47,6 +47,7 @@ main (int argc, char *argv[])
 
   uint16_t numberOfNodes = 2;
   uint16_t numberOfSNodes = 1;
+  uint32_t payloadSize = 1472;
   double simTime = 1.1;
   double distance = 60.0;
   double interPacketInterval = 100;
@@ -199,6 +200,7 @@ main (int argc, char *argv[])
       UdpClientHelper dlClient (ueIpIface.GetAddress (u), dlPort);
       dlClient.SetAttribute ("Interval", TimeValue (MilliSeconds(interPacketInterval)));
       dlClient.SetAttribute ("MaxPackets", UintegerValue(1000000));
+      dlClient.SetAttribute ("PacketSize", UintegerValue (payloadSize));
 
       UdpClientHelper ulClient (StaInterfaceA.GetAddress (0), ulPort);
       ulClient.SetAttribute ("Interval", TimeValue (MilliSeconds(interPacketInterval)));
