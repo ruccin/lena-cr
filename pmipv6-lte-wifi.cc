@@ -131,7 +131,38 @@ void InstallApplications (Args args)
   serverApps.Start (Seconds (1));
   clientApps.Start (Seconds (1));
 
+  FlowMonitorHelper flowmon;
+  Ptr<FlowMonitor> monitor = flowmon.InstallAll ();
 
+    //Print per flow statistics
+  monitor->CheckForLostPackets ();
+  Ptr<Ipv4FlowClassifier> classifier = DynamicCast<Ipv4FlowClassifier> (flowmon.GetClassifier ());
+  std::map<FlowId, FlowMonitor::FlowStats> stats = monitor->GetFlowStats ();
+
+  AsciiTraceHelper asciiTHFlow;
+  Ptr<OutputStreamWrapper> flowStream = asciiTHFlow.CreateFileStream ("lte01.txt");
+  for (std::map<FlowId, FlowMonitor::FlowStats>::const_iterator i = stats.begin (); i != stats.end (); ++i)
+    {
+          Ipv4FlowClassifier::FiveTuple t = classifier->FindFlow (i->first);
+          *flowStream->GetStream () << " Flow " << i->first << " (" << t.sourceAddress << " -> " << t.destinationAddress << ")" << std::endl;
+          *flowStream->GetStream () << " First packet time: " << i->second.timeFirstRxPacket << std::endl;
+          *flowStream->GetStream () << " Tx Packets: " << i->second.txPackets << std::endl;
+          *flowStream->GetStream () << " Rx Packets: " << i->second.rxPackets << std::endl;
+          uint32_t dropes = 0;
+           for (uint32_t reasonCode = 0; reasonCode < i->second.packetsDropped.size (); reasonCode++)
+           {
+        	   dropes+= i->second.packetsDropped[reasonCode];
+           }
+           *flowStream->GetStream () << " Drop packets: " << dropes << std::endl;
+    }
+
+	Ptr<PacketSink> sink1 = DynamicCast<PacketSink> (serverApps.Get (0));
+	*flowStream->GetStream () << "Total Bytes Received by sink packet #"<< ":" << sink1->GetTotalRx () << std::endl;
+	std::cout << "Total Bytes Received by sink packet #"<< ":" << sink1->GetTotalRx () << std::endl;
+  
+	Ptr<PacketSink> sink2 = DynamicCast<PacketSink> (serverApps.Get (1));
+	*flowStream->GetStream () << "Total Bytes Received by sink packet #"<< ":" << sink2->GetTotalRx () << std::endl;
+	std::cout << "Total Bytes Received by sink packet #"<< ":" << sink2->GetTotalRx () << std::endl;
 
 }
 
@@ -377,38 +408,6 @@ main (int argc, char *argv[])
   PrintNodesInfo (epcHelper, nodes);
   // Schedule print information
   Simulator::Schedule (Seconds (23), &PrintNodesInfo, epcHelper, nodes);
-
-  FlowMonitorHelper flowmon;
-  Ptr<FlowMonitor> monitor = flowmon.InstallAll ();
-    //Print per flow statistics
-  monitor->CheckForLostPackets ();
-  Ptr<Ipv4FlowClassifier> classifier = DynamicCast<Ipv4FlowClassifier> (flowmon.GetClassifier ());
-  std::map<FlowId, FlowMonitor::FlowStats> stats = monitor->GetFlowStats ();
-
-  AsciiTraceHelper asciiTHFlow;
-  Ptr<OutputStreamWrapper> flowStream = asciiTHFlow.CreateFileStream ("lte01.txt");
-  for (std::map<FlowId, FlowMonitor::FlowStats>::const_iterator i = stats.begin (); i != stats.end (); ++i)
-    {
-          Ipv4FlowClassifier::FiveTuple t = classifier->FindFlow (i->first);
-          *flowStream->GetStream () << " Flow " << i->first << " (" << t.sourceAddress << " -> " << t.destinationAddress << ")" << std::endl;
-          *flowStream->GetStream () << " First packet time: " << i->second.timeFirstRxPacket << std::endl;
-          *flowStream->GetStream () << " Tx Packets: " << i->second.txPackets << std::endl;
-          *flowStream->GetStream () << " Rx Packets: " << i->second.rxPackets << std::endl;
-          uint32_t dropes = 0;
-           for (uint32_t reasonCode = 0; reasonCode < i->second.packetsDropped.size (); reasonCode++)
-           {
-        	   dropes+= i->second.packetsDropped[reasonCode];
-           }
-           *flowStream->GetStream () << " Drop packets: " << dropes << std::endl;
-    }
-
-  for (uint32_t u = 0; u < ueNodes.GetN(); u++)
-  {
-	  Ptr<PacketSink> sink1 = DynamicCast<PacketSink> (serverApps.Get (u));
-	  *flowStream->GetStream () << "Total Bytes Received by sink packet #"<< u << ":" << sink1->GetTotalRx () << std::endl;
-	  std::cout << "Total Bytes Received by sink packet #"<< u << ":" << sink1->GetTotalRx () << std::endl;
-  }
-
 
   // Run simulation
   Simulator::Stop(Seconds(simTime));
