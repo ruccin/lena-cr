@@ -180,6 +180,8 @@ main (int argc, char *argv[])
   address.SetBase ("192.168.1.0", "255.255.255.0");
   Ipv4InterfaceContainer StaInterfaceA;
   StaInterfaceA = address.Assign (staDeviceA);
+  Ipv4InterfaceContainer ApInterfaceA;
+  ApInterfaceA = address.Assign (apDeviceA);
 
   // Install and start applications on UEs and remote host
   uint16_t dlPort = 1234;
