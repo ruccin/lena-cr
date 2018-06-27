@@ -343,8 +343,8 @@ main (int argc, char *argv[])
 
   // Enable PCAP traces
   p2ph.EnablePcapAll ("lte-pmipv6-p2p");
-  epcHelper->EnablePcap ("lte-pmipv6", ueLteDev);
-  epcHelper->EnablePcap ("lte-pmipv6", enbLteDev);
+  epcHelper->EnablePcap ("lte-pmipv6-ue", ueLteDev);
+  epcHelper->EnablePcap ("lte-pmipv6-enb", enbLteDev);
   wifiPhy.EnablePcap ("lte-pmipv6-wifi", wifiApDev);
 
   // Add IP traces to all nodes.
