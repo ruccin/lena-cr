@@ -253,6 +253,7 @@ main (int argc, char *argv[])
 //End Set of Lte
 
 //Start Set of WiF
+/*
   Config::SetDefault ("ns3::WifiRemoteStationManager::FragmentationThreshold", StringValue ("2200"));
   Config::SetDefault ("ns3::WifiRemoteStationManager::RtsCtsThreshold", StringValue ("2200"));
   Config::SetDefault ("ns3::WifiRemoteStationManager::NonUnicastMode",
@@ -280,21 +281,31 @@ main (int argc, char *argv[])
   wifiHelper.SetRemoteStationManager ("ns3::ConstantRateWifiManager",
                                       "DataMode", StringValue ("DsssRate1Mbps"),
                                       "ControlMode", StringValue ("DsssRate1Mbps"));
+  */
+  YansWifiChannelHelper channel = YansWifiChannelHelper::Default ();
+  YansWifiPhyHelper phy = YansWifiPhyHelper::Default ();
+  phy.SetPcapDataLinkType (WifiPhyHelper::DLT_IEEE802_11_RADIO);
+  phy.SetChannel (channel.Create ());
+
+  WifiHelper wifi;
+  wifi.SetStandard (WIFI_PHY_STANDARD_80211n_5GHZ);
+  wifi.SetRemoteStationManager ("ns3::ConstantRateWifiManager", "DataMode", StringValue ("HtMcs7"), "ControlMode", StringValue ("HtMcs0"));
+  WifiMacHelper mac;
   // Set of Ap
   Ssid ssid = Ssid ("network");
-  wifiPhy.Set ("ChannelNumber", UintegerValue (36));
-  wifiMac.SetType ("ns3::ApWifiMac",
+  phy.Set ("ChannelNumber", UintegerValue (36));
+  mac.SetType ("ns3::ApWifiMac",
                    "Ssid", SsidValue (ssid));
   
   NetDeviceContainer apDevices;
-  apDevices = wifiHelper.Install (wifiPhy, wifiMac, ueNodes);
+  apDevices = wifiHelper.Install (phy, mac, ueNodes);
 
   // Set of Sta
-  wifiMac.SetType ("ns3::StaWifiMac",
+  mac.SetType ("ns3::StaWifiMac",
                    "Ssid", SsidValue (ssid));
 
   NetDeviceContainer staDevices;
-  staDevices = wifiHelper.Install (wifiPhy, wifiMac, staNodes);
+  staDevices = wifiHelper.Install (phy, mac, staNodes);
 
   internet_olsr.Install (staNodes);
 
@@ -328,7 +339,7 @@ main (int argc, char *argv[])
   UdpServerHelper rhserver (81);
   serverApps.Add (rhserver.Install (remoteHost));
 
-  serverApps.Start (Seconds (1));
+  serverApps.Start (Seconds (0.1));
   serverApps.Stop (Seconds (simTime));
 
   UdpClientHelper wificlient (ueIpIface.GetAddress (0), 80);
@@ -337,7 +348,10 @@ main (int argc, char *argv[])
   wificlient.SetAttribute ("PacketSize", UintegerValue (payloadSize));
   clientApps.Add (wificlient.Install (staNodes));
 
-  clientApps.Start (Seconds (1));
+  clientApps.Start (Seconds (0.1));
+
+
+
   clientApps.Stop (Seconds (6.0));
 
   UdpClientHelper uclient (internetIpIfaces.GetAddress (1), 81);
@@ -350,7 +364,7 @@ main (int argc, char *argv[])
   clientApps.Stop (Seconds (simTime));
 
 //
-
+/*
   TypeId tid = TypeId::LookupByName ("ns3::UdpSocketFactory");
   Ptr<Socket> recvSink = Socket::CreateSocket (ueNodes.Get (0), tid);
   InetSocketAddress local = InetSocketAddress (Ipv4Address::GetAny (), 80);
@@ -380,7 +394,7 @@ main (int argc, char *argv[])
   Ptr<Ipv4StaticRouting> hnaEntries = Create<Ipv4StaticRouting> ();
   hnaEntries->AddNetworkRouteTo (Ipv4Address ("7.0.0.0"), Ipv4Mask ("255.0.0.0"), 1);
   olsrrp_Gw->SetRoutingTableAssociation (hnaEntries);
-  
+*/  
   uint64_t totalPacketsThrough = DynamicCast<UdpServer> (serverApps.Get (0))->GetReceived ();
   double throughput = totalPacketsThrough * payloadSize * 8 / (simTime * 1000000.0);
   std::cout << "Throughput: " << throughput << " Mbit/s" << '\n';
@@ -482,7 +496,7 @@ main (int argc, char *argv[])
   wifiPhy.EnablePcap ("olsr-hna-sta", staDevices);
   wifiPhy.EnablePcap ("olsr-hna-ap", apDevices);
 
-  Simulator::ScheduleWithContext (source->GetNode ()->GetId (), Seconds (20.0), &GenerateTraffic, source, packetSize, numPackets, interPacketInterval);
+  //Simulator::ScheduleWithContext (source->GetNode ()->GetId (), Seconds (20.0), &GenerateTraffic, source, packetSize, numPackets, interPacketInterval);
   Simulator::Stop(Seconds(simTime));
   //Simulator::Schedule(Seconds(1.0), monitor);
   Simulator::Run();
