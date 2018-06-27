@@ -227,6 +227,10 @@ main (int argc, char *argv[])
   // Uncomment to enable PCAP tracing
   //p2ph.EnablePcapAll("lena-epc-first");
 
+  uint64_t totalPacketsThrough = DynamicCast<PacketSink> (serverApps.Get (0))->GetReceived ();
+  double throughput = totalPacketsThrough * payloadSize * 8 / (simTime * 1000000.0);
+  std::cout << "Throughput: " << throughput << " Mbit/s" << '\n';
+
   Simulator::Stop(Seconds(simTime));
   Simulator::Run();
 
