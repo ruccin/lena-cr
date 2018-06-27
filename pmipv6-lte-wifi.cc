@@ -130,18 +130,6 @@ void InstallApplications (Args args)
   Config::Connect ("/NodeList/*/ApplicationList/*/$ns3::PacketSink/Rx", MakeCallback(&PacketSinkRxTrace));
   serverApps.Start (Seconds (1));
   clientApps.Start (Seconds (1));
-
-  FlowMonitorHelper flowmon;
-  Ptr<FlowMonitor> monitor = flowmon.InstallAll ();
-
-
-  //Print per flow statistics
-  monitor->CheckForLostPackets ();
-  Ptr<Ipv4FlowClassifier> classifier = DynamicCast<Ipv4FlowClassifier> (flowmon.GetClassifier ());
-  std::map<FlowId, FlowMonitor::FlowStats> stats = monitor->GetFlowStats ();
-
-  AsciiTraceHelper asciiTHFlow;
-  Ptr<OutputStreamWrapper> flowStream = asciiTHFlow.CreateFileStream ("lte01.txt");
 /*
   for (std::map<FlowId, FlowMonitor::FlowStats>::const_iterator i = stats.begin (); i != stats.end (); ++i)
     {
@@ -410,6 +398,17 @@ main (int argc, char *argv[])
   PrintNodesInfo (epcHelper, nodes);
   // Schedule print information
   Simulator::Schedule (Seconds (23), &PrintNodesInfo, epcHelper, nodes);
+
+  FlowMonitorHelper flowmon;
+  Ptr<FlowMonitor> monitor = flowmon.InstallAll ();
+
+  //Print per flow statistics
+  monitor->CheckForLostPackets ();
+  Ptr<Ipv4FlowClassifier> classifier = DynamicCast<Ipv4FlowClassifier> (flowmon.GetClassifier ());
+  std::map<FlowId, FlowMonitor::FlowStats> stats = monitor->GetFlowStats ();
+
+  AsciiTraceHelper asciiTHFlow;
+  Ptr<OutputStreamWrapper> flowStream = asciiTHFlow.CreateFileStream ("lte01.txt");
 
   // Run simulation
   Simulator::Stop(Seconds(simTime));
