@@ -243,11 +243,11 @@ main (int argc, char *argv[])
   MobilityHelper mobility;
   mobility.SetMobilityModel ("ns3::ConstantPositionMobilityModel");
   Ptr<ListPositionAllocator> enbPositionAlloc = CreateObject<ListPositionAllocator> ();
-  enbPositionAlloc->Add (Vector(0, 0, 0));
+  enbPositionAlloc->Add (Vector(4000, 0, 0));
   mobility.SetPositionAllocator (enbPositionAlloc);
   mobility.Install (enbNode);
   Ptr<ListPositionAllocator> uePositionAlloc = CreateObject<ListPositionAllocator> ();
-  uePositionAlloc->Add (Vector (0, 20, 0));
+  uePositionAlloc->Add (Vector (0, 0, 0));
   mobility.SetPositionAllocator (uePositionAlloc);
   mobility.Install (ueNode);
 
@@ -318,7 +318,7 @@ main (int argc, char *argv[])
 
   // Install mobility model on AP.
   Ptr<ListPositionAllocator> wifiApPositionAlloc = CreateObject<ListPositionAllocator> ();
-  wifiApPositionAlloc->Add (Vector(20, 0, 0));
+  wifiApPositionAlloc->Add (Vector(2000, 0, 0));
   mobility.SetMobilityModel ("ns3::ConstantPositionMobilityModel");
   mobility.SetPositionAllocator (wifiApPositionAlloc);
   mobility.Install (wifiAp);
