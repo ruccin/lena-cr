@@ -298,14 +298,14 @@ main (int argc, char *argv[])
                    "Ssid", SsidValue (ssid));
   
   NetDeviceContainer apDevices;
-  apDevices = wifiHelper.Install (phy, mac, ueNodes);
+  apDevices = wifi.Install (phy, mac, ueNodes);
 
   // Set of Sta
   mac.SetType ("ns3::StaWifiMac",
                    "Ssid", SsidValue (ssid));
 
   NetDeviceContainer staDevices;
-  staDevices = wifiHelper.Install (phy, mac, staNodes);
+  staDevices = wifi.Install (phy, mac, staNodes);
 
   internet_olsr.Install (staNodes);
 
