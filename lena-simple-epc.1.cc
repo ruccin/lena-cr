@@ -47,9 +47,10 @@ main (int argc, char *argv[])
 {
 
   uint16_t numberOfNodes = 2;
+  uint16_t numberOfANodes = 1;
   uint16_t numberOfSNodes = 1;
   uint32_t payloadSize = 1472;
-  double simTime = 1.1;
+  double simTime = 12;
   double distance = 60.0;
   double interPacketInterval = 100;
   bool useCa = false;
@@ -99,7 +100,7 @@ main (int argc, char *argv[])
   ipv4h.SetBase ("1.0.0.0", "255.0.0.0");
   Ipv4InterfaceContainer internetIpIfaces = ipv4h.Assign (internetDevices);
   // interface 0 is localhost, 1 is the p2p device
-  //Ipv4Address remoteHostAddr = internetIpIfaces.GetAddress (1);
+  Ipv4Address remoteHostAddr = internetIpIfaces.GetAddress (1);
 
   Ipv4StaticRoutingHelper ipv4RoutingHelper;
   Ptr<Ipv4StaticRouting> remoteHostStaticRouting = ipv4RoutingHelper.GetStaticRouting (remoteHost->GetObject<Ipv4> ());
@@ -108,13 +109,15 @@ main (int argc, char *argv[])
   NodeContainer ueNodes;
   NodeContainer enbNodes;
   NodeContainer staNodes;
+  NodeContainer apNodes;
   enbNodes.Create(numberOfNodes);
   ueNodes.Create(numberOfNodes);
   staNodes.Create(numberOfSNodes);
+  apNodes.Create(numberOfANodes);
 
   // Install Mobility Model
   Ptr<ListPositionAllocator> positionAlloc = CreateObject<ListPositionAllocator> ();
-  for (uint16_t i = 0; i < numberOfNodes; i++)
+  for (uint16_t i = 0; i < 4; i++)
     {
       positionAlloc->Add (Vector(distance * i, 0, 0));
     }
@@ -123,6 +126,7 @@ main (int argc, char *argv[])
   mobility.SetPositionAllocator(positionAlloc);
   mobility.Install(enbNodes);
   mobility.Install(ueNodes);
+  mobility.Install(apNodes);
   mobility.Install(staNodes);
 
   // Install LTE Devices to the nodes
@@ -171,17 +175,26 @@ main (int argc, char *argv[])
   mac.SetType ("ns3::ApWifiMac",
                "Ssid", SsidValue (ssid),
                "EnableBeaconJitter", BooleanValue (false));
-  apDeviceA = wifi.Install (phy, mac, ueNodes.Get (0));
+  apDeviceA = wifi.Install (phy, mac, apNodes.Get (0));
 
   InternetStackHelper stack;
   stack.Install (staNodes);
 
   Ipv4AddressHelper address;
-  address.SetBase ("192.168.1.0", "255.255.255.0");
+  address.SetBase ("3.0.0.0", "255.0.0.0");
   Ipv4InterfaceContainer StaInterfaceA;
   StaInterfaceA = address.Assign (staDeviceA);
   Ipv4InterfaceContainer ApInterfaceA;
   ApInterfaceA = address.Assign (apDeviceA);
+
+  PointToPointHelper p2pw;
+  p2pw.SetDeviceAttribute ("DataRate", DataRateValue (DataRate ("100Gb/s")));
+  p2pw.SetDeviceAttribute ("Mtu", UintegerValue (1500));
+  p2pw.SetChannelAttribute ("Delay", TimeValue (Seconds (0.010)));
+  NetDeviceContainer wDevices = p2pw.Install (apNodes, ueNodes);
+  Ipv4AddressHelper ipv4w;
+  ipv4w.SetBase ("5.0.0.0", "255.0.0.0");
+  Ipv4InterfaceContainer wIpIfaces = ipv4h.Assign (wDevices);
 
   // Install and start applications on UEs and remote host
   uint16_t dlPort = 1234;
@@ -198,17 +211,27 @@ main (int argc, char *argv[])
       //PacketSinkHelper packetSinkHelper ("ns3::UdpSocketFactory", InetSocketAddress (Ipv4Address::GetAny (), otherPort));
 
       UdpServerHelper dlServer (dlPort);
+      UdpServerHelper wlServer (80);
       UdpServerHelper ulServer (ulPort);
+
       serverApps.Add (dlServer.Install (ueNodes.Get(u)));
+      serverApps.Add (wlServer.Install (apNodes.Get (0)));
       serverApps.Add (ulServer.Install (staNodes.Get(0)));
       //serverApps.Add (packetSinkHelper.Install (staNodes.Get(0)));
+
+      serverApps.Start (Seconds (1.0));
+      serverApps.Stop (Seconds (simTime));
+
+      UdpClientHelper wlClient (wIpIfaces.GetAddress (0), 80);
+      wlClient.SetAttribute ("Interval", TimeValue (MilliSeconds(interPacketInterval)));
+      wlClient.SetAttribute ("MaxPackets", UintegerValue(1000000));
 
       UdpClientHelper dlClient (ueIpIface.GetAddress (u), dlPort);
       dlClient.SetAttribute ("Interval", TimeValue (MilliSeconds(interPacketInterval)));
       dlClient.SetAttribute ("MaxPackets", UintegerValue(1000000));
       dlClient.SetAttribute ("PacketSize", UintegerValue (payloadSize));
 
-      UdpClientHelper ulClient (StaInterfaceA.GetAddress (0), ulPort);
+      UdpClientHelper ulClient (remoteHostAddr, ulPort);
       ulClient.SetAttribute ("Interval", TimeValue (MilliSeconds(interPacketInterval)));
       ulClient.SetAttribute ("MaxPackets", UintegerValue(1000000));
 
@@ -216,8 +239,20 @@ main (int argc, char *argv[])
       //client.SetAttribute ("Interval", TimeValue (MilliSeconds(interPacketInterval)));
       //client.SetAttribute ("MaxPackets", UintegerValue(1000000));
 
-      clientApps.Add (dlClient.Install (staNodes.Get(0)));
+      clientApps.Add (wlClient.Install (staNodes.Get(0)));
+
+      clientApps.Start (Seconds (1.0));
+      clientApps.Stop (Seconds (4.0));
+
+      clientApps.Add (dlClient.Install (apNodes.Get(0)));
+
+      clientApps.Start (Seconds (4.1));
+      clientApps.Stop (Seconds (8.0));
+
       clientApps.Add (ulClient.Install (ueNodes.Get(u)));
+
+      clientApps.Start (Seconds (8.1));
+      clientApps.Stop (Seconds (simTime));
       /*
       if (u+1 < ueNodes.GetN ())
         {
@@ -230,8 +265,7 @@ main (int argc, char *argv[])
       */
     }
     
-  serverApps.Start (Seconds (0.01));
-  clientApps.Start (Seconds (0.01));
+
   lteHelper->EnableTraces ();
   // Uncomment to enable PCAP tracing
   //p2ph.EnablePcapAll("lena-epc-first");
