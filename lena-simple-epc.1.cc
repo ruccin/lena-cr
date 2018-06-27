@@ -117,10 +117,12 @@ main (int argc, char *argv[])
 
   // Install Mobility Model
   Ptr<ListPositionAllocator> positionAlloc = CreateObject<ListPositionAllocator> ();
-  for (uint16_t i = 0; i < 4; i++)
-    {
-      positionAlloc->Add (Vector(distance * i, 0, 0));
-    }
+
+  positionAlloc->Add (Vector(distance * 5, 0, 0));
+  positionAlloc->Add (Vector(distance * 3, 0, 0));
+  positionAlloc->Add (Vector(distance * 3, 0, 0));
+  positionAlloc->Add (Vector(distance * 1, 0, 0));
+
   MobilityHelper mobility;
   mobility.SetMobilityModel("ns3::ConstantPositionMobilityModel");
   mobility.SetPositionAllocator(positionAlloc);
