@@ -89,8 +89,8 @@ void TotalRx (ApplicationContainer Apps)
 {
   Ptr<PacketSink> sink = DynamicCast<PacketSink> (Apps.Get (1));
   uint64_t totalRecvPacket = sink->GetTotalRx ();
-  std::cout << "Total Bytes Received by sink packet :" << totalRecvPacket << std::endl;
-}
+  NS_LOG_UNCOND ("Total Bytes Received by sink packet :" << totalRecvPacket);
+
 /*
 void Throughput ()
 {
@@ -137,6 +137,8 @@ void InstallApplications (Args args)
   Config::Connect ("/NodeList/*/ApplicationList/*/$ns3::PacketSink/Rx", MakeCallback(&PacketSinkRxTrace));
   serverApps.Start (Seconds (1));
   clientApps.Start (Seconds (1));
+
+  NS_LOG_UNCOND (TotalRx(serverApps));
 }
 
 void PrintNodesInfo (Ptr<PointToPointEpc6Pmipv6Helper> epcHelper, NodeContainer nodes)
