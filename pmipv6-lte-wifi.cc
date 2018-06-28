@@ -381,7 +381,7 @@ main (int argc, char *argv[])
   // Flow Monitor
   FlowMonitorHelper flowmon;
   Ptr<FlowMonitor> monitor = flowmon.Install (args.ueNode);
-  monitor.Add (flowmon.Install (args.remoteHost));
+  //monitor flowmon.Install (args.remoteHost);
 
   std::map<FlowId, FlowMonitor::FlowStats> stats = monitor->GetFlowStats ();
 
