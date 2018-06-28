@@ -90,7 +90,7 @@ void TotalRx (ApplicationContainer Apps)
   Ptr<PacketSink> sink = DynamicCast<PacketSink> (Apps.Get (1));
   uint64_t totalRecvPacket = sink->GetTotalRx ();
   NS_LOG_UNCOND ("Total Bytes Received by sink packet :" << totalRecvPacket);
-
+}
 /*
 void Throughput ()
 {
