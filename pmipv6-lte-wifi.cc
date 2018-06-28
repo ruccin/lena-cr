@@ -30,6 +30,7 @@
 #include "ns3/csma-module.h"
 #include "ns3/wifi-module.h"
 #include "ns3/bridge-module.h"
+#include "ns3/flow-monitor-module.h"
 
 using namespace ns3;
 
@@ -90,6 +91,15 @@ void PacketSinkRxTrace (std::string context, Ptr<const Packet> packet, const Add
   NS_LOG_UNCOND (context << " " << seqTs.GetTs () << "->" << Simulator::Now() << ": " << seqTs.GetSeq());
 }
 
+void TotalRx (ApplicationContainer Apps)
+{
+  Ptr<PacketSink> sink = DynamicCast<PacketSink> (Apps.Get ());
+  uint64_t totalRecvPacket = sink->GetTotalRx ();
+  double throughput = totalRecvPacket * 1024 * 8 / (simTime);
+  std::cout << "Total Bytes Received by sink packet :" << totalRecvPacket << std::endl;
+  std::cout << "Throughput :" <<  throughput << std::endl;
+}
+
 struct Args
 {
   Ptr<Node> ueNode;
@@ -129,6 +139,8 @@ void InstallApplications (Args args)
   Config::Connect ("/NodeList/*/ApplicationList/*/$ns3::PacketSink/Rx", MakeCallback(&PacketSinkRxTrace));
   serverApps.Start (Seconds (1));
   clientApps.Start (Seconds (1));
+
+  TotalRx(serverApps);
 }
 
 void PrintNodesInfo (Ptr<PointToPointEpc6Pmipv6Helper> epcHelper, NodeContainer nodes)
@@ -262,7 +274,6 @@ main (int argc, char *argv[])
   ueIpIface = epcHelper->AssignWithoutAddress (ueLteDev);
 
   // Attach UE to eNB
-  // side effect: the default EPS bearer will be activated
   lteHelper->Attach (ueLteDev, enbLteDev, false);
 
   // Setup Wifi network
@@ -343,8 +354,8 @@ main (int argc, char *argv[])
 
   // Enable PCAP traces
   p2ph.EnablePcapAll ("lte-pmipv6-p2p");
-  epcHelper->EnablePcap ("lte-pmipv6-ue", ueLteDev);
-  epcHelper->EnablePcap ("lte-pmipv6-enb", enbLteDev);
+  epcHelper->EnablePcap ("lte-pmipv6", ueLteDev);
+  epcHelper->EnablePcap ("lte-pmipv6", enbLteDev);
   wifiPhy.EnablePcap ("lte-pmipv6-wifi", wifiApDev);
 
   // Add IP traces to all nodes.
@@ -362,6 +373,14 @@ main (int argc, char *argv[])
   args.maxPackets = maxPackets;
   args.remoteHostAddr = remoteHostAddr;
   Simulator::Schedule (Seconds (10), &InstallApplications, args);
+
+  // Flow Monitor
+  FlowMonitorHelper flowmon;
+  Ptr<FlowMonitor> monitor;
+  monitor.Install (args.ueNode);
+  monitor.Install (args.remoteHost);
+
+  std::map<FlowId, FlowMonitor::FlowStats> stats = monitor->GetFlowStats ();
 
   // Print Information
   NodeContainer nodes;
