@@ -138,7 +138,7 @@ void InstallApplications (Args args)
   serverApps.Start (Seconds (1));
   clientApps.Start (Seconds (1));
 
-  NS_LOG_UNCOND (TotalRx(serverApps));
+  TotalRx(serverApps);
 }
 
 void PrintNodesInfo (Ptr<PointToPointEpc6Pmipv6Helper> epcHelper, NodeContainer nodes)
