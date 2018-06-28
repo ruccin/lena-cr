@@ -93,13 +93,17 @@ void PacketSinkRxTrace (std::string context, Ptr<const Packet> packet, const Add
 
 void TotalRx (ApplicationContainer Apps)
 {
-  Ptr<PacketSink> sink = DynamicCast<PacketSink> (Apps.Get ());
+  Ptr<PacketSink> sink = DynamicCast<PacketSink> (Apps.Get (0));
   uint64_t totalRecvPacket = sink->GetTotalRx ();
-  double throughput = totalRecvPacket * 1024 * 8 / (simTime);
   std::cout << "Total Bytes Received by sink packet :" << totalRecvPacket << std::endl;
+}
+/*
+void Throughput ()
+{
+  double throughput = totalRecvPacket * 1024 * 8 / (simTime);
   std::cout << "Throughput :" <<  throughput << std::endl;
 }
-
+*/
 struct Args
 {
   Ptr<Node> ueNode;
@@ -376,9 +380,8 @@ main (int argc, char *argv[])
 
   // Flow Monitor
   FlowMonitorHelper flowmon;
-  Ptr<FlowMonitor> monitor;
-  monitor.Install (args.ueNode);
-  monitor.Install (args.remoteHost);
+  Ptr<FlowMonitor> monitor = flowmon.Install (args.ueNode);
+  monitor.Add (flowmon.Install (args.remoteHost));
 
   std::map<FlowId, FlowMonitor::FlowStats> stats = monitor->GetFlowStats ();
 
