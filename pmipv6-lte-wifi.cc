@@ -384,6 +384,7 @@ main (int argc, char *argv[])
   //monitor flowmon.Install (args.remoteHost);
 
   std::map<FlowId, FlowMonitor::FlowStats> stats = monitor->GetFlowStats ();
+  monitor->SerializeToXmlFile ("flowmon.xml", true, true);
 
   // Print Information
   NodeContainer nodes;
