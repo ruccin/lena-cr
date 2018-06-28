@@ -30,15 +30,9 @@
 #include "ns3/csma-module.h"
 #include "ns3/wifi-module.h"
 #include "ns3/bridge-module.h"
-#include "ns3/flow-monitor-module.h"
 
 using namespace ns3;
 
-/**
- * Sample simulation script for LTE+EPC. It instantiates several eNodeB,
- * attaches one UE per eNodeB starts a flow for each UE to  and from a remote host.
- * It also  starts yet another flow between each UE pair.
- */
 NS_LOG_COMPONENT_DEFINE ("LenaPmipv6");
 
 void PrintCompleteNodeInfo(Ptr<Node> node)
@@ -375,15 +369,6 @@ main (int argc, char *argv[])
   args.maxPackets = maxPackets;
   args.remoteHostAddr = remoteHostAddr;
   Simulator::Schedule (Seconds (10), &InstallApplications, args);
-  Simulator::Schedule (Seconds (19), &TotalRx (&InstallApplications->serverApps));
-
-  // Flow Monitor
-  FlowMonitorHelper flowmon;
-  Ptr<FlowMonitor> monitor = flowmon.Install (args.remoteHost);
-  //monitor flowmon.Install (args.remoteHost);
-
-  std::map<FlowId, FlowMonitor::FlowStats> stats = monitor->GetFlowStats ();
-  monitor->SerializeToXmlFile ("flowmon.xml", true, true);
 
   // Print Information
   NodeContainer nodes;
