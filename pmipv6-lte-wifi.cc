@@ -143,8 +143,6 @@ void InstallApplications (Args args)
   Config::Connect ("/NodeList/*/ApplicationList/*/$ns3::PacketSink/Rx", MakeCallback(&PacketSinkRxTrace));
   serverApps.Start (Seconds (1));
   clientApps.Start (Seconds (1));
-
-  TotalRx(serverApps);
 }
 
 void PrintNodesInfo (Ptr<PointToPointEpc6Pmipv6Helper> epcHelper, NodeContainer nodes)
@@ -377,6 +375,7 @@ main (int argc, char *argv[])
   args.maxPackets = maxPackets;
   args.remoteHostAddr = remoteHostAddr;
   Simulator::Schedule (Seconds (10), &InstallApplications, args);
+  Simulator::Schedule (Seconds (19), &TotalRx (&InstallApplications.serverApps));
 
   // Flow Monitor
   FlowMonitorHelper flowmon;
