@@ -93,7 +93,7 @@ void PacketSinkRxTrace (std::string context, Ptr<const Packet> packet, const Add
 
 void TotalRx (ApplicationContainer Apps)
 {
-  Ptr<PacketSink> sink = DynamicCast<PacketSink> (Apps.Get (0));
+  Ptr<PacketSink> sink = DynamicCast<PacketSink> (Apps.Get (1));
   uint64_t totalRecvPacket = sink->GetTotalRx ();
   std::cout << "Total Bytes Received by sink packet :" << totalRecvPacket << std::endl;
 }
