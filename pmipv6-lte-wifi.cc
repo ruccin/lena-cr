@@ -375,7 +375,7 @@ main (int argc, char *argv[])
   args.maxPackets = maxPackets;
   args.remoteHostAddr = remoteHostAddr;
   Simulator::Schedule (Seconds (10), &InstallApplications, args);
-  Simulator::Schedule (Seconds (19), &TotalRx (&InstallApplications.serverApps));
+  Simulator::Schedule (Seconds (19), &TotalRx (&InstallApplications->serverApps));
 
   // Flow Monitor
   FlowMonitorHelper flowmon;
