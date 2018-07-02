@@ -85,19 +85,17 @@ void PacketSinkRxTrace (std::string context, Ptr<const Packet> packet, const Add
   NS_LOG_UNCOND (context << " " << seqTs.GetTs () << "->" << Simulator::Now() << ": " << seqTs.GetSeq());
 }
 
-void TotalRx (ApplicationContainer Apps)
+void Throughput (ApplicationContainer Apps)
 {
+  // Throughput of RH
   Ptr<PacketSink> sink = DynamicCast<PacketSink> (Apps.Get (1));
   uint64_t totalRecvPacket = sink->GetTotalRx ();
   NS_LOG_UNCOND ("Total Bytes Received by sink packet :" << totalRecvPacket);
+  
+  double throughput = (totalRecvPacket * 1024 * 8) / Simulator::Now();
+  NS_LOG_UNCOND ("Throughput :" <<  throughput);
 }
-/*
-void Throughput ()
-{
-  double throughput = totalRecvPacket * 1024 * 8 / (simTime);
-  std::cout << "Throughput :" <<  throughput << std::endl;
-}
-*/
+
 struct Args
 {
   Ptr<Node> ueNode;
@@ -137,8 +135,6 @@ void InstallApplications (Args args)
   Config::Connect ("/NodeList/*/ApplicationList/*/$ns3::PacketSink/Rx", MakeCallback(&PacketSinkRxTrace));
   serverApps.Start (Seconds (1));
   clientApps.Start (Seconds (1));
-
-  TotalRx(serverApps);
 }
 
 void PrintNodesInfo (Ptr<PointToPointEpc6Pmipv6Helper> epcHelper, NodeContainer nodes)
@@ -382,6 +378,7 @@ main (int argc, char *argv[])
   PrintNodesInfo (epcHelper, nodes);
   // Schedule print information
   Simulator::Schedule (Seconds (23), &PrintNodesInfo, epcHelper, nodes);
+  Simulator::Schedule (Seconds (23), MakeCallback(&Throughput));
 
   // Run simulation
   Simulator::Stop(Seconds(simTime));
