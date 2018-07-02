@@ -91,9 +91,11 @@ void LteThroughput (ApplicationContainer Apps)
   Ptr<PacketSink> sink = DynamicCast<PacketSink> (Apps.Get (1));
   uint64_t totalRecvPacket = sink->GetTotalRx ();
   NS_LOG_UNCOND ("Total Bytes Received by sink packet :" << totalRecvPacket);
+  NS_LOG_DEBUG ("DEBUG, Total Bytes Received by sink packet :" << totalRecvPacket);
   
-  double throughput = (totalRecvPacket * 1024 * 8) / 23;
+  double throughput = (totalRecvPacket * 1024 * 8) / 20;
   NS_LOG_UNCOND ("Throughput :" <<  throughput);
+  NS_LOG_DEBUG ("DEBUG, Throughput :" <<  throughput);
 }
 
 struct Args
