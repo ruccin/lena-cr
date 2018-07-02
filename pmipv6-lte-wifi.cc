@@ -378,7 +378,7 @@ main (int argc, char *argv[])
   PrintNodesInfo (epcHelper, nodes);
   // Schedule print information
   Simulator::Schedule (Seconds (23), &PrintNodesInfo, epcHelper, nodes);
-  Simulator::Schedule (Seconds (23), MakeCallback(&Throughput));
+  Simulator::Schedule (Seconds (23), MakeCallback(&LteThroughput));
 
   // Run simulation
   Simulator::Stop(Seconds(simTime));
