@@ -85,14 +85,14 @@ void PacketSinkRxTrace (std::string context, Ptr<const Packet> packet, const Add
   NS_LOG_UNCOND (context << " " << seqTs.GetTs () << "->" << Simulator::Now() << ": " << seqTs.GetSeq());
 }
 
-void Throughput (ApplicationContainer Apps)
+void LteThroughput (ApplicationContainer Apps)
 {
   // Throughput of RH
   Ptr<PacketSink> sink = DynamicCast<PacketSink> (Apps.Get (1));
   uint64_t totalRecvPacket = sink->GetTotalRx ();
   NS_LOG_UNCOND ("Total Bytes Received by sink packet :" << totalRecvPacket);
   
-  double throughput = (totalRecvPacket * 1024 * 8) / Simulator::Now();
+  double throughput = (totalRecvPacket * 1024 * 8) / uint8_t 23;
   NS_LOG_UNCOND ("Throughput :" <<  throughput);
 }
 
