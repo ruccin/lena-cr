@@ -134,8 +134,8 @@ void InstallApplications (Args args)
   clientApps.Add (ulClient.Install (args.ueNode));
   Config::Connect ("/NodeList/*/ApplicationList/*/$ns3::PacketSink/Rx", MakeCallback(&PacketSinkRxTrace));
   //Simulator::Schedule (Seconds (23), Config::Connect ("LTE Throughput:: ", MakeCallback(&LteThroughput)));
-  Simulator::Schedule (Seconds (23), &LteThroughput, serverApps);
-  
+  Simulator::Schedule (Seconds (20), &LteThroughput, serverApps);
+
   serverApps.Start (Seconds (1));
   clientApps.Start (Seconds (1));
 }
@@ -335,7 +335,7 @@ main (int argc, char *argv[])
   wifiMac.SetType ("ns3::StaWifiMac",
                    "Ssid", SsidValue (ssid),
                    "ActiveProbing", BooleanValue (false));
-  Simulator::Schedule (Seconds (20), &InstallWifi, wifi, wifiPhy, wifiMac, ueNode, ueLteDev->GetAddress ());
+  Simulator::Schedule (Seconds (20.1), &InstallWifi, wifi, wifiPhy, wifiMac, ueNode, ueLteDev->GetAddress ());
 
   // Add Wifi Mag functionality to WifiMag node.
   Pmipv6MagHelper magHelper;
