@@ -133,6 +133,7 @@ void InstallApplications (Args args)
   clientApps.Add (dlClient.Install (args.remoteHost));
   clientApps.Add (ulClient.Install (args.ueNode));
   Config::Connect ("/NodeList/*/ApplicationList/*/$ns3::PacketSink/Rx", MakeCallback(&PacketSinkRxTrace));
+  Simulator::Schedule (Seconds (23), Config::Connect ("LTE Throughput:: ", MakeCallback(&LteThroughput)));
   serverApps.Start (Seconds (1));
   clientApps.Start (Seconds (1));
 }
@@ -378,7 +379,6 @@ main (int argc, char *argv[])
   PrintNodesInfo (epcHelper, nodes);
   // Schedule print information
   Simulator::Schedule (Seconds (23), &PrintNodesInfo, epcHelper, nodes);
-  Simulator::Schedule (Seconds (23), MakeCallback(&LteThroughput));
 
   // Run simulation
   Simulator::Stop(Seconds(simTime));
