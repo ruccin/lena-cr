@@ -92,7 +92,7 @@ void LteThroughput (ApplicationContainer Apps)
   uint64_t totalRecvPacket = sink->GetTotalRx ();
   NS_LOG_UNCOND ("Total Bytes Received by sink packet :" << totalRecvPacket);
   
-  double throughput = (totalRecvPacket * 1024 * 8) / uint8_t 23;
+  double throughput = (totalRecvPacket * 1024 * 8) / 23;
   NS_LOG_UNCOND ("Throughput :" <<  throughput);
 }
 
