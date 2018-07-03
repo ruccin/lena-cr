@@ -35,6 +35,8 @@ using namespace ns3;
 
 NS_LOG_COMPONENT_DEFINE ("LenaPmipv6");
 
+
+
 void PrintCompleteNodeInfo(Ptr<Node> node)
 {
   int n_interfaces, n_ipaddrs, i, j;
@@ -63,7 +65,9 @@ void PrintCompleteNodeInfo(Ptr<Node> node)
 
 void RxTrace (std::string context, Ptr<const Packet> packet, Ptr<Ipv6> ipv6, uint32_t interfaceId)
 {
-  NS_LOG_DEBUG (context << " " << interfaceId);
+  Ipv6Header ipv6Header;
+  packet->PeekHeader (ipv6Header);
+  NS_LOG_DEBUG (context << " " << ipv6Header << " " << interfaceId);
 }
 
 void TxTrace (std::string context, Ptr<const Packet> packet, Ptr<Ipv6> ipv6, uint32_t interfaceId)
@@ -93,9 +97,17 @@ void LteThroughput (ApplicationContainer Apps)
   NS_LOG_UNCOND ("Total Bytes Received by sink packet :" << totalRecvPacket);
   NS_LOG_DEBUG ("DEBUG, Total Bytes Received by sink packet :" << totalRecvPacket);
   
-  double throughput = (totalRecvPacket * 1024 * 8) / 20;
+  double throughput;
+  throughput = (totalRecvPacket * 1024 * 8) / 20;
   NS_LOG_UNCOND ("Throughput :" <<  throughput);
   NS_LOG_DEBUG ("DEBUG, Throughput :" <<  throughput);
+}
+
+void 
+SetFlowMonitor (Ptr<FlowMonitor> monitor, FlowMonitorHelper& flowmon, double duration)
+{
+  monitor->CheckForLostPackets ();
+  
 }
 
 struct Args
@@ -135,8 +147,6 @@ void InstallApplications (Args args)
   clientApps.Add (dlClient.Install (args.remoteHost));
   clientApps.Add (ulClient.Install (args.ueNode));
   Config::Connect ("/NodeList/*/ApplicationList/*/$ns3::PacketSink/Rx", MakeCallback(&PacketSinkRxTrace));
-  //Simulator::Schedule (Seconds (23), Config::Connect ("LTE Throughput:: ", MakeCallback(&LteThroughput)));
-  Simulator::Schedule (Seconds (20), &LteThroughput, serverApps);
 
   serverApps.Start (Seconds (1));
   clientApps.Start (Seconds (1));
@@ -337,7 +347,7 @@ main (int argc, char *argv[])
   wifiMac.SetType ("ns3::StaWifiMac",
                    "Ssid", SsidValue (ssid),
                    "ActiveProbing", BooleanValue (false));
-  Simulator::Schedule (Seconds (20.1), &InstallWifi, wifi, wifiPhy, wifiMac, ueNode, ueLteDev->GetAddress ());
+  Simulator::Schedule (Seconds (20), &InstallWifi, wifi, wifiPhy, wifiMac, ueNode, ueLteDev->GetAddress ());
 
   // Add Wifi Mag functionality to WifiMag node.
   Pmipv6MagHelper magHelper;
