@@ -108,7 +108,30 @@ SetFlowMonitor (Ptr<FlowMonitor> monitor, FlowMonitorHelper& flowmon, double dur
 {
   monitor->CheckForLostPackets ();
   Ptr<Ipv6FlowClassifier> classifier = DynamicCast<Ipv6FlowClassifier> (flowmon.GetClassifier ());
-  FlowMonitor::FlowStatsContainer
+  FlowMonitor::FlowStatsContainer stats = monitor->GetFlowStats ();
+  for (std::map<FlowId, FlowMonitor::FlowStats>::const_iterator i = stats.begin (); i != stats.end (); ++i)
+  {
+    std::cout << "Flow " << i->first << " (" << t.sourceAddress << ":" << t.sourcePort << " -> " << t.destinationAddress << ":" << t.destinationPort << ") proto " << protoStream.str () << "\n";
+    std::cout << "  Tx Packets: " << i->second.txPackets << "\n";
+    std::cout << "  Tx Bytes:   " << i->second.txBytes << "\n";
+    std::cout << "  TxOffered:  " << i->second.txBytes * 8.0 / duration / 1000 / 1000  << " Mbps\n";
+    std::cout << "  Rx Bytes:   " << i->second.rxBytes << "\n";
+    if (i->second.rxPackets > 0)
+      {
+        // Measure the duration of the flow from receiver's perspective
+        double rxDuration = i->second.timeLastRxPacket.GetSeconds () - i->second.timeFirstTxPacket.GetSeconds ();
+        std::cout << "  Throughput: " << i->second.rxBytes * 8.0 / rxDuration / 1000 / 1000  << " Mbps\n";
+        std::cout << "  Mean delay:  " << 1000 * i->second.delaySum.GetSeconds () / i->second.rxPackets << " ms\n";
+        std::cout << "  Mean jitter:  " << 1000 * i->second.jitterSum.GetSeconds () / i->second.rxPackets  << " ms\n";
+      }
+    else
+      {
+        std::cout << "  Throughput:  0 Mbps\n";
+        std::cout << "  Mean delay:  0 ms\n";
+        std::cout << "  Mean jitter: 0 ms\n";
+      }
+    std::cout << "  Rx Packets: " << i->second.rxPackets << "\n"
+  }
 }
 
 struct Args
@@ -394,6 +417,21 @@ main (int argc, char *argv[])
   PrintNodesInfo (epcHelper, nodes);
   // Schedule print information
   Simulator::Schedule (Seconds (23), &PrintNodesInfo, epcHelper, nodes);
+
+  // Flow Monitor 
+  FlowMonitorHelper flowmon1;
+  NodeContainer lteDev;
+  lteDev.Add (ueNode);
+  lteDev.Add (remoteHost);
+
+  FlowMonitorHelper flowmon2;
+  NodeContainer wifiDev;
+  wifiDev.Add (ueNode);
+  wifiDev.Add (wifiAp);
+  wifiDev.Add (remoteHost);
+
+  Ptr<FlowMonitor> monitorA = flowmon1.Install (lteDev);
+  Simulator::Schedule (Seconds (20), &SetFlowMonitor, monitorA, flowmon1, Simulator::Now());
 
   // Run simulation
   Simulator::Stop(Seconds(simTime));
