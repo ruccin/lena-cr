@@ -435,7 +435,7 @@ main (int argc, char *argv[])
   wifiDev.Add (remoteHost);
 
   Ptr<FlowMonitor> monitorA = flowmon1.Install (lteDev);
-  Simulator::Schedule (Seconds (20), &SetFlowMonitor, monitorA, flowmon1, Simulator::Now());
+  Simulator::Schedule (Seconds (20), &SetFlowMonitor, monitorA, flowmon1);
 
   // Run simulation
   Simulator::Stop(Seconds(simTime));
