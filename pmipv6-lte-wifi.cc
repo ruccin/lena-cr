@@ -105,7 +105,7 @@ void LteThroughput (ApplicationContainer Apps)
 }
 
 void 
-SetFlowMonitor (Ptr<FlowMonitor> monitor, FlowMonitorHelper& flowmon, double duration)
+SetFlowMonitor (Ptr<FlowMonitor> monitor, FlowMonitorHelper& flowmon)
 {
   monitor->CheckForLostPackets ();
   Ptr<Ipv4FlowClassifier> classifier = DynamicCast<Ipv4FlowClassifier> (flowmon.GetClassifier ());
@@ -115,8 +115,16 @@ SetFlowMonitor (Ptr<FlowMonitor> monitor, FlowMonitorHelper& flowmon, double dur
   {
     std::cout << "  Tx Packets: " << i->second.txPackets << "\n";
     std::cout << "  Tx Bytes:   " << i->second.txBytes << "\n";
-    std::cout << "  TxOffered:  " << i->second.txBytes * 8.0 / duration / 1000 / 1000  << " Mbps\n";
     std::cout << "  Rx Bytes:   " << i->second.rxBytes << "\n";
+    
+    if (monitor == monitorA)
+    {
+      std::cout << "  TxOffered:  " << i->second.txBytes * 8.0 / 20 / 1000 / 1000  << " Mbps\n";
+    }
+    else
+    {
+      std::cout << "  TxOffered:  " << i->second.txBytes * 8.0 / 30 / 1000 / 1000  << " Mbps\n";
+    }
 
     if (i->second.rxPackets > 0)
       {
@@ -126,7 +134,6 @@ SetFlowMonitor (Ptr<FlowMonitor> monitor, FlowMonitorHelper& flowmon, double dur
         std::cout << "  Mean delay:  " << 1000 * i->second.delaySum.GetSeconds () / i->second.rxPackets << " ms\n";
         std::cout << "  Mean jitter:  " << 1000 * i->second.jitterSum.GetSeconds () / i->second.rxPackets  << " ms\n";
       }
-
     else
       {
         std::cout << "  Throughput:  0 Mbps\n";
