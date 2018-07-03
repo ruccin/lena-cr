@@ -108,7 +108,7 @@ void
 SetFlowMonitor (Ptr<FlowMonitor> monitor, FlowMonitorHelper& flowmon, double duration)
 {
   monitor->CheckForLostPackets ();
-  Ptr<Ipv6FlowClassifier> classifier = DynamicCast<Ipv6FlowClassifier> (flowmon.GetClassifier ());
+  Ptr<Ipv4FlowClassifier> classifier = DynamicCast<Ipv4FlowClassifier> (flowmonHelper.GetClassifier ());
   FlowMonitor::FlowStatsContainer stats = monitor->GetFlowStats ();
   for (std::map<FlowId, FlowMonitor::FlowStats>::const_iterator i = stats.begin (); i != stats.end (); ++i)
   {
