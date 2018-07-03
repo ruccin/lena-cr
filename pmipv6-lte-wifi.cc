@@ -108,15 +108,17 @@ void
 SetFlowMonitor (Ptr<FlowMonitor> monitor, FlowMonitorHelper& flowmon, double duration)
 {
   monitor->CheckForLostPackets ();
-  Ptr<Ipv4FlowClassifier> classifier = DynamicCast<Ipv4FlowClassifier> (flowmonHelper.GetClassifier ());
+  Ptr<Ipv4FlowClassifier> classifier = DynamicCast<Ipv4FlowClassifier> (flowmon.GetClassifier ());
   FlowMonitor::FlowStatsContainer stats = monitor->GetFlowStats ();
+
   for (std::map<FlowId, FlowMonitor::FlowStats>::const_iterator i = stats.begin (); i != stats.end (); ++i)
   {
-    std::cout << "Flow " << i->first << " (" << t.sourceAddress << ":" << t.sourcePort << " -> " << t.destinationAddress << ":" << t.destinationPort << ") proto " << protoStream.str () << "\n";
+    std::cout << "Flow " << i->first << " (" << t.sourceAddress << ":" << t.sourcePort << " -> " << t.destinationAddress << ":" << t.destinationPort << ") "<< "\n";
     std::cout << "  Tx Packets: " << i->second.txPackets << "\n";
     std::cout << "  Tx Bytes:   " << i->second.txBytes << "\n";
     std::cout << "  TxOffered:  " << i->second.txBytes * 8.0 / duration / 1000 / 1000  << " Mbps\n";
     std::cout << "  Rx Bytes:   " << i->second.rxBytes << "\n";
+
     if (i->second.rxPackets > 0)
       {
         // Measure the duration of the flow from receiver's perspective
@@ -125,13 +127,16 @@ SetFlowMonitor (Ptr<FlowMonitor> monitor, FlowMonitorHelper& flowmon, double dur
         std::cout << "  Mean delay:  " << 1000 * i->second.delaySum.GetSeconds () / i->second.rxPackets << " ms\n";
         std::cout << "  Mean jitter:  " << 1000 * i->second.jitterSum.GetSeconds () / i->second.rxPackets  << " ms\n";
       }
+
     else
       {
         std::cout << "  Throughput:  0 Mbps\n";
         std::cout << "  Mean delay:  0 ms\n";
         std::cout << "  Mean jitter: 0 ms\n";
       }
+
     std::cout << "  Rx Packets: " << i->second.rxPackets << "\n"
+
   }
 }
 
