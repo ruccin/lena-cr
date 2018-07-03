@@ -116,15 +116,7 @@ SetFlowMonitor (Ptr<FlowMonitor> monitor, FlowMonitorHelper& flowmon)
     std::cout << "  Tx Packets: " << i->second.txPackets << "\n";
     std::cout << "  Tx Bytes:   " << i->second.txBytes << "\n";
     std::cout << "  Rx Bytes:   " << i->second.rxBytes << "\n";
-    
-    if (monitor == monitorA)
-    {
-      std::cout << "  TxOffered:  " << i->second.txBytes * 8.0 / 20 / 1000 / 1000  << " Mbps\n";
-    }
-    else
-    {
-      std::cout << "  TxOffered:  " << i->second.txBytes * 8.0 / 30 / 1000 / 1000  << " Mbps\n";
-    }
+    std::cout << "  TxOffered:  " << i->second.txBytes * 8.0 / 20 / 1000 / 1000  << " Mbps\n";
 
     if (i->second.rxPackets > 0)
       {
