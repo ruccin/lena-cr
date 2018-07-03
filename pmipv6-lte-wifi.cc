@@ -134,7 +134,7 @@ SetFlowMonitor (Ptr<FlowMonitor> monitor, FlowMonitorHelper& flowmon, double dur
         std::cout << "  Mean jitter: 0 ms\n";
       }
 
-    std::cout << "  Rx Packets: " << i->second.rxPackets << "\n"
+    std::cout << "  Rx Packets: " << i->second.rxPackets << "\n";
 
   }
 }
