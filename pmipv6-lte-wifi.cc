@@ -107,7 +107,8 @@ void
 SetFlowMonitor (Ptr<FlowMonitor> monitor, FlowMonitorHelper& flowmon, double duration)
 {
   monitor->CheckForLostPackets ();
-  
+  Ptr<Ipv6FlowClassifier> classifier = DynamicCast<Ipv6FlowClassifier> (flowmon.GetClassifier ());
+  FlowMonitor::FlowStatsContainer
 }
 
 struct Args
