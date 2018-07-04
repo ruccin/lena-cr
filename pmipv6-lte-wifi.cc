@@ -103,7 +103,7 @@ void LteThroughput (ApplicationContainer Apps)
   NS_LOG_UNCOND ("Throughput :" <<  throughput);
   NS_LOG_DEBUG ("DEBUG, Throughput :" <<  throughput);
 }
-
+/*
 void 
 SetFlowMonitor (Ptr<FlowMonitor> monitor, FlowMonitorHelper& flowmon)
 {
@@ -137,7 +137,7 @@ SetFlowMonitor (Ptr<FlowMonitor> monitor, FlowMonitorHelper& flowmon)
 
   }
 }
-
+*/
 struct Args
 {
   Ptr<Node> ueNode;
@@ -164,7 +164,6 @@ void installFlowMonitorB (Args args)
   FlowMonitorHelper flowmon2;
   NodeContainer wifiDev;
   wifiDev.Add (args.ueNode);
-  wifiDev.Add (args.wifiAp);
   wifiDev.Add (args.remoteHost);
 
   Ptr<FlowMonitor> monitorB = flowmon2.Install (wifiDev);
@@ -469,7 +468,7 @@ main (int argc, char *argv[])
 
   Simulator::Schedule (Seconds (21), &InstallApplicationsB, args);
   Simulator::Schedule (Seconds (21), &installFlowMonitorB, args);
-  
+
   // Print Information
   NodeContainer nodes;
   nodes.Add (enbNode);
