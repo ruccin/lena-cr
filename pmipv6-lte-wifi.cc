@@ -288,6 +288,10 @@ main (int argc, char *argv[])
   uint32_t maxPackets = 0xff;
   double simTime = 31;
   double interPacketInterval = 1000;
+  
+  ApplicationContainer clientAppsA;
+  ApplicationContainer clientAppsB;
+  ApplicationContainer serverApps;
 
   // Command line arguments
   CommandLine cmd;
