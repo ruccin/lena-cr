@@ -214,7 +214,7 @@ void InstallApplications (Args args)
   Config::Connect ("/NodeList/*/ApplicationList/*/$ns3::PacketSink/Rx", MakeCallback(&PacketSinkRxTrace));
 
   args.clientAppsA.Start (Seconds (1));
-  args.clientAppsA.Stop (Seconds (20));
+  args.clientAppsA.Stop (Seconds (20.1));
   
 
   UdpClientHelper dlClientB (args.ueIpIface.GetAddress (0, 1), dlPort);
@@ -288,7 +288,7 @@ main (int argc, char *argv[])
   uint32_t maxPackets = 0xff;
   double simTime = 31;
   double interPacketInterval = 1000;
-  
+
   ApplicationContainer clientAppsA;
   ApplicationContainer clientAppsB;
   ApplicationContainer serverApps;
