@@ -214,9 +214,9 @@ void InstallApplications (Args args)
   Config::Connect ("/NodeList/*/ApplicationList/*/$ns3::PacketSink/Rx", MakeCallback(&PacketSinkRxTrace));
 
   args.clientAppsA.Start (Seconds (1));
-  args.clientAppsA.Stop (Seconds (20.1));
+  //args.clientAppsA.Stop (Seconds (20.1));
   
-
+/*
   UdpClientHelper dlClientB (args.ueIpIface.GetAddress (0, 1), dlPort);
   dlClientB.SetAttribute ("Interval", TimeValue (MilliSeconds(args.interPacketInterval)));
   dlClientB.SetAttribute ("MaxPackets", UintegerValue (args.maxPackets));
@@ -231,6 +231,7 @@ void InstallApplications (Args args)
   Config::Connect ("/NodeList/*/ApplicationList/*/$ns3::PacketSink/Rx", MakeCallback(&PacketSinkRxTrace));
 
   args.clientAppsB.Start (Seconds (21));
+  */
 }
 
 void PrintNodesInfo (Ptr<PointToPointEpc6Pmipv6Helper> epcHelper, NodeContainer nodes)
@@ -432,7 +433,7 @@ main (int argc, char *argv[])
   wifiMac.SetType ("ns3::StaWifiMac",
                    "Ssid", SsidValue (ssid),
                    "ActiveProbing", BooleanValue (false));
-  Simulator::Schedule (Seconds (21), &InstallWifi, wifi, wifiPhy, wifiMac, ueNode, ueLteDev->GetAddress ());
+  Simulator::Schedule (Seconds (20.1), &InstallWifi, wifi, wifiPhy, wifiMac, ueNode, ueLteDev->GetAddress ());
 
 
   // Add Wifi Mag functionality to WifiMag node.
@@ -484,7 +485,7 @@ main (int argc, char *argv[])
   Simulator::Schedule (Seconds (23), &PrintNodesInfo, epcHelper, nodes);
 
   Simulator::Schedule (Seconds (20), &LteThroughput, serverApps);
-  Simulator::Schedule (Seconds (simTime), &wifiThroughput, serverApps);
+  //Simulator::Schedule (Seconds (simTime), &wifiThroughput, serverApps);
 
   // Run simulation
   Simulator::Stop(Seconds(simTime));
