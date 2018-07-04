@@ -195,8 +195,8 @@ void InstallApplications (Args args)
 
   PacketSinkHelper dlPacketSinkHelper ("ns3::UdpSocketFactory", Inet6SocketAddress (Ipv6Address::GetAny (), dlPort));
   PacketSinkHelper ulPacketSinkHelper ("ns3::UdpSocketFactory", Inet6SocketAddress (Ipv6Address::GetAny (), ulPort));
-  args.serverApps.Add (dlPacketSinkHelper.Install (args.ueNode));
-  args.serverApps.Add (ulPacketSinkHelper.Install (args.remoteHost));
+  serverApps.Add (dlPacketSinkHelper.Install (args.ueNode));
+  serverApps.Add (ulPacketSinkHelper.Install (args.remoteHost));
 
   args.serverApps.Start (Seconds (1));
 
@@ -204,17 +204,17 @@ void InstallApplications (Args args)
   dlClientA.SetAttribute ("Interval", TimeValue (MilliSeconds(args.interPacketInterval)));
   dlClientA.SetAttribute ("MaxPackets", UintegerValue (args.maxPackets));
   dlClientA.SetAttribute ("PacketSize", UintegerValue (1024));
+
   UdpClientHelper ulClientA (args.remoteHostAddr, ulPort);
   ulClientA.SetAttribute ("Interval", TimeValue (MilliSeconds(args.interPacketInterval)));
   ulClientA.SetAttribute ("MaxPackets", UintegerValue(args.maxPackets));
   ulClientA.SetAttribute ("PacketSize", UintegerValue (1024));
 
-  args.clientAppsA.Add (dlClientA.Install (args.remoteHost));
-  args.clientAppsA.Add (ulClientA.Install (args.ueNode));
+  clientAppsA.Add (dlClientA.Install (args.remoteHost));
+  clientAppsA.Add (ulClientA.Install (args.ueNode));
   Config::Connect ("/NodeList/*/ApplicationList/*/$ns3::PacketSink/Rx", MakeCallback(&PacketSinkRxTrace));
 
-  args.clientAppsA.Start (Seconds (1));
-  //args.clientAppsA.Stop (Seconds (20.1));
+  clientAppsA.Start (Seconds (1));
 }
 
 void PrintNodesInfo (Ptr<PointToPointEpc6Pmipv6Helper> epcHelper, NodeContainer nodes)
@@ -272,10 +272,6 @@ main (int argc, char *argv[])
   uint32_t maxPackets = 0xff;
   double simTime = 31;
   double interPacketInterval = 1000;
-
-  ApplicationContainer clientAppsA;
-  ApplicationContainer clientAppsB;
-  ApplicationContainer serverApps;
 
   // Command line arguments
   CommandLine cmd;
@@ -416,7 +412,7 @@ main (int argc, char *argv[])
   wifiMac.SetType ("ns3::StaWifiMac",
                    "Ssid", SsidValue (ssid),
                    "ActiveProbing", BooleanValue (false));
-  Simulator::Schedule (Seconds (20.1), &InstallWifi, wifi, wifiPhy, wifiMac, ueNode, ueLteDev->GetAddress ());
+  Simulator::Schedule (Seconds (20), &InstallWifi, wifi, wifiPhy, wifiMac, ueNode, ueLteDev->GetAddress ());
 
 
   // Add Wifi Mag functionality to WifiMag node.
@@ -451,9 +447,6 @@ main (int argc, char *argv[])
   args.interPacketInterval = interPacketInterval;
   args.maxPackets = maxPackets;
   args.remoteHostAddr = remoteHostAddr;
-  args.serverApps = serverApps;
-  args.clientAppsA = clientAppsA;
-  args.clientAppsB = clientAppsB;
   Simulator::Schedule (Seconds (10), &InstallApplications, args);
 
   // Print Information
