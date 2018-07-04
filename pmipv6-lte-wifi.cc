@@ -103,6 +103,20 @@ void LteThroughput (ApplicationContainer Apps)
   NS_LOG_UNCOND ("Throughput :" <<  throughput);
   NS_LOG_DEBUG ("DEBUG, Throughput :" <<  throughput);
 }
+
+void wifiThroughput (ApplicationContainer Apps)
+{
+  // Throughput of RH
+  Ptr<PacketSink> sink = DynamicCast<PacketSink> (Apps.Get (1));
+  uint64_t totalRecvPacket = sink->GetTotalRx ();
+  NS_LOG_UNCOND ("Total Bytes Received by sink packet :" << totalRecvPacket);
+  NS_LOG_DEBUG ("DEBUG, Total Bytes Received by sink packet :" << totalRecvPacket);
+  
+  double throughput;
+  throughput = (totalRecvPacket * 1024 * 8) / 31;
+  NS_LOG_UNCOND ("Throughput :" <<  throughput);
+  NS_LOG_DEBUG ("DEBUG, Throughput :" <<  throughput);
+}
 /*
 void 
 SetFlowMonitor (Ptr<FlowMonitor> monitor, FlowMonitorHelper& flowmon)
@@ -147,6 +161,9 @@ struct Args
   double interPacketInterval;
   uint32_t maxPackets;
   Ipv6Address remoteHostAddr;
+  ApplicationContainer clientAppsA;
+  ApplicationContainer clientAppsB;
+  ApplicationContainer serverApps;
 };
 
 void installFlowMonitorA (Args args)
@@ -175,16 +192,13 @@ void InstallApplications (Args args)
   // Install and start applications on UEs and remote host
   uint16_t dlPort = 1234;
   uint16_t ulPort = 2000;
-  ApplicationContainer clientAppsA;
-  ApplicationContainer clientAppsB;
-  ApplicationContainer serverApps;
 
   PacketSinkHelper dlPacketSinkHelper ("ns3::UdpSocketFactory", Inet6SocketAddress (Ipv6Address::GetAny (), dlPort));
   PacketSinkHelper ulPacketSinkHelper ("ns3::UdpSocketFactory", Inet6SocketAddress (Ipv6Address::GetAny (), ulPort));
-  serverApps.Add (dlPacketSinkHelper.Install (args.ueNode));
-  serverApps.Add (ulPacketSinkHelper.Install (args.remoteHost));
+  args.serverApps.Add (dlPacketSinkHelper.Install (args.ueNode));
+  args.serverApps.Add (ulPacketSinkHelper.Install (args.remoteHost));
 
-  serverApps.Start (Seconds (1));
+  args.serverApps.Start (Seconds (1));
 
   UdpClientHelper dlClientA (args.ueIpIface.GetAddress (0, 1), dlPort);
   dlClientA.SetAttribute ("Interval", TimeValue (MilliSeconds(args.interPacketInterval)));
@@ -195,12 +209,13 @@ void InstallApplications (Args args)
   ulClientA.SetAttribute ("MaxPackets", UintegerValue(args.maxPackets));
   ulClientA.SetAttribute ("PacketSize", UintegerValue (1024));
 
-  clientAppsA.Add (dlClientA.Install (args.remoteHost));
-  clientAppsA.Add (ulClientA.Install (args.ueNode));
+  args.clientAppsA.Add (dlClientA.Install (args.remoteHost));
+  args.clientAppsA.Add (ulClientA.Install (args.ueNode));
   Config::Connect ("/NodeList/*/ApplicationList/*/$ns3::PacketSink/Rx", MakeCallback(&PacketSinkRxTrace));
 
-  clientAppsA.Start (Seconds (1));
-  clientAppsA.Stop (Seconds (20));
+  args.clientAppsA.Start (Seconds (1));
+  args.clientAppsA.Stop (Seconds (20));
+  
 
   UdpClientHelper dlClientB (args.ueIpIface.GetAddress (0, 1), dlPort);
   dlClientB.SetAttribute ("Interval", TimeValue (MilliSeconds(args.interPacketInterval)));
@@ -211,11 +226,11 @@ void InstallApplications (Args args)
   ulClientB.SetAttribute ("MaxPackets", UintegerValue(args.maxPackets));
   ulClientB.SetAttribute ("PacketSize", UintegerValue (1024));
 
-  clientAppsB.Add (dlClientB.Install (args.remoteHost));
-  clientAppsB.Add (ulClientB.Install (args.ueNode));
+  args.clientAppsB.Add (dlClientB.Install (args.remoteHost));
+  args.clientAppsB.Add (ulClientB.Install (args.ueNode));
   Config::Connect ("/NodeList/*/ApplicationList/*/$ns3::PacketSink/Rx", MakeCallback(&PacketSinkRxTrace));
 
-  clientAppsB.Start (Seconds (21));
+  args.clientAppsB.Start (Seconds (21));
 }
 
 void PrintNodesInfo (Ptr<PointToPointEpc6Pmipv6Helper> epcHelper, NodeContainer nodes)
@@ -448,6 +463,9 @@ main (int argc, char *argv[])
   args.interPacketInterval = interPacketInterval;
   args.maxPackets = maxPackets;
   args.remoteHostAddr = remoteHostAddr;
+  args.serverApps = serverApps;
+  args.clientAppsA = clientAppsA;
+  args.clientAppsB = clientAppsB;
   Simulator::Schedule (Seconds (10), &InstallApplications, args);
 
   // Print Information
@@ -460,6 +478,9 @@ main (int argc, char *argv[])
   PrintNodesInfo (epcHelper, nodes);
   // Schedule print information
   Simulator::Schedule (Seconds (23), &PrintNodesInfo, epcHelper, nodes);
+
+  Simulator::Schedule (Seconds (20), &LteThroughput, serverApps);
+  Simulator::Schedule (Seconds (simTime), &wifiThroughput, serverApps);
 
   // Run simulation
   Simulator::Stop(Seconds(simTime));
