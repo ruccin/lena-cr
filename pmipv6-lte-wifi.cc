@@ -215,23 +215,6 @@ void InstallApplications (Args args)
 
   args.clientAppsA.Start (Seconds (1));
   //args.clientAppsA.Stop (Seconds (20.1));
-  
-/*
-  UdpClientHelper dlClientB (args.ueIpIface.GetAddress (0, 1), dlPort);
-  dlClientB.SetAttribute ("Interval", TimeValue (MilliSeconds(args.interPacketInterval)));
-  dlClientB.SetAttribute ("MaxPackets", UintegerValue (args.maxPackets));
-  dlClientB.SetAttribute ("PacketSize", UintegerValue (1024));
-  UdpClientHelper ulClientB (args.remoteHostAddr, ulPort);
-  ulClientB.SetAttribute ("Interval", TimeValue (MilliSeconds(args.interPacketInterval)));
-  ulClientB.SetAttribute ("MaxPackets", UintegerValue(args.maxPackets));
-  ulClientB.SetAttribute ("PacketSize", UintegerValue (1024));
-
-  args.clientAppsB.Add (dlClientB.Install (args.remoteHost));
-  args.clientAppsB.Add (ulClientB.Install (args.ueNode));
-  Config::Connect ("/NodeList/*/ApplicationList/*/$ns3::PacketSink/Rx", MakeCallback(&PacketSinkRxTrace));
-
-  args.clientAppsB.Start (Seconds (21));
-  */
 }
 
 void PrintNodesInfo (Ptr<PointToPointEpc6Pmipv6Helper> epcHelper, NodeContainer nodes)
