@@ -467,7 +467,7 @@ main (int argc, char *argv[])
   // Schedule print information
   Simulator::Schedule (Seconds (23), &PrintNodesInfo, epcHelper, nodes);
 
-  Simulator::Schedule (Seconds (20), &LteThroughput, serverApps);
+  //Simulator::Schedule (Seconds (20), &LteThroughput, serverApps);
   //Simulator::Schedule (Seconds (simTime), &wifiThroughput, serverApps);
 
   // Run simulation
