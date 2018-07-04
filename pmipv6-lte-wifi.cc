@@ -93,29 +93,27 @@ void PacketSinkRxTrace (std::string context, Ptr<const Packet> packet, const Add
 void LteThroughput (ApplicationContainer Apps)
 {
   // Throughput of RH
-  Ptr<PacketSink> sink = DynamicCast<PacketSink> (Apps.Get (1));
-  uint64_t totalRecvPacket = sink->GetTotalRx ();
-  NS_LOG_UNCOND ("Total Bytes Received by sink packet :" << totalRecvPacket);
-  NS_LOG_DEBUG ("DEBUG, Total Bytes Received by sink packet :" << totalRecvPacket);
+  Ptr<PacketSink> sinkA = DynamicCast<PacketSink> (Apps.Get (1));
+  uint64_t totalRecvPacketA = sinkA->GetTotalRx ();
+  NS_LOG_UNCOND ("Total Bytes Received by sink packet :" << totalRecvPacketA);
+  //NS_LOG_DEBUG ("DEBUG, Total Bytes Received by sink packet :" << totalRecvPacket);
   
-  double throughput;
-  throughput = (totalRecvPacket * 1024 * 8) / 20;
-  NS_LOG_UNCOND ("Throughput :" <<  throughput);
-  NS_LOG_DEBUG ("DEBUG, Throughput :" <<  throughput);
+  double throughputA = (totalRecvPacketA * 1024 * 8) / 20;
+  NS_LOG_UNCOND ("Throughput :" <<  throughputA);
+  //NS_LOG_DEBUG ("DEBUG, Throughput :" <<  throughput);
 }
 
 void wifiThroughput (ApplicationContainer Apps)
 {
   // Throughput of RH
-  Ptr<PacketSink> sink = DynamicCast<PacketSink> (Apps.Get (1));
-  uint64_t totalRecvPacket = sink->GetTotalRx ();
-  NS_LOG_UNCOND ("Total Bytes Received by sink packet :" << totalRecvPacket);
-  NS_LOG_DEBUG ("DEBUG, Total Bytes Received by sink packet :" << totalRecvPacket);
+  Ptr<PacketSink> sinkB = DynamicCast<PacketSink> (Apps.Get (1));
+  uint64_t totalRecvPacketB = sinkB->GetTotalRx ();
+  NS_LOG_UNCOND ("Total Bytes Received by sink packet :" << totalRecvPacketB);
+  //NS_LOG_DEBUG ("DEBUG, Total Bytes Received by sink packet :" << totalRecvPacket);
   
-  double throughput;
-  throughput = (totalRecvPacket * 1024 * 8) / 31;
-  NS_LOG_UNCOND ("Throughput :" <<  throughput);
-  NS_LOG_DEBUG ("DEBUG, Throughput :" <<  throughput);
+  double throughputB = (totalRecvPacketB * 1024 * 8) / 31;
+  NS_LOG_UNCOND ("Throughput :" <<  throughputB);
+  //NS_LOG_DEBUG ("DEBUG, Throughput :" <<  throughput);
 }
 /*
 void 
