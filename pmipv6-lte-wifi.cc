@@ -138,6 +138,17 @@ SetFlowMonitor (Ptr<FlowMonitor> monitor, FlowMonitorHelper& flowmon)
   }
 }
 
+struct Args
+{
+  Ptr<Node> ueNode;
+  Ptr<PointToPointEpc6Pmipv6Helper> epcHelper;
+  Ptr<Node> remoteHost;
+  Ipv6InterfaceContainer ueIpIface;
+  double interPacketInterval;
+  uint32_t maxPackets;
+  Ipv6Address remoteHostAddr;
+};
+
 void installFlowMonitorA (Args args)
 {  
   FlowMonitorHelper flowmon1;
@@ -158,17 +169,6 @@ void installFlowMonitorB (Args args)
 
   Ptr<FlowMonitor> monitorB = flowmon2.Install (wifiDev);
 }
-
-struct Args
-{
-  Ptr<Node> ueNode;
-  Ptr<PointToPointEpc6Pmipv6Helper> epcHelper;
-  Ptr<Node> remoteHost;
-  Ipv6InterfaceContainer ueIpIface;
-  double interPacketInterval;
-  uint32_t maxPackets;
-  Ipv6Address remoteHostAddr;
-};
 
 void InstallApplicationsA (Args args)
 {
