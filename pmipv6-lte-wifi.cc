@@ -430,8 +430,7 @@ main (int argc, char *argv[])
                    "Ssid", SsidValue (ssid),
                    "ActiveProbing", BooleanValue (false));
   Simulator::Schedule (Seconds (21), &InstallWifi, wifi, wifiPhy, wifiMac, ueNode, ueLteDev->GetAddress ());
-  Simulator::Schedule (Seconds (21), &InstallApplicationsB, args);
-  Simulator::Schedule (Seconds (21), &installFlowMonitorB, args);
+
 
   // Add Wifi Mag functionality to WifiMag node.
   Pmipv6MagHelper magHelper;
@@ -468,6 +467,9 @@ main (int argc, char *argv[])
   Simulator::Schedule (Seconds (10), &InstallApplicationsA, args);
   Simulator::Schedule (Seconds (10), &installFlowMonitorA, args);
 
+  Simulator::Schedule (Seconds (21), &InstallApplicationsB, args);
+  Simulator::Schedule (Seconds (21), &installFlowMonitorB, args);
+  
   // Print Information
   NodeContainer nodes;
   nodes.Add (enbNode);
