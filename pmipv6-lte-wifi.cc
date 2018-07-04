@@ -108,7 +108,7 @@ void
 SetFlowMonitor (Ptr<FlowMonitor> monitor, FlowMonitorHelper& flowmon)
 {
   monitor->CheckForLostPackets ();
-  Ptr<Ipv6FlowClassifier> classifier = DynamicCast<FlowClassifier> (flowmon.GetClassifier6 ());
+  Ptr<Ipv6FlowClassifier> classifier = DynamicCast<Ipv6FlowClassifier> (flowmon.GetClassifier6 ());
   FlowMonitor::FlowStatsContainer stats = monitor->GetFlowStats ();
 
   for (std::map<FlowId, FlowMonitor::FlowStats>::const_iterator i = stats.begin (); i != stats.end (); ++i)
@@ -138,6 +138,27 @@ SetFlowMonitor (Ptr<FlowMonitor> monitor, FlowMonitorHelper& flowmon)
   }
 }
 
+void installFlowMonitorA (Args args)
+{  
+  FlowMonitorHelper flowmon1;
+  NodeContainer lteDev;
+  lteDev.Add (args.ueNode);
+  lteDev.Add (args.remoteHost);
+
+  Ptr<FlowMonitor> monitorA = flowmon1.Install (lteDev);
+}
+
+void installFlowMonitorB (Args args)
+{
+  FlowMonitorHelper flowmon2;
+  NodeContainer wifiDev;
+  wifiDev.Add (args.ueNode);
+  wifiDev.Add (args.wifiAp);
+  wifiDev.Add (args.remoteHost);
+
+  Ptr<FlowMonitor> monitorB = flowmon2.Install (wifiDev);
+}
+
 struct Args
 {
   Ptr<Node> ueNode;
@@ -149,7 +170,7 @@ struct Args
   Ipv6Address remoteHostAddr;
 };
 
-void InstallApplications (Args args)
+void InstallApplicationsA (Args args)
 {
   NS_LOG_UNCOND ("Installing Applications");
   // Install and start applications on UEs and remote host
@@ -177,7 +198,40 @@ void InstallApplications (Args args)
   Config::Connect ("/NodeList/*/ApplicationList/*/$ns3::PacketSink/Rx", MakeCallback(&PacketSinkRxTrace));
 
   serverApps.Start (Seconds (1));
+  serverApps.Stop (Seconds (20));
   clientApps.Start (Seconds (1));
+  clientApps.Stop (Seconds (20));
+}
+
+void InstallApplicationsB (Args args)
+{
+  NS_LOG_UNCOND ("Installing Applications");
+  // Install and start applications on UEs and remote host
+  uint16_t dlPort = 1234;
+  uint16_t ulPort = 2000;
+  ApplicationContainer clientApps;
+  ApplicationContainer serverApps;
+
+  PacketSinkHelper dlPacketSinkHelper ("ns3::UdpSocketFactory", Inet6SocketAddress (Ipv6Address::GetAny (), dlPort));
+  PacketSinkHelper ulPacketSinkHelper ("ns3::UdpSocketFactory", Inet6SocketAddress (Ipv6Address::GetAny (), ulPort));
+  serverApps.Add (dlPacketSinkHelper.Install (args.ueNode));
+  serverApps.Add (ulPacketSinkHelper.Install (args.remoteHost));
+
+  UdpClientHelper dlClient (args.ueIpIface.GetAddress (0, 1), dlPort);
+  dlClient.SetAttribute ("Interval", TimeValue (MilliSeconds(args.interPacketInterval)));
+  dlClient.SetAttribute ("MaxPackets", UintegerValue (args.maxPackets));
+  dlClient.SetAttribute ("PacketSize", UintegerValue (1024));
+  UdpClientHelper ulClient (args.remoteHostAddr, ulPort);
+  ulClient.SetAttribute ("Interval", TimeValue (MilliSeconds(args.interPacketInterval)));
+  ulClient.SetAttribute ("MaxPackets", UintegerValue(args.maxPackets));
+  ulClient.SetAttribute ("PacketSize", UintegerValue (1024));
+
+  clientApps.Add (dlClient.Install (args.remoteHost));
+  clientApps.Add (ulClient.Install (args.ueNode));
+  Config::Connect ("/NodeList/*/ApplicationList/*/$ns3::PacketSink/Rx", MakeCallback(&PacketSinkRxTrace));
+
+  serverApps.Start (Seconds (21));
+  clientApps.Start (Seconds (21));
 }
 
 void PrintNodesInfo (Ptr<PointToPointEpc6Pmipv6Helper> epcHelper, NodeContainer nodes)
@@ -233,7 +287,7 @@ int
 main (int argc, char *argv[])
 {
   uint32_t maxPackets = 0xff;
-  double simTime = 30;
+  double simTime = 31;
   double interPacketInterval = 1000;
 
   // Command line arguments
@@ -375,7 +429,9 @@ main (int argc, char *argv[])
   wifiMac.SetType ("ns3::StaWifiMac",
                    "Ssid", SsidValue (ssid),
                    "ActiveProbing", BooleanValue (false));
-  Simulator::Schedule (Seconds (20), &InstallWifi, wifi, wifiPhy, wifiMac, ueNode, ueLteDev->GetAddress ());
+  Simulator::Schedule (Seconds (21), &InstallWifi, wifi, wifiPhy, wifiMac, ueNode, ueLteDev->GetAddress ());
+  Simulator::Schedule (Seconds (21), &InstallApplicationsB, args);
+  Simulator::Schedule (Seconds (21), &installFlowMonitorB, args);
 
   // Add Wifi Mag functionality to WifiMag node.
   Pmipv6MagHelper magHelper;
@@ -409,7 +465,8 @@ main (int argc, char *argv[])
   args.interPacketInterval = interPacketInterval;
   args.maxPackets = maxPackets;
   args.remoteHostAddr = remoteHostAddr;
-  Simulator::Schedule (Seconds (10), &InstallApplications, args);
+  Simulator::Schedule (Seconds (10), &InstallApplicationsA, args);
+  Simulator::Schedule (Seconds (10), &installFlowMonitorA, args);
 
   // Print Information
   NodeContainer nodes;
@@ -421,21 +478,6 @@ main (int argc, char *argv[])
   PrintNodesInfo (epcHelper, nodes);
   // Schedule print information
   Simulator::Schedule (Seconds (23), &PrintNodesInfo, epcHelper, nodes);
-
-  // Flow Monitor 
-  FlowMonitorHelper flowmon1;
-  NodeContainer lteDev;
-  lteDev.Add (ueNode);
-  lteDev.Add (remoteHost);
-
-  FlowMonitorHelper flowmon2;
-  NodeContainer wifiDev;
-  wifiDev.Add (ueNode);
-  wifiDev.Add (wifiAp);
-  wifiDev.Add (remoteHost);
-
-  Ptr<FlowMonitor> monitorA = flowmon1.Install (lteDev);
-  Simulator::Schedule (Seconds (20), &SetFlowMonitor, monitorA, flowmon1);
 
   // Run simulation
   Simulator::Stop(Seconds(simTime));
