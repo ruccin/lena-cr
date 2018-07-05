@@ -197,7 +197,7 @@ void InstallApplications (Args args)
   serverApps.Add (dlPacketSinkHelper.Install (args.ueNode));
   serverApps.Add (ulPacketSinkHelper.Install (args.remoteHost));
 
-  args.serverApps.Start (Seconds (1));
+  serverApps.Start (Seconds (1));
 
   UdpClientHelper dlClientA (args.ueIpIface.GetAddress (0, 1), dlPort);
   dlClientA.SetAttribute ("Interval", TimeValue (MilliSeconds(args.interPacketInterval)));
