@@ -227,7 +227,7 @@ void InstallApplications (Args args)
 
   clientApps.Start (Seconds (1));
 
-  Config::Connect (wifiThroughputB(serverApps));
+  wifiThroughputB(serverApps);
 }
 
 void PrintNodesInfo (Ptr<PointToPointEpc6Pmipv6Helper> epcHelper, NodeContainer nodes)
