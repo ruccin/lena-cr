@@ -116,6 +116,13 @@ void wifiThroughput (ApplicationContainer Apps)
   NS_LOG_UNCOND ("Throughput :" <<  throughputB);
   //NS_LOG_DEBUG ("DEBUG, Throughput :" <<  throughput);
 }
+
+void wifiThroughputB (ApplicationContainer Apps)
+{
+  uint64_t totalPacketThrough = DynamicCast<UdpServer> (serverApps.Get (1)->GetReceived ());
+  double throughput = totalPacketThrough * 1472 * 8 / 20;
+  NS_LOG_UNCOND ("Throughput :" <<  throughput);
+}
 /*
 void 
 SetFlowMonitor (Ptr<FlowMonitor> monitor, FlowMonitorHelper& flowmon)
@@ -191,29 +198,36 @@ void InstallApplications (Args args)
 
   ApplicationContainer clientApps;
   ApplicationContainer serverApps;
-
+/*
   PacketSinkHelper dlPacketSinkHelper ("ns3::UdpSocketFactory", Inet6SocketAddress (Ipv6Address::GetAny (), dlPort));
   PacketSinkHelper ulPacketSinkHelper ("ns3::UdpSocketFactory", Inet6SocketAddress (Ipv6Address::GetAny (), ulPort));
   serverApps.Add (dlPacketSinkHelper.Install (args.ueNode));
   serverApps.Add (ulPacketSinkHelper.Install (args.remoteHost));
+*/
 
+  UdpServerHelper dlServer (dlPort);
+  UdpServerHelper ulServer (ulPort);
+  serverApps.Add (dlServer.Install (args.ueNode));
+  serverApps.Add (ulServer.Install (args.remoteHost));
   serverApps.Start (Seconds (1));
 
   UdpClientHelper dlClientA (args.ueIpIface.GetAddress (0, 1), dlPort);
   dlClientA.SetAttribute ("Interval", TimeValue (MilliSeconds(args.interPacketInterval)));
   dlClientA.SetAttribute ("MaxPackets", UintegerValue (args.maxPackets));
-  dlClientA.SetAttribute ("PacketSize", UintegerValue (1024));
+  dlClientA.SetAttribute ("PacketSize", UintegerValue (1472));
 
   UdpClientHelper ulClientA (args.remoteHostAddr, ulPort);
   ulClientA.SetAttribute ("Interval", TimeValue (MilliSeconds(args.interPacketInterval)));
   ulClientA.SetAttribute ("MaxPackets", UintegerValue(args.maxPackets));
-  ulClientA.SetAttribute ("PacketSize", UintegerValue (1024));
+  ulClientA.SetAttribute ("PacketSize", UintegerValue (1472));
 
   clientApps.Add (dlClientA.Install (args.remoteHost));
   clientApps.Add (ulClientA.Install (args.ueNode));
   Config::Connect ("/NodeList/*/ApplicationList/*/$ns3::PacketSink/Rx", MakeCallback(&PacketSinkRxTrace));
 
   clientApps.Start (Seconds (1));
+
+  wifiThroughputB(serverApps);
 }
 
 void PrintNodesInfo (Ptr<PointToPointEpc6Pmipv6Helper> epcHelper, NodeContainer nodes)
