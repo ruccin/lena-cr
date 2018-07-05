@@ -354,7 +354,7 @@ main (int argc, char *argv[])
   wifiMac.SetType ("ns3::StaWifiMac",
                    "Ssid", SsidValue (ssid),
                    "ActiveProbing", BooleanValue (false));
-  Simulator::Schedule (Seconds (9), &InstallWifi, wifi, wifiPhy, wifiMac, ueNode, ueLteDev->GetAddress ());
+  Simulator::Schedule (Seconds (5), &InstallWifi, wifi, wifiPhy, wifiMac, ueNode, ueLteDev->GetAddress ());
 
 
   // Add Wifi Mag functionality to WifiMag node.
@@ -400,7 +400,7 @@ main (int argc, char *argv[])
   nodes.Add (wifiAp);
   PrintNodesInfo (epcHelper, nodes);
   // Schedule print information
-  //Simulator::Schedule (Seconds (23), &PrintNodesInfo, epcHelper, nodes);
+  Simulator::Schedule (Seconds (6), &PrintNodesInfo, epcHelper, nodes);
 
   //Simulator::Schedule (Seconds (20), &LteThroughput, serverApps);
   //Simulator::Schedule (Seconds (simTime), &wifiThroughput, serverApps);
