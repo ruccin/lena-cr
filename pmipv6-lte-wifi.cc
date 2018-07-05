@@ -95,12 +95,12 @@ void PacketSinkRxTrace (std::string context, Ptr<const Packet> packet, const Add
 void wifiThroughput (ApplicationContainer Apps)
 {
   Ptr<PacketSink> sink = DynamicCast<PacketSink> (Apps.Get (1));
-  //uint64_t totalRecvPacket = sink->GetTotalRx ();
   uint64_t RecvPacketStart = sink->StartApplication (Seconds (1));
   uint64_t RecvPacketStop = sink->StopApplication (Seconds (31));
+  uint64_t totalRecvPacket = sink->GetTotalRx ();
   NS_LOG_UNCOND ("Received by sink packet Start : " << RecvPacketStart);
   NS_LOG_UNCOND ("Received by sink packet Stop : " << RecvPacketStop);
-  //NS_LOG_UNCOND ("Total Bytes Received by sink packet :" << totalRecvPacketB);
+  NS_LOG_UNCOND ("Total Bytes Received by sink packet :" << totalRecvPacket);
   
   //double throughputB = (totalRecvPacket * 1024 * 8) / 20;
   //NS_LOG_UNCOND ("Throughput :" <<  throughput);
