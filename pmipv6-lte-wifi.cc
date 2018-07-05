@@ -160,9 +160,6 @@ struct Args
   double interPacketInterval;
   uint32_t maxPackets;
   Ipv6Address remoteHostAddr;
-  ApplicationContainer clientAppsA;
-  ApplicationContainer clientAppsB;
-  ApplicationContainer serverApps;
 };
 
 void installFlowMonitorA (Args args)
@@ -192,6 +189,9 @@ void InstallApplications (Args args)
   uint16_t dlPort = 1234;
   uint16_t ulPort = 2000;
 
+  ApplicationContainer clientApps;
+  ApplicationContainer serverApps;
+
   PacketSinkHelper dlPacketSinkHelper ("ns3::UdpSocketFactory", Inet6SocketAddress (Ipv6Address::GetAny (), dlPort));
   PacketSinkHelper ulPacketSinkHelper ("ns3::UdpSocketFactory", Inet6SocketAddress (Ipv6Address::GetAny (), ulPort));
   serverApps.Add (dlPacketSinkHelper.Install (args.ueNode));
@@ -209,11 +209,11 @@ void InstallApplications (Args args)
   ulClientA.SetAttribute ("MaxPackets", UintegerValue(args.maxPackets));
   ulClientA.SetAttribute ("PacketSize", UintegerValue (1024));
 
-  clientAppsA.Add (dlClientA.Install (args.remoteHost));
-  clientAppsA.Add (ulClientA.Install (args.ueNode));
+  clientApps.Add (dlClientA.Install (args.remoteHost));
+  clientApps.Add (ulClientA.Install (args.ueNode));
   Config::Connect ("/NodeList/*/ApplicationList/*/$ns3::PacketSink/Rx", MakeCallback(&PacketSinkRxTrace));
 
-  clientAppsA.Start (Seconds (1));
+  clientApps.Start (Seconds (1));
 }
 
 void PrintNodesInfo (Ptr<PointToPointEpc6Pmipv6Helper> epcHelper, NodeContainer nodes)
