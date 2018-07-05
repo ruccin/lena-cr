@@ -76,6 +76,7 @@ void TxTrace (std::string context, Ptr<const Packet> packet, Ptr<Ipv6> ipv6, uin
   Ipv6Header ipv6Header;
   packet->PeekHeader (ipv6Header);
   NS_LOG_DEBUG (context << " " << ipv6Header << " " << interfaceId);
+
 }
 
 void DropTrace (std::string context, const Ipv6Header & ipv6Header, Ptr<const Packet> packet, Ipv6L3Protocol::DropReason dropReason, Ptr<Ipv6> ipv6, uint32_t interfaceId)
@@ -410,7 +411,7 @@ main (int argc, char *argv[])
   wifiMac.SetType ("ns3::StaWifiMac",
                    "Ssid", SsidValue (ssid),
                    "ActiveProbing", BooleanValue (false));
-  Simulator::Schedule (Seconds (20), &InstallWifi, wifi, wifiPhy, wifiMac, ueNode, ueLteDev->GetAddress ());
+  Simulator::Schedule (Seconds (9), &InstallWifi, wifi, wifiPhy, wifiMac, ueNode, ueLteDev->GetAddress ());
 
 
   // Add Wifi Mag functionality to WifiMag node.
@@ -445,7 +446,7 @@ main (int argc, char *argv[])
   args.interPacketInterval = interPacketInterval;
   args.maxPackets = maxPackets;
   args.remoteHostAddr = remoteHostAddr;
-  Simulator::Schedule (Seconds (10), &InstallApplications, args);
+  Simulator::Schedule (Seconds (11), &InstallApplications, args);
 
   // Print Information
   NodeContainer nodes;
@@ -456,7 +457,7 @@ main (int argc, char *argv[])
   nodes.Add (wifiAp);
   PrintNodesInfo (epcHelper, nodes);
   // Schedule print information
-  Simulator::Schedule (Seconds (23), &PrintNodesInfo, epcHelper, nodes);
+  //Simulator::Schedule (Seconds (23), &PrintNodesInfo, epcHelper, nodes);
 
   //Simulator::Schedule (Seconds (20), &LteThroughput, serverApps);
   //Simulator::Schedule (Seconds (simTime), &wifiThroughput, serverApps);
