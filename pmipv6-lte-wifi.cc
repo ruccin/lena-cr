@@ -138,8 +138,6 @@ void InstallApplications (Args args)
   serverApps.Add (dlPacketSinkHelper.Install (args.ueNode));
   serverApps.Add (ulPacketSinkHelper.Install (args.remoteHost));
   serverApps.Start (Seconds (1));
-  serverApps.Stop (Seconds (31));
-  wifiThroughput(serverApps);
 
   UdpClientHelper dlClientA (args.ueIpIface.GetAddress (0, 1), dlPort);
   dlClientA.SetAttribute ("Interval", TimeValue (MilliSeconds(args.interPacketInterval)));
