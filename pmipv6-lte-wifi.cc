@@ -91,73 +91,19 @@ void PacketSinkRxTrace (std::string context, Ptr<const Packet> packet, const Add
   NS_LOG_UNCOND (context << " " << seqTs.GetTs () << "->" << Simulator::Now() << ": " << seqTs.GetSeq());
 }
 
-void LteThroughput (ApplicationContainer Apps)
-{
-  // Throughput of RH
-  Ptr<PacketSink> sinkA = DynamicCast<PacketSink> (Apps.Get (1));
-  uint64_t totalRecvPacketA = sinkA->GetTotalRx ();
-  NS_LOG_UNCOND ("Total Bytes Received by sink packet :" << totalRecvPacketA);
-  //NS_LOG_DEBUG ("DEBUG, Total Bytes Received by sink packet :" << totalRecvPacket);
-  
-  double throughputA = (totalRecvPacketA * 1024 * 8) / 20;
-  NS_LOG_UNCOND ("Throughput :" <<  throughputA);
-  //NS_LOG_DEBUG ("DEBUG, Throughput :" <<  throughput);
-}
 
 void wifiThroughput (ApplicationContainer Apps)
 {
-  // Throughput of RH
-  Ptr<PacketSink> sinkB = DynamicCast<PacketSink> (Apps.Get (1));
-  uint64_t totalRecvPacketB = sinkB->GetTotalRx ();
-  NS_LOG_UNCOND ("Total Bytes Received by sink packet :" << totalRecvPacketB);
-  //NS_LOG_DEBUG ("DEBUG, Total Bytes Received by sink packet :" << totalRecvPacket);
+  Ptr<PacketSink> sink = DynamicCast<PacketSink> (Apps.Get (1));
+  //uint64_t totalRecvPacket = sink->GetTotalRx ();
+  uint64_t RecvPacket = sink->StartApplication ();
+  NS_LOG_UNCOND ("Received by sink packet: " << RecvPacket);
+  //NS_LOG_UNCOND ("Total Bytes Received by sink packet :" << totalRecvPacketB);
   
-  double throughputB = (totalRecvPacketB * 1024 * 8) / 31;
-  NS_LOG_UNCOND ("Throughput :" <<  throughputB);
-  //NS_LOG_DEBUG ("DEBUG, Throughput :" <<  throughput);
+  //double throughputB = (totalRecvPacket * 1024 * 8) / 20;
+  //NS_LOG_UNCOND ("Throughput :" <<  throughput);
 }
 
-void wifiThroughputB (ApplicationContainer Apps)
-{
-  uint64_t totalPacketThrough = DynamicCast<UdpServer> (Apps.Get (1))->GetReceived ();
-  double throughput = totalPacketThrough * 1472 * 8 / 20;
-  NS_LOG_UNCOND ("Throughput :" <<  throughput);
-}
-/*
-void 
-SetFlowMonitor (Ptr<FlowMonitor> monitor, FlowMonitorHelper& flowmon)
-{
-  monitor->CheckForLostPackets ();
-  Ptr<Ipv6FlowClassifier> classifier = DynamicCast<Ipv6FlowClassifier> (flowmon.GetClassifier6 ());
-  FlowMonitor::FlowStatsContainer stats = monitor->GetFlowStats ();
-
-  for (std::map<FlowId, FlowMonitor::FlowStats>::const_iterator i = stats.begin (); i != stats.end (); ++i)
-  {
-    std::cout << "  Tx Packets: " << i->second.txPackets << "\n";
-    std::cout << "  Tx Bytes:   " << i->second.txBytes << "\n";
-    std::cout << "  Rx Bytes:   " << i->second.rxBytes << "\n";
-    std::cout << "  TxOffered:  " << i->second.txBytes * 8.0 / 20 / 1000 / 1000  << " Mbps\n";
-
-    if (i->second.rxPackets > 0)
-      {
-        // Measure the duration of the flow from receiver's perspective
-        double rxDuration = i->second.timeLastRxPacket.GetSeconds () - i->second.timeFirstTxPacket.GetSeconds ();
-        std::cout << "  Throughput: " << i->second.rxBytes * 8.0 / rxDuration / 1000 / 1000  << " Mbps\n";
-        std::cout << "  Mean delay:  " << 1000 * i->second.delaySum.GetSeconds () / i->second.rxPackets << " ms\n";
-        std::cout << "  Mean jitter:  " << 1000 * i->second.jitterSum.GetSeconds () / i->second.rxPackets  << " ms\n";
-      }
-    else
-      {
-        std::cout << "  Throughput:  0 Mbps\n";
-        std::cout << "  Mean delay:  0 ms\n";
-        std::cout << "  Mean jitter: 0 ms\n";
-      }
-
-    std::cout << "  Rx Packets: " << i->second.rxPackets << "\n";
-
-  }
-}
-*/
 struct Args
 {
   Ptr<Node> ueNode;
@@ -168,16 +114,6 @@ struct Args
   uint32_t maxPackets;
   Ipv6Address remoteHostAddr;
 };
-
-void installFlowMonitorA (Args args)
-{  
-  FlowMonitorHelper flowmon1;
-  NodeContainer lteDev;
-  lteDev.Add (args.ueNode);
-  lteDev.Add (args.remoteHost);
-
-  Ptr<FlowMonitor> monitorA = flowmon1.Install (lteDev);
-}
 
 void installFlowMonitorB (Args args)
 {
@@ -198,18 +134,13 @@ void InstallApplications (Args args)
 
   ApplicationContainer clientApps;
   ApplicationContainer serverApps;
-/*
+
   PacketSinkHelper dlPacketSinkHelper ("ns3::UdpSocketFactory", Inet6SocketAddress (Ipv6Address::GetAny (), dlPort));
   PacketSinkHelper ulPacketSinkHelper ("ns3::UdpSocketFactory", Inet6SocketAddress (Ipv6Address::GetAny (), ulPort));
   serverApps.Add (dlPacketSinkHelper.Install (args.ueNode));
   serverApps.Add (ulPacketSinkHelper.Install (args.remoteHost));
-*/
-
-  UdpServerHelper dlServer (dlPort);
-  UdpServerHelper ulServer (ulPort);
-  serverApps.Add (dlServer.Install (args.ueNode));
-  serverApps.Add (ulServer.Install (args.remoteHost));
   serverApps.Start (Seconds (1));
+  wifiThroughput(serverApps);
 
   UdpClientHelper dlClientA (args.ueIpIface.GetAddress (0, 1), dlPort);
   dlClientA.SetAttribute ("Interval", TimeValue (MilliSeconds(args.interPacketInterval)));
@@ -227,7 +158,6 @@ void InstallApplications (Args args)
 
   clientApps.Start (Seconds (1));
 
-  wifiThroughputB(serverApps);
 }
 
 void PrintNodesInfo (Ptr<PointToPointEpc6Pmipv6Helper> epcHelper, NodeContainer nodes)
