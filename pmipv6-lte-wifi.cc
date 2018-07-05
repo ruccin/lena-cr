@@ -119,7 +119,7 @@ void wifiThroughput (ApplicationContainer Apps)
 
 void wifiThroughputB (ApplicationContainer Apps)
 {
-  uint64_t totalPacketThrough = DynamicCast<UdpServer> (serverApps.Get (1)->GetReceived ());
+  uint64_t totalPacketThrough = DynamicCast<UdpServer> (Apps.Get (1)->GetReceived ());
   double throughput = totalPacketThrough * 1472 * 8 / 20;
   NS_LOG_UNCOND ("Throughput :" <<  throughput);
 }
