@@ -96,8 +96,10 @@ void wifiThroughput (ApplicationContainer Apps)
 {
   Ptr<PacketSink> sink = DynamicCast<PacketSink> (Apps.Get (1));
   //uint64_t totalRecvPacket = sink->GetTotalRx ();
-  uint64_t RecvPacket = sink->StartApplication ();
-  NS_LOG_UNCOND ("Received by sink packet: " << RecvPacket);
+  uint64_t RecvPacketStart = sink->StartApplication ();
+  uint64_t RecvPacketStop = sink->StopApplication ();
+  NS_LOG_UNCOND ("Received by sink packet Start : " << RecvPacketStart);
+  NS_LOG_UNCOND ("Received by sink packet Stop : " << RecvPacketStop);
   //NS_LOG_UNCOND ("Total Bytes Received by sink packet :" << totalRecvPacketB);
   
   //double throughputB = (totalRecvPacket * 1024 * 8) / 20;
@@ -140,7 +142,10 @@ void InstallApplications (Args args)
   serverApps.Add (dlPacketSinkHelper.Install (args.ueNode));
   serverApps.Add (ulPacketSinkHelper.Install (args.remoteHost));
   serverApps.Start (Seconds (1));
+  serverApps.Stop (Seconds (31));
   wifiThroughput(serverApps);
+
+
 
   UdpClientHelper dlClientA (args.ueIpIface.GetAddress (0, 1), dlPort);
   dlClientA.SetAttribute ("Interval", TimeValue (MilliSeconds(args.interPacketInterval)));
