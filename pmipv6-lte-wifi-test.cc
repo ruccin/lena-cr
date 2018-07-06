@@ -1,3 +1,23 @@
+/* -*-  Mode: C++; c-file-style: "gnu"; indent-tabs-mode:nil; -*- */
+/*
+ * Copyright (c) 2011 Centre Tecnologic de Telecomunicacions de Catalunya (CTTC)
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License version 2 as
+ * published by the Free Software Foundation;
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+ *
+ * Author: Jaume Nin <jaume.nin@cttc.cat>
+ */
+
 #include "ns3/core-module.h"
 #include "ns3/network-module.h"
 #include "ns3/internet-module.h"
@@ -14,7 +34,9 @@
 
 using namespace ns3;
 
-NS_LOG_COMPONENT_DEFINE ("Lena-pmipv6-lte-wifi-cr");
+NS_LOG_COMPONENT_DEFINE ("LenaPmipv6");
+
+
 
 void PrintCompleteNodeInfo(Ptr<Node> node)
 {
@@ -99,6 +121,40 @@ void installFlowMonitorB (Args args)
   wifiDev.Add (args.remoteHost);
 
   Ptr<FlowMonitor> monitorB = flowmon2.Install (wifiDev);
+}
+
+void InstallApplications (Args args)
+{
+  NS_LOG_UNCOND ("Installing Applications");
+  // Install and start applications on UEs and remote host
+  uint16_t dlPort = 1234;
+  uint16_t ulPort = 2000;
+
+  ApplicationContainer clientApps;
+  ApplicationContainer serverApps;
+
+  PacketSinkHelper dlPacketSinkHelper ("ns3::UdpSocketFactory", Inet6SocketAddress (Ipv6Address::GetAny (), dlPort));
+  PacketSinkHelper ulPacketSinkHelper ("ns3::UdpSocketFactory", Inet6SocketAddress (Ipv6Address::GetAny (), ulPort));
+  serverApps.Add (dlPacketSinkHelper.Install (args.ueNode));
+  serverApps.Add (ulPacketSinkHelper.Install (args.remoteHost));
+  serverApps.Start (Seconds (1));
+
+  UdpClientHelper dlClientA (args.ueIpIface.GetAddress (0, 1), dlPort);
+  dlClientA.SetAttribute ("Interval", TimeValue (MilliSeconds(args.interPacketInterval)));
+  dlClientA.SetAttribute ("MaxPackets", UintegerValue (args.maxPackets));
+  dlClientA.SetAttribute ("PacketSize", UintegerValue (1472));
+
+  UdpClientHelper ulClientA (args.remoteHostAddr, ulPort);
+  ulClientA.SetAttribute ("Interval", TimeValue (MilliSeconds(args.interPacketInterval)));
+  ulClientA.SetAttribute ("MaxPackets", UintegerValue(args.maxPackets));
+  ulClientA.SetAttribute ("PacketSize", UintegerValue (1472));
+
+  clientApps.Add (dlClientA.Install (args.remoteHost));
+  clientApps.Add (ulClientA.Install (args.ueNode));
+  Config::Connect ("/NodeList/*/ApplicationList/*/$ns3::PacketSink/Rx", MakeCallback(&PacketSinkRxTrace));
+
+  clientApps.Start (Seconds (1));
+
 }
 
 void PrintNodesInfo (Ptr<PointToPointEpc6Pmipv6Helper> epcHelper, NodeContainer nodes)
@@ -296,7 +352,7 @@ main (int argc, char *argv[])
   wifiMac.SetType ("ns3::StaWifiMac",
                    "Ssid", SsidValue (ssid),
                    "ActiveProbing", BooleanValue (false));
-  Simulator::Schedule (Seconds (3), &InstallWifi, wifi, wifiPhy, wifiMac, ueNode, ueLteDev->GetAddress ());
+  Simulator::Schedule (Seconds (5), &InstallWifi, wifi, wifiPhy, wifiMac, ueNode, ueLteDev->GetAddress ());
 
 
   // Add Wifi Mag functionality to WifiMag node.
@@ -331,7 +387,7 @@ main (int argc, char *argv[])
   args.interPacketInterval = interPacketInterval;
   args.maxPackets = maxPackets;
   args.remoteHostAddr = remoteHostAddr;
-  //Simulator::Schedule (Seconds (11), &InstallApplications, args);
+  Simulator::Schedule (Seconds (11), &InstallApplications, args);
 
   // Print Information
   NodeContainer nodes;
@@ -342,37 +398,10 @@ main (int argc, char *argv[])
   nodes.Add (wifiAp);
   PrintNodesInfo (epcHelper, nodes);
   // Schedule print information
-  Simulator::Schedule (Seconds (4), &PrintNodesInfo, epcHelper, nodes);
+  Simulator::Schedule (Seconds (6), &PrintNodesInfo, epcHelper, nodes);
 
-  //NS_LOG_UNCOND ("Installing Applications");
-  // Install and start applications on UEs and remote host
-  uint16_t dlPort = 1234;
-  uint16_t ulPort = 2000;
-
-  ApplicationContainer clientApps;
-  ApplicationContainer serverApps;
-
-  PacketSinkHelper dlPacketSinkHelper ("ns3::UdpSocketFactory", Inet6SocketAddress (Ipv6Address::GetAny (), dlPort));
-  PacketSinkHelper ulPacketSinkHelper ("ns3::UdpSocketFactory", Inet6SocketAddress (Ipv6Address::GetAny (), ulPort));
-  serverApps.Add (dlPacketSinkHelper.Install (ueNode));
-  serverApps.Add (ulPacketSinkHelper.Install (remoteHost));
-  serverApps.Start (Seconds (1));
-
-  UdpClientHelper dlClientA (ueIpIface.GetAddress (0, 1), dlPort);
-  dlClientA.SetAttribute ("Interval", TimeValue (MilliSeconds(interPacketInterval)));
-  dlClientA.SetAttribute ("MaxPackets", UintegerValue (maxPackets));
-  dlClientA.SetAttribute ("PacketSize", UintegerValue (1472));
-
-  UdpClientHelper ulClientA (remoteHostAddr, ulPort);
-  ulClientA.SetAttribute ("Interval", TimeValue (MilliSeconds(interPacketInterval)));
-  ulClientA.SetAttribute ("MaxPackets", UintegerValue(maxPackets));
-  ulClientA.SetAttribute ("PacketSize", UintegerValue (1472));
-
-  clientApps.Add (dlClientA.Install (remoteHost));
-  clientApps.Add (ulClientA.Install (ueNode));
-  Config::Connect ("/NodeList/*/ApplicationList/*/$ns3::PacketSink/Rx", MakeCallback(&PacketSinkRxTrace));
-
-  clientApps.Start (Seconds (1));
+  //Simulator::Schedule (Seconds (20), &LteThroughput, serverApps);
+  //Simulator::Schedule (Seconds (simTime), &wifiThroughput, serverApps);
 
   // Run simulation
   Simulator::Stop(Seconds(simTime));

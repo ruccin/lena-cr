@@ -154,7 +154,6 @@ void InstallApplications (Args args)
   Config::Connect ("/NodeList/*/ApplicationList/*/$ns3::PacketSink/Rx", MakeCallback(&PacketSinkRxTrace));
 
   clientApps.Start (Seconds (1));
-
 }
 
 void PrintNodesInfo (Ptr<PointToPointEpc6Pmipv6Helper> epcHelper, NodeContainer nodes)
