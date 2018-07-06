@@ -356,7 +356,7 @@ main (int argc, char *argv[])
   PacketSinkHelper ulPacketSinkHelper ("ns3::UdpSocketFactory", Inet6SocketAddress (Ipv6Address::GetAny (), ulPort));
   serverApps.Add (dlPacketSinkHelper.Install (ueNode));
   serverApps.Add (ulPacketSinkHelper.Install (remoteHost));
-  serverApps.Start (Seconds (11));
+  serverApps.Start (Seconds (1));
 
   UdpClientHelper dlClientA (ueIpIface.GetAddress (0, 1), dlPort);
   dlClientA.SetAttribute ("Interval", TimeValue (MilliSeconds(interPacketInterval)));
@@ -372,7 +372,7 @@ main (int argc, char *argv[])
   clientApps.Add (ulClientA.Install (ueNode));
   Config::Connect ("/NodeList/*/ApplicationList/*/$ns3::PacketSink/Rx", MakeCallback(&PacketSinkRxTrace));
 
-  clientApps.Start (Seconds (11));
+  clientApps.Start (Seconds (1));
 
   // Run simulation
   Simulator::Stop(Seconds(simTime));
