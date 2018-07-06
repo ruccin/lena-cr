@@ -342,7 +342,7 @@ main (int argc, char *argv[])
   nodes.Add (wifiAp);
   PrintNodesInfo (epcHelper, nodes);
   // Schedule print information
-  Simulator::Schedule (Seconds (3), &PrintNodesInfo, epcHelper, nodes);
+  Simulator::Schedule (Seconds (4), &PrintNodesInfo, epcHelper, nodes);
 
   //NS_LOG_UNCOND ("Installing Applications");
   // Install and start applications on UEs and remote host
@@ -373,7 +373,6 @@ main (int argc, char *argv[])
   Config::Connect ("/NodeList/*/ApplicationList/*/$ns3::PacketSink/Rx", MakeCallback(&PacketSinkRxTrace));
 
   clientApps.Start (Seconds (11));
-
 
   // Run simulation
   Simulator::Stop(Seconds(simTime));
