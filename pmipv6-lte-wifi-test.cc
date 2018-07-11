@@ -139,18 +139,18 @@ void InstallApplications (Args args)
   serverApps.Add (ulPacketSinkHelper.Install (args.remoteHost));
   serverApps.Start (Seconds (1));
 
-  UdpClientHelper dlClientA (args.ueIpIface.GetAddress (0, 1), dlPort);
-  dlClientA.SetAttribute ("Interval", TimeValue (MilliSeconds(args.interPacketInterval)));
-  dlClientA.SetAttribute ("MaxPackets", UintegerValue (args.maxPackets));
-  dlClientA.SetAttribute ("PacketSize", UintegerValue (1472));
+  UdpClientHelper dlClient (args.ueIpIface.GetAddress (0, 1), dlPort);
+  dlClient.SetAttribute ("Interval", TimeValue (MilliSeconds(args.interPacketInterval)));
+  dlClient.SetAttribute ("MaxPackets", UintegerValue (args.maxPackets));
+  dlClient.SetAttribute ("PacketSize", UintegerValue (1472));
 
-  UdpClientHelper ulClientA (args.remoteHostAddr, ulPort);
-  ulClientA.SetAttribute ("Interval", TimeValue (MilliSeconds(args.interPacketInterval)));
-  ulClientA.SetAttribute ("MaxPackets", UintegerValue(args.maxPackets));
-  ulClientA.SetAttribute ("PacketSize", UintegerValue (1472));
+  UdpClientHelper ulClient (args.remoteHostAddr, ulPort);
+  ulClient.SetAttribute ("Interval", TimeValue (MilliSeconds(args.interPacketInterval)));
+  ulClient.SetAttribute ("MaxPackets", UintegerValue(args.maxPackets));
+  ulClient.SetAttribute ("PacketSize", UintegerValue (1472));
 
-  clientApps.Add (dlClientA.Install (args.remoteHost));
-  clientApps.Add (ulClientA.Install (args.ueNode));
+  clientApps.Add (dlClient.Install (args.remoteHost));
+  clientApps.Add (ulClient.Install (args.ueNode));
   Config::Connect ("/NodeList/*/ApplicationList/*/$ns3::PacketSink/Rx", MakeCallback(&PacketSinkRxTrace));
 
   clientApps.Start (Seconds (1));
