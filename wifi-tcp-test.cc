@@ -37,6 +37,9 @@
 #include "ns3/internet-module.h"
 #include "ns3/mobility-module.h"
 #include "ns3/wifi-module.h"
+#include "ns3/point-to-point-helper.h"
+#include "ns3/csma-module.h"
+#include "ns3/flow-monitor-module.h"
 
 NS_LOG_COMPONENT_DEFINE ("wifi-tcp");
 
