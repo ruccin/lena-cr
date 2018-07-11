@@ -136,7 +136,16 @@ main (int argc, char *argv[])
   ipv4h.SetBase ("1.0.0.0", "255.0.0.0");
   Ipv4InterfaceContainer internetIpIface = ipv4h.Assign (internetDevices);
 
+  CsmaHelper csmaHelper;
+  csmaHelper.SetChannelAttribute ("DataRate", DataRateValue (DataRate ("10Gbps")));
+  csmaHelper.SetChannelAttribute ("Delay", TimeValue (MicroSeconds(100)));
+  csmaHelper.SetDeviceAttribute ("Mtu", UintegerValue (1500));
+  
+  NodeContainer csmaContainer;
+  csmaContainer.Add (smallBS);
+  csmaContainer.Add (apWifiNode);
 
+  NetDeviceContainer csmaDevs = csmaHelper.Install (csmaContainer);
 
   /* Setup Physical Layer */
   YansWifiPhyHelper wifiPhy = YansWifiPhyHelper::Default ();
@@ -194,11 +203,11 @@ main (int argc, char *argv[])
 
   /* Install TCP Receiver on the access point */
   PacketSinkHelper sinkHelper ("ns3::TcpSocketFactory", InetSocketAddress (Ipv4Address::GetAny (), 9));
-  ApplicationContainer sinkApp = sinkHelper.Install (apWifiNode);
+  ApplicationContainer sinkApp = sinkHelper.Install (remoteHost);
   sink = StaticCast<PacketSink> (sinkApp.Get (0));
 
   /* Install TCP/UDP Transmitter on the station */
-  OnOffHelper server ("ns3::TcpSocketFactory", (InetSocketAddress (apInterface.GetAddress (0), 9)));
+  OnOffHelper server ("ns3::TcpSocketFactory", (InetSocketAddress (internetIpIface.GetAddress (1), 9)));
   server.SetAttribute ("PacketSize", UintegerValue (payloadSize));
   server.SetAttribute ("OnTime", StringValue ("ns3::ConstantRandomVariable[Constant=1]"));
   server.SetAttribute ("OffTime", StringValue ("ns3::ConstantRandomVariable[Constant=0]"));
