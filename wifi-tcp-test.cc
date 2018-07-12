@@ -225,11 +225,11 @@ main (int argc, char *argv[])
   //Ptr<Ipv4StaticRouting> staStaticRouting = ipv4RoutingHelper.GetStaticRouting (staWifiNode->GetObject<Ipv4> ());
   //staStaticRouting->AddHostRouteTo (Ipv4Address ("1.0.0.2"), Ipv4Address ("10.0.0.1"), 1);
 
-  //Ptr<Ipv4StaticRouting> apStaticRouting = ipv4RoutingHelper.GetStaticRouting (apWifiNode->GetObject<Ipv4> ());
-  //apStaticRouting->AddHostRouteTo (Ipv4Address ("1.0.0.2"), Ipv4Address ("2.0.0.1"), 2);
+  Ptr<Ipv4StaticRouting> apStaticRouting = ipv4RoutingHelper.GetStaticRouting (apWifiNode->GetObject<Ipv4> ());
+  apStaticRouting->AddHostRouteTo (Ipv4Address ("1.0.0.2"), Ipv4Address ("2.0.0.1"), 2);
 
-  //Ptr<Ipv4StaticRouting> SBSStaticRouting = ipv4RoutingHelper.GetStaticRouting (smallBS->GetObject<Ipv4> ());
-  //SBSStaticRouting->AddHostRouteTo (Ipv4Address ("1.0.0.2"), Ipv4Address ("1.0.0.2"), 1);
+  Ptr<Ipv4StaticRouting> SBSStaticRouting = ipv4RoutingHelper.GetStaticRouting (smallBS->GetObject<Ipv4> ());
+  SBSStaticRouting->AddHostRouteTo (Ipv4Address ("1.0.0.2"), Ipv4Address ("1.0.0.2"), 1);
   //SBSStaticRouting->SetDefaultRoute (internetIpIface.GetAddress (1), 4);
 
   /* Populate routing table */
