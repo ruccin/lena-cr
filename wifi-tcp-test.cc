@@ -218,11 +218,11 @@ main (int argc, char *argv[])
 
   Ipv4StaticRoutingHelper ipv4RoutingHelper;
   Ptr<Ipv4StaticRouting> apStaticRouting = ipv4RoutingHelper.GetStaticRouting (apWifiNode->GetObject<Ipv4> ());
-  apStaticRouting->AddHostRouteTo (Ipv4Address ("1.0.0.2"), Ipv4Address ("2.0.0.1"), 1);
+  apStaticRouting->AddHostRouteTo (Ipv4Address ("1.0.0.2"), Ipv4Address ("2.0.0.1"), 4);
 
   Ptr<Ipv4StaticRouting> SBSStaticRouting = ipv4RoutingHelper.GetStaticRouting (smallBS->GetObject<Ipv4> ());
   //SBSStaticRouting->AddHostRouteTo (Ipv4Address ("1.0.0.2"), Ipv4Address ("1.0.0.2"), 1);
-  SBSStaticRouting->SetDefaultRoute (internetIpIface.GetAddress (1), 1);
+  SBSStaticRouting->SetDefaultRoute (internetIpIface.GetAddress (1), 4);
 
   /* Populate routing table */
   //Ipv4GlobalRoutingHelper::PopulateRoutingTables ();
