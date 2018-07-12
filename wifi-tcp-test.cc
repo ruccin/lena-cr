@@ -120,15 +120,15 @@ main (int argc, char *argv[])
   networkNodes.Create (2);
   Ptr<Node> apWifiNode = networkNodes.Get (0);
   Ptr<Node> staWifiNode = networkNodes.Get (1);
-
+/*
   OlsrHelper olsr;
   Ipv4StaticRoutingHelper staticRouting;
   Ipv4ListRoutingHelper list;
   list.Add (staticRouting, 0);
   list.Add (olsr, 10);
-
+*/
   InternetStackHelper internet_olsr;
-  internet_olsr.SetRoutingHelper (list);
+  //internet_olsr.SetRoutingHelper (list);
   internet_olsr.Install (networkNodes);
 
   NodeContainer remoteHostContainer;
@@ -194,6 +194,9 @@ main (int argc, char *argv[])
 
   NetDeviceContainer staDevices;
   staDevices = wifiHelper.Install (wifiPhy, wifiMac, staWifiNode);
+
+  BridgeHelper bridgeHelper;
+  Ptr<NetDevice> wifiApBrDev = (bridgeHelper.Install (apWifiNode, NetDeviceContainer (apDevice, csmaDevs.Get (1)))).Get (0);
 
   /* Mobility model */
   MobilityHelper mobility;
