@@ -214,22 +214,6 @@ main (int argc, char *argv[])
   Ipv4InterfaceContainer staInterface;
   staInterface = address.Assign (staDevices);
 
-  Ptr<Ipv4> stack = remoteHostContainer.Get(0)->GetObject<Ipv4> ();
-  Ptr<Ipv4RoutingProtocol> rp_Gw = (stack->GetRoutingProtocol ());
-  Ptr<Ipv4ListRouting> lrp_Gw = DynamicCast<Ipv4ListRouting> (rp_Gw);
-
-  Ptr<olsr::RoutingProtocol> olsrrp_Gw;
-
-  for (uint32_t i = 0; i < lrp_Gw->GetNRoutingProtocols (); i++)
-  {
-    int16_t priority;
-    Ptr<Ipv4RoutingProtocol> temp = lrp_Gw->GetRoutingProtocol (i, priority);
-    if (DynamicCast<olsr::RoutingProtocol> (temp))
-    {
-      olsrrp_Gw = DynamicCast<olsr::RoutingProtocol> (temp);
-    }
-  }
-
   /* Populate routing table */
   //Ipv4GlobalRoutingHelper::PopulateRoutingTables ();
 
@@ -245,6 +229,22 @@ main (int argc, char *argv[])
   client.SetAttribute ("OffTime", StringValue ("ns3::ConstantRandomVariable[Constant=0]"));
   client.SetAttribute ("DataRate", DataRateValue (DataRate (dataRate)));
   ApplicationContainer clientApp = client.Install (staWifiNode);
+
+  Ptr<Ipv4> stack = remoteHost->GetObject<Ipv4> ();
+  Ptr<Ipv4RoutingProtocol> rp_Gw = (stack->GetRoutingProtocol ());
+  Ptr<Ipv4ListRouting> lrp_Gw = DynamicCast<Ipv4ListRouting> (rp_Gw);
+
+  Ptr<olsr::RoutingProtocol> olsrrp_Gw;
+
+  for (uint32_t i = 0; i < lrp_Gw->GetNRoutingProtocols (); i++)
+  {
+    int16_t priority;
+    Ptr<Ipv4RoutingProtocol> temp = lrp_Gw->GetRoutingProtocol (i, priority);
+    if (DynamicCast<olsr::RoutingProtocol> (temp))
+    {
+      olsrrp_Gw = DynamicCast<olsr::RoutingProtocol> (temp);
+    }
+  }
 
   /* Start Applications */
   sinkApp.Start (Seconds (0.0));
