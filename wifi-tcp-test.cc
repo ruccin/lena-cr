@@ -216,6 +216,13 @@ main (int argc, char *argv[])
   Ipv4InterfaceContainer staInterface;
   staInterface = address.Assign (staDevices);
 
+  Ptr<Ipv4StaticRouting> apStaticRouting = Ipv4RoutingHelper.GetStaticRouting (apWifiNode->GetObject<Ipv4> ());
+  apStaticRouting->AddHostRouteTo (Ipv4Address ("1.0.0.2"), Ipv4Address ("2.0.0.1"), 1);
+
+  Ptr<Ipv4StaticRouting> SBSStaticRouting = Ipv4RoutingHelper.GetStaticRouting (smallBS->GetObject<Ipv4> ());
+  //SBSStaticRouting->AddHostRouteTo (Ipv4Address ("1.0.0.2"), Ipv4Address ("1.0.0.2"), 1);
+  SBSStaticRouting->SetDefaultRoute (internetIpIface.GetAddress (1), 1);
+
   /* Populate routing table */
   //Ipv4GlobalRoutingHelper::PopulateRoutingTables ();
 
