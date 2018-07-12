@@ -140,8 +140,9 @@ main (int argc, char *argv[])
   NodeContainer smallBSConatainer;
   smallBSConatainer.Create (1);
   Ptr<Node> smallBS = smallBSConatainer.Get (0);
-  InternetStackHelper stack;
-  stack.Install (smallBS);
+  //InternetStackHelper stack;
+  //stack.Install (smallBS);
+  internet_olsr.Install (smallBS);
 
   PointToPointHelper p2ph;
   p2ph.SetDeviceAttribute ("DataRate", DataRateValue (DataRate ("100Gb/s")));
