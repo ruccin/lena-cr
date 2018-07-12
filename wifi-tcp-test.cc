@@ -121,10 +121,6 @@ main (int argc, char *argv[])
   Ptr<Node> apWifiNode = networkNodes.Get (0);
   Ptr<Node> staWifiNode = networkNodes.Get (1);
 
-  NodeContainer remoteHostContainer;
-  remoteHostContainer.Create (1);
-  Ptr<Node> remoteHost = remoteHostContainer.Get (0);
-
   lsrHelper olsr;
   Ipv4StaticRoutingHelper staticRouting;
   Ipv4ListRoutingHelper list;
@@ -134,6 +130,10 @@ main (int argc, char *argv[])
   InternetStackHelper internet_olsr;
   internet_olsr.SetRoutingHelper (list);
   internet_olsr.Install (networkNodes);
+
+  NodeContainer remoteHostContainer;
+  remoteHostContainer.Create (1);
+  Ptr<Node> remoteHost = remoteHostContainer.Get (0);
   internet_olsr.Install (remoteHostContainer);
 
   NodeContainer smallBSConatainer;
@@ -214,7 +214,7 @@ main (int argc, char *argv[])
   Ipv4InterfaceContainer staInterface;
   staInterface = address.Assign (staDevices);
 
-  Ptr<Ipv4> stack = remoteHostContainer.Get(0)->GetObject<Ipv4> ();
+  Ptr<Ipv4> stack = remoteHost->GetObject<Ipv4> ();
   Ptr<Ipv4RoutingProtocol> rp_Gw = (stack->GetRoutingProtocol ());
   Ptr<Ipv4ListRouting> lrp_Gw = DynamicCast<Ipv4ListRouting> (rp_Gw);
 
