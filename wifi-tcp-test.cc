@@ -121,10 +121,10 @@ main (int argc, char *argv[])
   Ptr<Node> apWifiNode = networkNodes.Get (0);
   Ptr<Node> staWifiNode = networkNodes.Get (1);
 
-  lsrHelper olsr;
+  OlsrHelper olsr;
   Ipv4StaticRoutingHelper staticRouting;
   Ipv4ListRoutingHelper list;
-  list.Add (staticRouting,0);
+  list.Add (staticRouting, 0);
   list.Add (olsr, 10);
 
   InternetStackHelper internet_olsr;
