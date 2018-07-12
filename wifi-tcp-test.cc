@@ -160,7 +160,7 @@ main (int argc, char *argv[])
   
   NodeContainer csmaContainer;
   csmaContainer.Add (smallBS);
-  csmaContainer.Add (apWifiNode);
+  //csmaContainer.Add (apWifiNode);
 
   NetDeviceContainer csmaDevs = csmaHelper.Install (csmaContainer);
   ipv4h.SetBase ("2.0.0.0", "255.0.0.0");
