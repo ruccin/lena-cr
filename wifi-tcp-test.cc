@@ -160,7 +160,7 @@ main (int argc, char *argv[])
   
   NodeContainer csmaContainer;
   csmaContainer.Add (smallBS);
-  //csmaContainer.Add (apWifiNode);
+  csmaContainer.Add (apWifiNode);
 
   NetDeviceContainer csmaDevs = csmaHelper.Install (csmaContainer);
   ipv4h.SetBase ("2.0.0.0", "255.0.0.0");
@@ -195,15 +195,15 @@ main (int argc, char *argv[])
 
   Ptr<NetDevice> staDevices = (wifiHelper.Install (wifiPhy, wifiMac, staWifiNode)).Get (0);
 
-  //BridgeHelper bridgeHelper;
-  //Ptr<NetDevice> wifiApBrDev = (bridgeHelper.Install (apWifiNode, NetDeviceContainer (apDevice, csmaDevs.Get (1)))).Get (0);
+  BridgeHelper bridgeHelper;
+  Ptr<NetDevice> wifiApBrDev = (bridgeHelper.Install (apWifiNode, NetDeviceContainer (apDevice, csmaDevs.Get (1)))).Get (0);
 
   /* Mobility model */
   MobilityHelper mobility;
   Ptr<ListPositionAllocator> positionAlloc = CreateObject<ListPositionAllocator> ();
   positionAlloc->Add (Vector (400.0, 0.0, 0.0));
   positionAlloc->Add (Vector (300.0, 0.0, 0.0));
-  positionAlloc->Add (Vector (100.0, 0.0, 0.0));
+  positionAlloc->Add (Vector (1.0, 0.0, 0.0));
   positionAlloc->Add (Vector (1.0, 0.0, 0.0));
 
   mobility.SetPositionAllocator (positionAlloc);
