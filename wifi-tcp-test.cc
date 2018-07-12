@@ -42,6 +42,7 @@
 #include "ns3/flow-monitor-module.h"
 #include "ns3/olsr-helper.h"
 #include "ns3/olsr-routing-protocol.h"
+#include "ns3/bridge-module.h"
 
 NS_LOG_COMPONENT_DEFINE ("wifi-tcp");
 
