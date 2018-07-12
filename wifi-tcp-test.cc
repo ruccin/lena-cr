@@ -186,15 +186,13 @@ main (int argc, char *argv[])
   wifiMac.SetType ("ns3::ApWifiMac",
                    "Ssid", SsidValue (ssid));
 
-  NetDeviceContainer apDevice;
-  apDevice = wifiHelper.Install (wifiPhy, wifiMac, apWifiNode);
+  Ptr<NetDevice> apDevice = (wifiHelper.Install (wifiPhy, wifiMac, apWifiNode)).Get (0);
 
   /* Configure STA */
   wifiMac.SetType ("ns3::StaWifiMac",
                    "Ssid", SsidValue (ssid));
 
-  NetDeviceContainer staDevices;
-  staDevices = wifiHelper.Install (wifiPhy, wifiMac, staWifiNode);
+  Ptr<NetDevice> staDevices = (wifiHelper.Install (wifiPhy, wifiMac, staWifiNode)).Get (0);
 
   BridgeHelper bridgeHelper;
   Ptr<NetDevice> wifiApBrDev = (bridgeHelper.Install (apWifiNode, NetDeviceContainer (apDevice, csmaDevs.Get (1)))).Get (0);
