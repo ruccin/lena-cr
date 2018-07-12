@@ -149,6 +149,8 @@ main (int argc, char *argv[])
   csmaContainer.Add (apWifiNode);
 
   NetDeviceContainer csmaDevs = csmaHelper.Install (csmaContainer);
+  ipv4h.SetBase ("2.0.0.0", "255.0.0.0");
+  Ipv4InterfaceContainer csmaIpIface = ipv4h.Assign (csmaDevs);
 
   /* Setup Physical Layer */
   YansWifiPhyHelper wifiPhy = YansWifiPhyHelper::Default ();
@@ -193,7 +195,14 @@ main (int argc, char *argv[])
   mobility.Install (staWifiNode);
 
   /* Internet stack */
-  stack.Install (networkNodes);
+  OlsrHelper olsr;
+  Ipv4StaticRoutingHelper staticRouting;
+  Ipv4ListRoutingHelper list;
+  list.Add (staticRouting, 0);
+  list.Add (olsr, 10);
+  InternetStackHelper internet_olsr;
+  internet_olsr.SetRoutingHelper (list);
+  internet_olsr.Install (networkNodes);
   Ipv4AddressHelper address;
   address.SetBase ("10.0.0.0", "255.255.255.0");
   Ipv4InterfaceContainer apInterface;
@@ -201,8 +210,24 @@ main (int argc, char *argv[])
   Ipv4InterfaceContainer staInterface;
   staInterface = address.Assign (staDevices);
 
+  Ptr<Ipv4> stack = remoteHost->GetObject<Ipv4> ();
+  Ptr<Ipv4RoutingProtocol> rp_Gw = (stack->GetRoutingProtocol ());
+  Ptr<Ipv4ListRouting> lrp_Gw = DynamicCast<Ipv4ListRouting> (rp_Gw);
+
+  Ptr<olsr::RoutingProtocol> olsrrp_Gw;
+
+  for (uint32_t i = 0; i < lrp_Gw->GetNRoutingProtocols (); i++)
+  {
+    int16_t priority;
+    Ptr<Ipv4RoutingProtocol> temp = lrp_Gw->GetRoutingProtocol (i, priority);
+    if (DynamicCast<olsr::RoutingProtocol> (temp))
+    {
+      olsrrp_Gw = DynamicCast<olsr::RoutingProtocol> (temp);
+    }
+  }
+
   /* Populate routing table */
-  Ipv4GlobalRoutingHelper::PopulateRoutingTables ();
+  //Ipv4GlobalRoutingHelper::PopulateRoutingTables ();
 
   /* Install TCP Receiver on the access point */
   PacketSinkHelper sinkHelper ("ns3::TcpSocketFactory", InetSocketAddress (Ipv4Address::GetAny (), 9));
@@ -210,16 +235,16 @@ main (int argc, char *argv[])
   sink = StaticCast<PacketSink> (sinkApp.Get (0));
 
   /* Install TCP/UDP Transmitter on the station */
-  OnOffHelper server ("ns3::TcpSocketFactory", (InetSocketAddress (internetIpIface.GetAddress (1), 9)));
-  server.SetAttribute ("PacketSize", UintegerValue (payloadSize));
-  server.SetAttribute ("OnTime", StringValue ("ns3::ConstantRandomVariable[Constant=1]"));
-  server.SetAttribute ("OffTime", StringValue ("ns3::ConstantRandomVariable[Constant=0]"));
-  server.SetAttribute ("DataRate", DataRateValue (DataRate (dataRate)));
-  ApplicationContainer serverApp = server.Install (staWifiNode);
+  OnOffHelper client ("ns3::TcpSocketFactory", (InetSocketAddress (internetIpIface.GetAddress (1), 9)));
+  client.SetAttribute ("PacketSize", UintegerValue (payloadSize));
+  client.SetAttribute ("OnTime", StringValue ("ns3::ConstantRandomVariable[Constant=1]"));
+  client.SetAttribute ("OffTime", StringValue ("ns3::ConstantRandomVariable[Constant=0]"));
+  client.SetAttribute ("DataRate", DataRateValue (DataRate (dataRate)));
+  ApplicationContainer clientApp = client.Install (staWifiNode);
 
   /* Start Applications */
   sinkApp.Start (Seconds (0.0));
-  serverApp.Start (Seconds (1.0));
+  clientApp.Start (Seconds (1.0));
   Simulator::Schedule (Seconds (1.1), &CalculateThroughput);
 
   /* Enable Traces */
@@ -243,4 +268,28 @@ main (int argc, char *argv[])
     }
   std::cout << "\nAverage throughput: " << averageThroughput << " Mbit/s" << std::endl;
   return 0;
+
+  FlowMonitorHelper flowmon;
+  Ptr<FlowMonitor> monitor = flowmon.InstallAll ();
+
+  monitor->CheckForLostPackets ();
+  Ptr<Ipv4FlowClassifier> classifier = DynamicCast<Ipv4FlowClassifier> (flowmon.GetClassifier ());
+  std::map<FlowId, FlowMonitor::FlowStats> stats = monitor->GetFlowStats ();
+
+  AsciiTraceHelper asciiTHFlow;
+  Ptr<OutputStreamWrapper> flowStream = asciiTHFlow.CreateFileStream ("lte01.txt");
+  for (std::map<FlowId, FlowMonitor::FlowStats>::const_iterator i = stats.begin (); i != stats.end (); ++i)
+    {
+          Ipv4FlowClassifier::FiveTuple t = classifier->FindFlow (i->first);
+          *flowStream->GetStream () << " Flow " << i->first << " (" << t.sourceAddress << " -> " << t.destinationAddress << ")" << std::endl;
+          *flowStream->GetStream () << " First packet time: " << i->second.timeFirstRxPacket << std::endl;
+          *flowStream->GetStream () << " Tx Packets: " << i->second.txPackets << std::endl;
+          *flowStream->GetStream () << " Rx Packets: " << i->second.rxPackets << std::endl;
+          uint32_t dropes = 0;
+           for (uint32_t reasonCode = 0; reasonCode < i->second.packetsDropped.size (); reasonCode++)
+           {
+        	   dropes+= i->second.packetsDropped[reasonCode];
+           }
+           *flowStream->GetStream () << " Drop packets: " << dropes << std::endl;
+    }
 }
