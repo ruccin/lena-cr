@@ -216,6 +216,7 @@ main (int argc, char *argv[])
   Ipv4InterfaceContainer staInterface;
   staInterface = address.Assign (staDevices);
 
+  Ipv4StaticRoutingHelper ipv4RoutingHelper;
   Ptr<Ipv4StaticRouting> apStaticRouting = Ipv4RoutingHelper.GetStaticRouting (apWifiNode->GetObject<Ipv4> ());
   apStaticRouting->AddHostRouteTo (Ipv4Address ("1.0.0.2"), Ipv4Address ("2.0.0.1"), 1);
 
