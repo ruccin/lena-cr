@@ -195,8 +195,8 @@ main (int argc, char *argv[])
 
   Ptr<NetDevice> staDevices = (wifiHelper.Install (wifiPhy, wifiMac, staWifiNode)).Get (0);
 
-  BridgeHelper bridgeHelper;
-  Ptr<NetDevice> wifiApBrDev = (bridgeHelper.Install (apWifiNode, NetDeviceContainer (apDevice, csmaDevs.Get (1)))).Get (0);
+  //BridgeHelper bridgeHelper;
+  //Ptr<NetDevice> wifiApBrDev = (bridgeHelper.Install (apWifiNode, NetDeviceContainer (apDevice, csmaDevs.Get (1)))).Get (0);
 
   /* Mobility model */
   MobilityHelper mobility;
