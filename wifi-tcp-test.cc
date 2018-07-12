@@ -124,12 +124,13 @@ main (int argc, char *argv[])
   NodeContainer remoteHostContainer;
   remoteHostContainer.Create (1);
   Ptr<Node> remoteHost = remoteHostContainer.Get (0);
-  InternetStackHelper stack;
-  stack.Install (remoteHostContainer);
+  InternetStackHelper internet_olsr;
+  internet_olsr.Install (remoteHostContainer);
 
   NodeContainer smallBSConatainer;
   smallBSConatainer.Create (1);
   Ptr<Node> smallBS = smallBSConatainer.Get (0);
+  InternetStackHelper stack;
   stack.Install (smallBS);
 
   PointToPointHelper p2ph;
@@ -202,7 +203,6 @@ main (int argc, char *argv[])
   Ipv4ListRoutingHelper list;
   list.Add (staticRouting, 0);
   list.Add (olsr, 10);
-  InternetStackHelper internet_olsr;
   internet_olsr.SetRoutingHelper (list);
   internet_olsr.Install (networkNodes);
   Ipv4AddressHelper address;
@@ -212,7 +212,7 @@ main (int argc, char *argv[])
   Ipv4InterfaceContainer staInterface;
   staInterface = address.Assign (staDevices);
 
-  Ptr<Ipv4> stack = remoteHostContainer.Get(0)->GetObject<Ipv4> ();
+  Ptr<Ipv4> stack = remoteHost->GetObject<Ipv4> ();
   Ptr<Ipv4RoutingProtocol> rp_Gw = (stack->GetRoutingProtocol ());
   Ptr<Ipv4ListRouting> lrp_Gw = DynamicCast<Ipv4ListRouting> (rp_Gw);
 
