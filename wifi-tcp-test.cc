@@ -285,7 +285,6 @@ main (int argc, char *argv[])
       exit (1);
     }
   std::cout << "\nAverage throughput: " << averageThroughput << " Mbit/s" << std::endl;
-  return 0;
 
   FlowMonitorHelper flowmon;
   Ptr<FlowMonitor> monitor = flowmon.InstallAll ();
@@ -310,4 +309,6 @@ main (int argc, char *argv[])
            }
            *flowStream->GetStream () << " Drop packets: " << dropes << std::endl;
     }
+
+  return 0;
 }
