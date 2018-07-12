@@ -124,7 +124,16 @@ main (int argc, char *argv[])
   NodeContainer remoteHostContainer;
   remoteHostContainer.Create (1);
   Ptr<Node> remoteHost = remoteHostContainer.Get (0);
+
+  lsrHelper olsr;
+  Ipv4StaticRoutingHelper staticRouting;
+  Ipv4ListRoutingHelper list;
+  list.Add (staticRouting,0);
+  list.Add (olsr, 10);
+
   InternetStackHelper internet_olsr;
+  internet_olsr.SetRoutingHelper (list);
+  internet_olsr.Install (networkNodes);
   internet_olsr.Install (remoteHostContainer);
 
   NodeContainer smallBSConatainer;
@@ -198,13 +207,6 @@ main (int argc, char *argv[])
   mobility.Install (staWifiNode);
 
   /* Internet stack */
-  OlsrHelper olsr;
-  Ipv4StaticRoutingHelper staticRouting;
-  Ipv4ListRoutingHelper list;
-  list.Add (staticRouting, 0);
-  list.Add (olsr, 10);
-  internet_olsr.SetRoutingHelper (list);
-  internet_olsr.Install (networkNodes);
   Ipv4AddressHelper address;
   address.SetBase ("10.0.0.0", "255.255.255.0");
   Ipv4InterfaceContainer apInterface;
