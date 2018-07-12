@@ -40,6 +40,8 @@
 #include "ns3/point-to-point-helper.h"
 #include "ns3/csma-module.h"
 #include "ns3/flow-monitor-module.h"
+#include "ns3/olsr-helper.h"
+#include "ns3/olsr-routing-protocol.h"
 
 NS_LOG_COMPONENT_DEFINE ("wifi-tcp");
 
