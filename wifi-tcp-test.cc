@@ -237,7 +237,7 @@ main (int argc, char *argv[])
 
   /* Install TCP Receiver on the access point */
   PacketSinkHelper sinkHelper ("ns3::TcpSocketFactory", InetSocketAddress (Ipv4Address::GetAny (), 9));
-  ApplicationContainer sinkApp = sinkHelper.Install (apWiFiNode);
+  ApplicationContainer sinkApp = sinkHelper.Install (apWifiNode);
   sink = StaticCast<PacketSink> (sinkApp.Get (0));
 
   /* Install TCP/UDP Transmitter on the station */
