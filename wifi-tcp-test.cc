@@ -214,7 +214,7 @@ main (int argc, char *argv[])
   Ipv4InterfaceContainer staInterface;
   staInterface = address.Assign (staDevices);
 
-  Ptr<Ipv4> stack = remoteHost->GetObject<Ipv4> ();
+  Ptr<Ipv4> stack = remoteHostContainer.Get(0)->GetObject<Ipv4> ();
   Ptr<Ipv4RoutingProtocol> rp_Gw = (stack->GetRoutingProtocol ());
   Ptr<Ipv4ListRouting> lrp_Gw = DynamicCast<Ipv4ListRouting> (rp_Gw);
 
