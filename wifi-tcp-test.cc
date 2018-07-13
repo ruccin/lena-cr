@@ -242,7 +242,7 @@ main (int argc, char *argv[])
   ApplicationContainer serverApp = server.Install (remoteHost);
 
   UdpClientHelper client (internetIpIface.GetAddress (1), 9);
-  client.SetAttribute ("MaxPackets", UintegerValue (4294967295u));
+  client.SetAttribute ("MaxPackets", UintegerValue (1000));
   client.SetAttribute ("Interval", TimeValue (Time ("0.00002"))); //packets/s
   client.SetAttribute ("PacketSize", UintegerValue (payloadSize));
   ApplicationContainer clientApp = client.Install (staWifiNode);
