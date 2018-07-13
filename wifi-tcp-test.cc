@@ -48,6 +48,16 @@ CalculateThroughput ()
   Simulator::Schedule (MilliSeconds (100), &CalculateThroughput);
 }
 
+void
+CalculateThroughputB ()
+{
+  Time now = Simulator::Now ();                                         /* Return the simulator's virtual time. */
+  double cur = (sinkB->GetTotalRx () - lastTotalRx) * (double) 8 / 1e5;     /* Convert Application RX Packets to MBits. */
+  std::cout << now.GetSeconds () << "s: \t" << cur << " Mbit/s" << std::endl;
+  lastTotalRx = sinkB->GetTotalRx ();
+  Simulator::Schedule (MilliSeconds (100), &CalculateThroughputB);
+}
+
 int
 main (int argc, char *argv[])
 {
@@ -55,7 +65,7 @@ main (int argc, char *argv[])
   std::string dataRate = "100Mbps";                  /* Application layer datarate. */
   std::string tcpVariant = "TcpNewReno";             /* TCP variant type. */
   std::string phyRate = "HtMcs7";                    /* Physical layer bitrate. */
-  double simulationTime = 20;                        /* Simulation time in seconds. */
+  double simulationTime = 40;                        /* Simulation time in seconds. */
   bool pcapTracing = false;                          /* PCAP Tracing is enabled or not. */
 
   /* Command line argument parser setup. */
@@ -229,6 +239,7 @@ main (int argc, char *argv[])
   
   UdpEchoServerHelper ulserver (7);
   ApplicationContainer serverAppB = ulserver.Install (staWifiNode);
+  sinkB = StaticCast<UdpServer> (serverAppB.Get (0));
 
   /* Install TCP/UDP Transmitter on the station */
   OnOffHelper client ("ns3::TcpSocketFactory", (InetSocketAddress (internetIpIface.GetAddress (1), 9)));
@@ -246,10 +257,13 @@ main (int argc, char *argv[])
 
   /* Start Applications */
   serverApp.Start (Seconds (0.0));
-  serverAppB.Start (Seconds (0.0));
+  serverApp.Stop (Seconds (20.0));
+  serverAppB.Start (Seconds (20.1));
   clientApp.Start (Seconds (1.0));
-  clientAppB.Start (Seconds (1.0));
+  clientApp.Stop (Seconds (20.0));
+  clientAppB.Start (Seconds (20.1));
   Simulator::Schedule (Seconds (1.1), &CalculateThroughput);
+  Simulator::Schedule (Seconds (20.1), &CalculateThroughputB);
 
   /* Enable Traces */
   if (pcapTracing)
