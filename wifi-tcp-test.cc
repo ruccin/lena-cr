@@ -235,8 +235,6 @@ main (int argc, char *argv[])
   /* Populate routing table */
   //Ipv4GlobalRoutingHelper::PopulateRoutingTables ();
 
-  Ptr<Node> remoteAddr = smallBS->GetObject<Ipv4> ()->GetAddress ().GetLocal ();
-
   /* Install TCP Receiver on the access point */
   PacketSinkHelper sinkHelper ("ns3::TcpSocketFactory", InetSocketAddress (Ipv4Address::GetAny (), 9));
   ApplicationContainer sinkApp = sinkHelper.Install (smallBS);
@@ -268,7 +266,7 @@ main (int argc, char *argv[])
     }
   }
 */
-  UdpEchoClientHelper echoClient (remoteAddr, 9);
+  UdpEchoClientHelper echoClient (csmaIpIface.GetAddress (0), 9);
   echoClient.SetAttribute ("MaxPackets", UintegerValue (1000));
   echoClient.SetAttribute ("Interval", TimeValue (Seconds (1.0)));
   echoClient.SetAttribute ("PacketSize", UintegerValue (1024));
