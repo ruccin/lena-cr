@@ -16,21 +16,8 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  * Author: Hany Assasa <hany.assasa@gmail.com>
-.*
- * This is a simple example to test TCP over 802.11n (with MPDU aggregation enabled).
- *
- * Network topology:
- *
- *   Ap    STA
- *   *      *
- *   |      |
- *   n1     n2
- *
- * In this example, an HT station sends TCP packets to the access point.
- * We report the total throughput received during a window of 100ms.
- * The user can specify the application data rate and choose the variant
- * of TCP i.e. congestion control algorithm to use.
- */
+ * 
+ * */
 
 #include "ns3/applications-module.h"
 #include "ns3/core-module.h"
@@ -222,8 +209,8 @@ main (int argc, char *argv[])
   staInterface = address.Assign (staDevices);
 
   Ipv4StaticRoutingHelper ipv4RoutingHelper;
-  //Ptr<Ipv4StaticRouting> staStaticRouting = ipv4RoutingHelper.GetStaticRouting (staWifiNode->GetObject<Ipv4> ());
-  //staStaticRouting->AddHostRouteTo (Ipv4Address ("1.0.0.2"), Ipv4Address ("10.0.0.1"), 1);
+  Ptr<Ipv4StaticRouting> staStaticRouting = ipv4RoutingHelper.GetStaticRouting (staWifiNode->GetObject<Ipv4> ());
+  staStaticRouting->AddHostRouteTo (csmaIpIface.GetAddress (0), Ipv4Address ("2.0.0.1"), 1);
 
   Ptr<Ipv4StaticRouting> apStaticRouting = ipv4RoutingHelper.GetStaticRouting (apWifiNode->GetObject<Ipv4> ());
   apStaticRouting->AddHostRouteTo (csmaIpIface.GetAddress (0), Ipv4Address("2.0.0.1"), 1);
@@ -247,8 +234,6 @@ main (int argc, char *argv[])
   client.SetAttribute ("OffTime", StringValue ("ns3::ConstantRandomVariable[Constant=0]"));
   client.SetAttribute ("DataRate", DataRateValue (DataRate (dataRate)));
   ApplicationContainer clientApp = client.Install (staWifiNode);
-
-  
 
 /*
   Ptr<Ipv4> stack = smallBS->GetObject<Ipv4> ();
@@ -294,10 +279,11 @@ main (int argc, char *argv[])
     }
   std::cout << "\nAverage throughput: " << averageThroughput << " Mbit/s" << std::endl;
 
+/*
   FlowMonitorHelper flowmon;
   Ptr<FlowMonitor> monitor = flowmon.InstallAll ();
-
   monitor->CheckForLostPackets ();
+
   Ptr<Ipv4FlowClassifier> classifier = DynamicCast<Ipv4FlowClassifier> (flowmon.GetClassifier ());
   std::map<FlowId, FlowMonitor::FlowStats> stats = monitor->GetFlowStats ();
 
@@ -317,6 +303,7 @@ main (int argc, char *argv[])
            }
            *flowStream->GetStream () << " Drop packets: " << dropes << std::endl;
     }
+*/
 
   return 0;
 }
