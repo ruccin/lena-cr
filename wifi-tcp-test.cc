@@ -202,7 +202,7 @@ main (int argc, char *argv[])
   MobilityHelper mobility;
   Ptr<ListPositionAllocator> positionAlloc = CreateObject<ListPositionAllocator> ();
   positionAlloc->Add (Vector (100.0, 0.0, 0.0));
-  positionAlloc->Add (Vector (20.0, 0.0, 0.0));
+  positionAlloc->Add (Vector (40.0, 0.0, 0.0));
   positionAlloc->Add (Vector (20.0, 0.0, 0.0));
   positionAlloc->Add (Vector (1.0, 0.0, 0.0));
 
@@ -226,7 +226,7 @@ main (int argc, char *argv[])
   //staStaticRouting->AddHostRouteTo (Ipv4Address ("1.0.0.2"), Ipv4Address ("10.0.0.1"), 1);
 
   Ptr<Ipv4StaticRouting> apStaticRouting = ipv4RoutingHelper.GetStaticRouting (apWifiNode->GetObject<Ipv4> ());
-  apStaticRouting->AddHostRouteTo (Ipv4Address ("2.0.0.2"), Ipv4Address ("2.0.0.1"), 3);
+  apStaticRouting->AddHostRouteTo (csmaIpIface.GetAddress (0), csmaIpIface.GetAddress (0), 1);
 
   //Ptr<Ipv4StaticRouting> SBSStaticRouting = ipv4RoutingHelper.GetStaticRouting (smallBS->GetObject<Ipv4> ());
   //SBSStaticRouting->AddHostRouteTo (Ipv4Address ("1.0.0.2"), Ipv4Address ("1.0.0.2"), 1);
