@@ -266,7 +266,7 @@ main (int argc, char *argv[])
 */
 
   /* Start Applications */
-  sinkApp.Start (Seconds (0.0));
+  serverApp.Start (Seconds (0.0));
   clientApp.Start (Seconds (1.0));
   Simulator::Schedule (Seconds (1.1), &CalculateThroughput);
 
