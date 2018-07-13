@@ -36,7 +36,6 @@ NS_LOG_COMPONENT_DEFINE ("wifi-tcp");
 using namespace ns3;
 
 Ptr<PacketSink> sink;                         /* Pointer to the packet sink application */
-Ptr<UdpServer> sinkB; 
 uint64_t lastTotalRx = 0;                     /* The value of the last total received bytes */
 
 void
@@ -47,16 +46,6 @@ CalculateThroughput ()
   std::cout << now.GetSeconds () << "s: \t" << cur << " Mbit/s" << std::endl;
   lastTotalRx = sink->GetTotalRx ();
   Simulator::Schedule (MilliSeconds (100), &CalculateThroughput);
-}
-
-void
-CalculateThroughputB ()
-{
-  Time now = Simulator::Now ();                                         /* Return the simulator's virtual time. */
-  double cur = (sinkB->GetTotalRx () - lastTotalRx) * (double) 8 / 1e5;     /* Convert Application RX Packets to MBits. */
-  std::cout << now.GetSeconds () << "s: \t" << cur << " Mbit/s" << std::endl;
-  lastTotalRx = sinkB->GetTotalRx ();
-  Simulator::Schedule (MilliSeconds (100), &CalculateThroughputB);
 }
 
 int
@@ -145,7 +134,7 @@ main (int argc, char *argv[])
   PointToPointHelper p2ph;
   p2ph.SetDeviceAttribute ("DataRate", DataRateValue (DataRate ("100Gb/s")));
   p2ph.SetDeviceAttribute ("Mtu", UintegerValue (1500));
-  p2ph.SetChannelAttribute ("Delay", TimeValue (MilliSeconds (300)));
+  p2ph.SetChannelAttribute ("Delay", TimeValue (MilliSeconds (100)));
   NetDeviceContainer internetDevices = p2ph.Install (smallBS, remoteHost);
   Ipv4AddressHelper ipv4h;
   ipv4h.SetBase ("1.0.0.0", "255.0.0.0");
@@ -153,7 +142,7 @@ main (int argc, char *argv[])
 
   CsmaHelper csmaHelper;
   csmaHelper.SetChannelAttribute ("DataRate", DataRateValue (DataRate ("10Gbps")));
-  csmaHelper.SetChannelAttribute ("Delay", TimeValue (MicroSeconds(100)));
+  csmaHelper.SetChannelAttribute ("Delay", TimeValue (MicroSeconds (100)));
   csmaHelper.SetDeviceAttribute ("Mtu", UintegerValue (1500));
   
   NodeContainer csmaContainer;
@@ -237,10 +226,6 @@ main (int argc, char *argv[])
   PacketSinkHelper dlserver ("ns3::TcpSocketFactory", InetSocketAddress (Ipv4Address::GetAny (), 9));
   ApplicationContainer serverApp = dlserver.Install (remoteHost);
   sink = StaticCast<PacketSink> (serverApp.Get (0));
-  
-  UdpEchoServerHelper ulserver (7);
-  ApplicationContainer serverAppB = ulserver.Install (staWifiNode);
-  sinkB = StaticCast<UdpServer> (serverAppB.Get (0));
 
   /* Install TCP/UDP Transmitter on the station */
   OnOffHelper client ("ns3::TcpSocketFactory", (InetSocketAddress (internetIpIface.GetAddress (1), 9)));
@@ -250,21 +235,10 @@ main (int argc, char *argv[])
   client.SetAttribute ("DataRate", DataRateValue (DataRate (dataRate)));
   ApplicationContainer clientApp = client.Install (staWifiNode);
 
-  UdpEchoClientHelper ulclient (staInterface.GetAddress (0), 7);
-  ulclient.SetAttribute ("MaxPackets", UintegerValue (1000));
-  ulclient.SetAttribute ("Interval", TimeValue (Time ("0.00002"))); //packets/s
-  ulclient.SetAttribute ("PacketSize", UintegerValue (1024));
-  ApplicationContainer clientAppB = ulclient.Install (remoteHost);
-
   /* Start Applications */
   serverApp.Start (Seconds (0.0));
-  serverApp.Stop (Seconds (20.0));
-  serverAppB.Start (Seconds (20.1));
   clientApp.Start (Seconds (1.0));
-  clientApp.Stop (Seconds (20.0));
-  clientAppB.Start (Seconds (20.1));
   Simulator::Schedule (Seconds (1.1), &CalculateThroughput);
-  Simulator::Schedule (Seconds (20.1), &CalculateThroughputB);
 
   /* Enable Traces */
   if (pcapTracing)
@@ -312,10 +286,6 @@ main (int argc, char *argv[])
       exit (1);
     }
   std::cout << "\nAverage throughput: " << averageThroughput << " Mbit/s" << std::endl;
-
-  uint64_t totalPacketsThrough = DynamicCast<UdpServer> (serverAppB.Get (0))->GetReceived ();
-  double throughput = totalPacketsThrough * payloadSize * 8 / (simulationTime * 1000000.0);
-  std::cout << "Throughput with default configuration (A-MPDU aggregation enabled, 65kB): " << throughput << " Mbit/s" << '\n';
 
   return 0;
 }
