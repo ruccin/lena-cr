@@ -296,11 +296,7 @@ main (int argc, char *argv[])
            *flowStream->GetStream () << " Drop packets: " << dropes << std::endl;
     }
 
-  /* Start Simulation */
-  Simulator::Stop (Seconds (simulationTime + 1));
-  Simulator::Run ();
-  Simulator::Destroy ();
-
+  
   double averageThroughput = ((sink->GetTotalRx () * 8) / (1e6  * simulationTime));
   if (averageThroughput < 50)
     {
@@ -309,5 +305,10 @@ main (int argc, char *argv[])
     }
   std::cout << "\nAverage throughput: " << averageThroughput << " Mbit/s" << std::endl;
 
+  /* Start Simulation */
+  Simulator::Stop (Seconds (simulationTime + 1));
+  Simulator::Run ();
+  Simulator::Destroy ();
+  
   return 0;
 }
