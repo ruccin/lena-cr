@@ -223,9 +223,12 @@ main (int argc, char *argv[])
   Ipv4GlobalRoutingHelper::PopulateRoutingTables ();
 
   /* Install TCP Receiver on the access point */
-  PacketSinkHelper sinkHelper ("ns3::TcpSocketFactory", InetSocketAddress (Ipv4Address::GetAny (), 9));
-  ApplicationContainer serverApp = sinkHelper.Install (remoteHost);
+  PacketSinkHelper dlserver ("ns3::TcpSocketFactory", InetSocketAddress (Ipv4Address::GetAny (), 9));
+  ApplicationContainer serverApp = dlserver.Install (remoteHost);
   sink = StaticCast<PacketSink> (serverApp.Get (0));
+  
+  UdpEchoServerHelper ulserver (7);
+  ApplicationContainer serverAppB = ulserver.Install (staWifiNode);
 
   /* Install TCP/UDP Transmitter on the station */
   OnOffHelper client ("ns3::TcpSocketFactory", (InetSocketAddress (internetIpIface.GetAddress (1), 9)));
@@ -235,9 +238,17 @@ main (int argc, char *argv[])
   client.SetAttribute ("DataRate", DataRateValue (DataRate (dataRate)));
   ApplicationContainer clientApp = client.Install (staWifiNode);
 
+  UdpEchoClientHelper ulclient (staInterface.GetAddress (0), 7);
+  ulclient.SetAttribute ("MaxPackets", UintegerValue (1000));
+  ulclient.SetAttribute ("Interval", TimeValue (Time ("0.00002"))); //packets/s
+  ulclient.SetAttribute ("PacketSize", UintegerValue (1024));
+  ApplicationContainer clientAppB = ulclient.Install (remoteHost);
+
   /* Start Applications */
   serverApp.Start (Seconds (0.0));
+  serverAppB.Start (Seconds (0.0));
   clientApp.Start (Seconds (1.0));
+  clientAppB.Start (Seconds (1.0));
   Simulator::Schedule (Seconds (1.1), &CalculateThroughput);
 
   /* Enable Traces */
@@ -286,6 +297,10 @@ main (int argc, char *argv[])
       exit (1);
     }
   std::cout << "\nAverage throughput: " << averageThroughput << " Mbit/s" << std::endl;
+
+  uint64_t totalPacketsThrough = DynamicCast<UdpServer> (serverAppB.Get (0))->GetReceived ();
+  double throughput = totalPacketsThrough * payloadSize * 8 / (simulationTime * 1000000.0);
+  std::cout << "Throughput with default configuration (A-MPDU aggregation enabled, 65kB): " << throughput << " Mbit/s" << '\n';
 
   return 0;
 }
