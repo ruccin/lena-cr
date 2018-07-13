@@ -188,8 +188,8 @@ main (int argc, char *argv[])
   /* Mobility model */
   MobilityHelper mobility;
   Ptr<ListPositionAllocator> positionAlloc = CreateObject<ListPositionAllocator> ();
-  positionAlloc->Add (Vector (40.0, 0.0, 0.0));
-  positionAlloc->Add (Vector (40.0, 0.0, 0.0));
+  positionAlloc->Add (Vector (20.0, 0.0, 0.0));
+  positionAlloc->Add (Vector (20.0, 0.0, 0.0));
   positionAlloc->Add (Vector (20.0, 0.0, 0.0));
   positionAlloc->Add (Vector (1.0, 0.0, 0.0));
 
