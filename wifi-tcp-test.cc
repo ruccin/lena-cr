@@ -224,11 +224,11 @@ main (int argc, char *argv[])
 
   /* Install TCP Receiver on the access point */
   PacketSinkHelper sinkHelper ("ns3::TcpSocketFactory", InetSocketAddress (Ipv4Address::GetAny (), 9));
-  ApplicationContainer sinkApp = sinkHelper.Install (smallBS);
+  ApplicationContainer sinkApp = sinkHelper.Install (remoteHost);
   sink = StaticCast<PacketSink> (sinkApp.Get (0));
 
   /* Install TCP/UDP Transmitter on the station */
-  OnOffHelper client ("ns3::TcpSocketFactory", (InetSocketAddress (csmaIpIface.GetAddress (0), 9)));
+  OnOffHelper client ("ns3::TcpSocketFactory", (InetSocketAddress (internetIpIface.GetAddress (1), 9)));
   client.SetAttribute ("PacketSize", UintegerValue (payloadSize));
   client.SetAttribute ("OnTime", StringValue ("ns3::ConstantRandomVariable[Constant=1]"));
   client.SetAttribute ("OffTime", StringValue ("ns3::ConstantRandomVariable[Constant=0]"));
