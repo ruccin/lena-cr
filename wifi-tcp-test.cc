@@ -188,9 +188,9 @@ main (int argc, char *argv[])
   /* Mobility model */
   MobilityHelper mobility;
   Ptr<ListPositionAllocator> positionAlloc = CreateObject<ListPositionAllocator> ();
-  positionAlloc->Add (Vector (20.0, 0.0, 0.0));
-  positionAlloc->Add (Vector (20.0, 0.0, 0.0));
   positionAlloc->Add (Vector (10.0, 0.0, 0.0));
+  positionAlloc->Add (Vector (5.0, 0.0, 0.0));
+  positionAlloc->Add (Vector (3.0, 0.0, 0.0));
   positionAlloc->Add (Vector (1.0, 0.0, 0.0));
 
   mobility.SetPositionAllocator (positionAlloc);
@@ -216,7 +216,7 @@ main (int argc, char *argv[])
   apStaticRouting->AddHostRouteTo (internetIpIface.GetAddress (1), Ipv4Address("2.0.0.1"), 1);
 
   Ptr<Ipv4StaticRouting> SBSStaticRouting = ipv4RoutingHelper.GetStaticRouting (smallBS->GetObject<Ipv4> ());
-  SBSStaticRouting->AddHostRouteTo (internetIpIface.GetAddress (1), Ipv4Address ("1.0.0.2"), 1);
+  SBSStaticRouting->AddHostRouteTo (internetIpIface.GetAddress (1), Ipv4Address ("1.0.0.1"), 1);
   //SBSStaticRouting->SetDefaultRoute (internetIpIface.GetAddress (1), 4);
 
   /* Populate routing table */
