@@ -255,8 +255,8 @@ main (int argc, char *argv[])
 
   /* Start Applications */
   sinkApp.Start (Seconds (0.0));
-  clientApp.Start (Seconds (4.0));
-  Simulator::Schedule (Seconds (4.1), &CalculateThroughput);
+  clientApp.Start (Seconds (1.0));
+  Simulator::Schedule (Seconds (1.1), &CalculateThroughput);
 
   /* Enable Traces */
   if (pcapTracing)
@@ -268,11 +268,7 @@ main (int argc, char *argv[])
 
   FlowMonitorHelper flowmon;
   Ptr<FlowMonitor> monitor;
-  monitor = flowmon.Install (remoteHost);
-  monitor = flowmon.Install (smallBS);
-  monitor = flowmon.Install (apWifiNode);
-  monitor = flowmon.Install (staWifiNode);
-
+  monitor = flowmon.InstallAll ();
   monitor->CheckForLostPackets (Time(0.001));
   monitor->SerializeToXmlFile ("result.xml", true, true);
 
@@ -296,7 +292,11 @@ main (int argc, char *argv[])
            *flowStream->GetStream () << " Drop packets: " << dropes << std::endl;
     }
 
-  
+  /* Start Simulation */
+  Simulator::Stop (Seconds (simulationTime + 1));
+  Simulator::Run ();
+  Simulator::Destroy ();
+
   double averageThroughput = ((sink->GetTotalRx () * 8) / (1e6  * simulationTime));
   if (averageThroughput < 50)
     {
@@ -305,10 +305,5 @@ main (int argc, char *argv[])
     }
   std::cout << "\nAverage throughput: " << averageThroughput << " Mbit/s" << std::endl;
 
-  /* Start Simulation */
-  Simulator::Stop (Seconds (simulationTime + 1));
-  Simulator::Run ();
-  Simulator::Destroy ();
-  
   return 0;
 }
