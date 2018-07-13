@@ -243,6 +243,7 @@ main (int argc, char *argv[])
   sink = StaticCast<PacketSink> (sinkApp.Get (0));
 
   /* Install TCP/UDP Transmitter on the station */
+  /*
   OnOffHelper client ("ns3::TcpSocketFactory", (InetSocketAddress (csmaIpIface.GetAddress (0), 9)));
   client.SetAttribute ("PacketSize", UintegerValue (payloadSize));
   client.SetAttribute ("OnTime", StringValue ("ns3::ConstantRandomVariable[Constant=1]"));
@@ -250,6 +251,7 @@ main (int argc, char *argv[])
   client.SetAttribute ("DataRate", DataRateValue (DataRate (dataRate)));
   ApplicationContainer clientApp = client.Install (staWifiNode);
 
+/*
   Ptr<Ipv4> stack = smallBS->GetObject<Ipv4> ();
   Ptr<Ipv4RoutingProtocol> rp_Gw = (stack->GetRoutingProtocol ());
   Ptr<Ipv4ListRouting> lrp_Gw = DynamicCast<Ipv4ListRouting> (rp_Gw);
@@ -265,6 +267,12 @@ main (int argc, char *argv[])
       olsrrp_Gw = DynamicCast<olsr::RoutingProtocol> (temp);
     }
   }
+*/
+  UdpEchoClientHelper echoClient (remoteAddr, 9);
+  echoClient.SetAttribute ("MaxPackets", UintegerValue (1000));
+  echoClient.SetAttribute ("Interval", TimeValue (Seconds (1.0)));
+  echoClient.SetAttribute ("PacketSize", UintegerValue (1024));
+  ApplicationContainer clientApp = echoClient.Install (staWifiNode);
 
   /* Start Applications */
   sinkApp.Start (Seconds (0.0));
