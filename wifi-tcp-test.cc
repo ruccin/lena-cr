@@ -235,7 +235,7 @@ main (int argc, char *argv[])
   /* Populate routing table */
   //Ipv4GlobalRoutingHelper::PopulateRoutingTables ();
 
-  Ptr<Node> remoteAddr = smallBS->GetObject<Ipv4> ()->GetAddress (1, 0).GetLocal ();
+  //Ptr<Node> remoteAddr = smallBS->GetObject<Ipv4> ()->GetAddress (1, 0).GetLocal ();
 
   /* Install TCP Receiver on the access point */
   PacketSinkHelper sinkHelper ("ns3::TcpSocketFactory", InetSocketAddress (Ipv4Address::GetAny (), 9));
@@ -243,14 +243,14 @@ main (int argc, char *argv[])
   sink = StaticCast<PacketSink> (sinkApp.Get (0));
 
   /* Install TCP/UDP Transmitter on the station */
-  OnOffHelper client ("ns3::TcpSocketFactory", (InetSocketAddress (remoteAddr, 9)));
+  OnOffHelper client ("ns3::TcpSocketFactory", (InetSocketAddress (csmaIpIface.GetAddress (0), 9)));
   client.SetAttribute ("PacketSize", UintegerValue (payloadSize));
   client.SetAttribute ("OnTime", StringValue ("ns3::ConstantRandomVariable[Constant=1]"));
   client.SetAttribute ("OffTime", StringValue ("ns3::ConstantRandomVariable[Constant=0]"));
   client.SetAttribute ("DataRate", DataRateValue (DataRate (dataRate)));
   ApplicationContainer clientApp = client.Install (staWifiNode);
-/*
-  Ptr<Ipv4> stack = remoteHost->GetObject<Ipv4> ();
+
+  Ptr<Ipv4> stack = smallBS->GetObject<Ipv4> ();
   Ptr<Ipv4RoutingProtocol> rp_Gw = (stack->GetRoutingProtocol ());
   Ptr<Ipv4ListRouting> lrp_Gw = DynamicCast<Ipv4ListRouting> (rp_Gw);
 
@@ -265,7 +265,7 @@ main (int argc, char *argv[])
       olsrrp_Gw = DynamicCast<olsr::RoutingProtocol> (temp);
     }
   }
-*/
+
   /* Start Applications */
   sinkApp.Start (Seconds (0.0));
   clientApp.Start (Seconds (1.0));
