@@ -188,8 +188,8 @@ main (int argc, char *argv[])
   /* Mobility model */
   MobilityHelper mobility;
   Ptr<ListPositionAllocator> positionAlloc = CreateObject<ListPositionAllocator> ();
-  positionAlloc->Add (Vector (100.0, 0.0, 0.0));
-  positionAlloc->Add (Vector (20.0, 0.0, 0.0));
+  positionAlloc->Add (Vector (50.0, 0.0, 0.0));
+  positionAlloc->Add (Vector (40.0, 0.0, 0.0));
   positionAlloc->Add (Vector (20.0, 0.0, 0.0));
   positionAlloc->Add (Vector (1.0, 0.0, 0.0));
 
@@ -210,13 +210,13 @@ main (int argc, char *argv[])
 
   Ipv4StaticRoutingHelper ipv4RoutingHelper;
   Ptr<Ipv4StaticRouting> staStaticRouting = ipv4RoutingHelper.GetStaticRouting (staWifiNode->GetObject<Ipv4> ());
-  staStaticRouting->AddHostRouteTo (csmaIpIface.GetAddress (0), Ipv4Address ("10.0.0.1"), 1);
+  staStaticRouting->AddHostRouteTo (internetIpIface.GetAddress (1), Ipv4Address ("10.0.0.1"), 1);
 
   Ptr<Ipv4StaticRouting> apStaticRouting = ipv4RoutingHelper.GetStaticRouting (apWifiNode->GetObject<Ipv4> ());
-  apStaticRouting->AddHostRouteTo (csmaIpIface.GetAddress (0), Ipv4Address("2.0.0.1"), 1);
+  apStaticRouting->AddHostRouteTo (internetIpIface.GetAddress (1), Ipv4Address("2.0.0.1"), 1);
 
-  //Ptr<Ipv4StaticRouting> SBSStaticRouting = ipv4RoutingHelper.GetStaticRouting (smallBS->GetObject<Ipv4> ());
-  //SBSStaticRouting->AddHostRouteTo (Ipv4Address ("1.0.0.2"), Ipv4Address ("1.0.0.2"), 1);
+  Ptr<Ipv4StaticRouting> SBSStaticRouting = ipv4RoutingHelper.GetStaticRouting (smallBS->GetObject<Ipv4> ());
+  SBSStaticRouting->AddHostRouteTo (internetIpIface.GetAddress (1), Ipv4Address ("1.0.0.2"), 1);
   //SBSStaticRouting->SetDefaultRoute (internetIpIface.GetAddress (1), 4);
 
   /* Populate routing table */
