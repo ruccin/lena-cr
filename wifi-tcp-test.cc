@@ -36,6 +36,7 @@ NS_LOG_COMPONENT_DEFINE ("wifi-tcp");
 using namespace ns3;
 
 Ptr<PacketSink> sink;                         /* Pointer to the packet sink application */
+Ptr<PacketSink> sinkB; 
 uint64_t lastTotalRx = 0;                     /* The value of the last total received bytes */
 
 void
