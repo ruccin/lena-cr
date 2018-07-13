@@ -249,7 +249,6 @@ main (int argc, char *argv[])
   client.SetAttribute ("DataRate", DataRateValue (DataRate (dataRate)));
   ApplicationContainer clientApp = client.Install (staWifiNode);
 
-/*
   Ptr<Ipv4> stack = smallBS->GetObject<Ipv4> ();
   Ptr<Ipv4RoutingProtocol> rp_Gw = (stack->GetRoutingProtocol ());
   Ptr<Ipv4ListRouting> lrp_Gw = DynamicCast<Ipv4ListRouting> (rp_Gw);
