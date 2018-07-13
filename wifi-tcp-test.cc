@@ -266,23 +266,15 @@ main (int argc, char *argv[])
       wifiPhy.EnablePcap ("Station", staDevices);
     }
 
-  /* Start Simulation */
-  Simulator::Stop (Seconds (simulationTime + 1));
-  Simulator::Run ();
-  Simulator::Destroy ();
-
-  double averageThroughput = ((sink->GetTotalRx () * 8) / (1e6  * simulationTime));
-  if (averageThroughput < 50)
-    {
-      NS_LOG_ERROR ("Obtained throughput is not in the expected boundaries!");
-      exit (1);
-    }
-  std::cout << "\nAverage throughput: " << averageThroughput << " Mbit/s" << std::endl;
-
-/*
   FlowMonitorHelper flowmon;
-  Ptr<FlowMonitor> monitor = flowmon.InstallAll ();
-  monitor->CheckForLostPackets ();
+  Ptr<FlowMonitor> monitor;
+  monitor = flowmon.Install (remoteHost);
+  monitor = flowmon.Install (smallBS);
+  monitor = flowmon.Install (apWifiNode);
+  monitor = flowmon.Install (staWifiNode);
+
+  monitor->CheckForLostPackets (Time(0.001));
+  monitor->SerializeToXmlFile ("result.xml", true, true);
 
   Ptr<Ipv4FlowClassifier> classifier = DynamicCast<Ipv4FlowClassifier> (flowmon.GetClassifier ());
   std::map<FlowId, FlowMonitor::FlowStats> stats = monitor->GetFlowStats ();
@@ -303,7 +295,19 @@ main (int argc, char *argv[])
            }
            *flowStream->GetStream () << " Drop packets: " << dropes << std::endl;
     }
-*/
+
+  /* Start Simulation */
+  Simulator::Stop (Seconds (simulationTime + 1));
+  Simulator::Run ();
+  Simulator::Destroy ();
+
+  double averageThroughput = ((sink->GetTotalRx () * 8) / (1e6  * simulationTime));
+  if (averageThroughput < 50)
+    {
+      NS_LOG_ERROR ("Obtained throughput is not in the expected boundaries!");
+      exit (1);
+    }
+  std::cout << "\nAverage throughput: " << averageThroughput << " Mbit/s" << std::endl;
 
   return 0;
 }
