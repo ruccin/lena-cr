@@ -228,38 +228,12 @@ main (int argc, char *argv[])
   sink = StaticCast<PacketSink> (serverApp.Get (0));
 
   /* Install TCP/UDP Transmitter on the station */
-  /*
   OnOffHelper client ("ns3::TcpSocketFactory", (InetSocketAddress (internetIpIface.GetAddress (1), 9)));
   client.SetAttribute ("PacketSize", UintegerValue (payloadSize));
   client.SetAttribute ("OnTime", StringValue ("ns3::ConstantRandomVariable[Constant=1]"));
   client.SetAttribute ("OffTime", StringValue ("ns3::ConstantRandomVariable[Constant=0]"));
   client.SetAttribute ("DataRate", DataRateValue (DataRate (dataRate)));
   ApplicationContainer clientApp = client.Install (staWifiNode);
-  */
-
-  UdpClientHelper client (internetIpIface.GetAddress (1), 9);
-  client.SetAttribute ("MaxPackets", UintegerValue (1000));
-  client.SetAttribute ("Interval", TimeValue (Time ("0.00002"))); //packets/s
-  client.SetAttribute ("PacketSize", UintegerValue (payloadSize));
-  ApplicationContainer clientApp = client.Install (staWifiNode);
-
-/*
-  Ptr<Ipv4> stack = smallBS->GetObject<Ipv4> ();
-  Ptr<Ipv4RoutingProtocol> rp_Gw = (stack->GetRoutingProtocol ());
-  Ptr<Ipv4ListRouting> lrp_Gw = DynamicCast<Ipv4ListRouting> (rp_Gw);
-
-  Ptr<olsr::RoutingProtocol> olsrrp_Gw;
-
-  for (uint32_t i = 0; i < lrp_Gw->GetNRoutingProtocols (); i++)
-  {
-    int16_t priority;
-    Ptr<Ipv4RoutingProtocol> temp = lrp_Gw->GetRoutingProtocol (i, priority);
-    if (DynamicCast<olsr::RoutingProtocol> (temp))
-    {
-      olsrrp_Gw = DynamicCast<olsr::RoutingProtocol> (temp);
-    }
-  }
-*/
 
   /* Start Applications */
   serverApp.Start (Seconds (0.0));
