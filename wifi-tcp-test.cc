@@ -223,16 +223,28 @@ main (int argc, char *argv[])
   Ipv4GlobalRoutingHelper::PopulateRoutingTables ();
 
   /* Install TCP Receiver on the access point */
+  /*
   PacketSinkHelper sinkHelper ("ns3::TcpSocketFactory", InetSocketAddress (Ipv4Address::GetAny (), 9));
   ApplicationContainer sinkApp = sinkHelper.Install (remoteHost);
   sink = StaticCast<PacketSink> (sinkApp.Get (0));
+  */
 
   /* Install TCP/UDP Transmitter on the station */
+  /*
   OnOffHelper client ("ns3::TcpSocketFactory", (InetSocketAddress (internetIpIface.GetAddress (1), 9)));
   client.SetAttribute ("PacketSize", UintegerValue (payloadSize));
   client.SetAttribute ("OnTime", StringValue ("ns3::ConstantRandomVariable[Constant=1]"));
   client.SetAttribute ("OffTime", StringValue ("ns3::ConstantRandomVariable[Constant=0]"));
   client.SetAttribute ("DataRate", DataRateValue (DataRate (dataRate)));
+  ApplicationContainer clientApp = client.Install (staWifiNode);
+  */
+  UdpServerHelper server (9);
+  ApplicationContainer serverApp = server.Install (remoteHost);
+
+  UdpClientHelper client (internetIpIface.GetAddress (1), 9);
+  client.SetAttribute ("MaxPackets", UintegerValue (4294967295u));
+  client.SetAttribute ("Interval", TimeValue (Time ("0.00002"))); //packets/s
+  client.SetAttribute ("PacketSize", UintegerValue (payloadSize));
   ApplicationContainer clientApp = client.Install (staWifiNode);
 
 /*
@@ -296,7 +308,7 @@ main (int argc, char *argv[])
   Simulator::Stop (Seconds (simulationTime + 1));
   Simulator::Run ();
   Simulator::Destroy ();
-
+/*
   double averageThroughput = ((sink->GetTotalRx () * 8) / (1e6  * simulationTime));
   if (averageThroughput < 50)
     {
@@ -304,6 +316,11 @@ main (int argc, char *argv[])
       exit (1);
     }
   std::cout << "\nAverage throughput: " << averageThroughput << " Mbit/s" << std::endl;
+*/
+
+  uint64_t totalPacketsThrough = DynamicCast<UdpServer> (serverApp.Get (0))->GetReceived ();
+  double throughput = totalPacketsThrough * payloadSize * 8 / (simulationTime * 1000000.0);
+  std::cout << "Throughput with default configuration (A-MPDU aggregation enabled, 65kB): " << throughput << " Mbit/s" << '\n';
 
   return 0;
 }
