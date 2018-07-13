@@ -235,7 +235,7 @@ main (int argc, char *argv[])
   /* Populate routing table */
   //Ipv4GlobalRoutingHelper::PopulateRoutingTables ();
 
-  //Ptr<Node> remoteAddr = smallBS->GetObject<Ipv4> ()->GetAddress (1, 0).GetLocal ();
+  Ptr<Node> remoteAddr = smallBS->GetObject<Ipv4> ()->GetAddress (1, 0).GetLocal ();
 
   /* Install TCP Receiver on the access point */
   PacketSinkHelper sinkHelper ("ns3::TcpSocketFactory", InetSocketAddress (Ipv4Address::GetAny (), 9));
