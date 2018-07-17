@@ -41,14 +41,26 @@ using namespace ns3;
 
 NS_LOG_COMPONENT_DEFINE ("EpcFirstExample");
 
+Ptr<PacketSink> sink;
+
+void
+GetTotalRx ()
+{
+  Time now = Simulator::Now ();
+  double totalrx = sink->GetTotalRx () * 8;
+  double totalthroughput = totalrx / now.GetSeconds ();
+  std::cout << now.GetSeconds () << "s: \t" << "total RX :" << totalrx << " " << "total Throughput :" << totalthroughput << " Mbit/s" << std::endl;
+  Simulator::Schedule (MilliSeconds (100), &GetTotalRx);
+}
+
 int
 main (int argc, char *argv[])
 {
 
   uint16_t numberOfNodes = 2;
-  double simTime = 1.1;
-  double distance = 60.0;
+  double simTime = 30;
   double interPacketInterval = 100;
+  bool useCa = false;
 
   // Command line arguments
   CommandLine cmd;
@@ -59,12 +71,16 @@ main (int argc, char *argv[])
   cmd.AddValue("useCa", "Whether to use carrier aggregation.", useCa);
   cmd.Parse(argc, argv);
 
-  Mac48Address magMacAddress ("00:00:aa:bb:cc:dd");
+  if (useCa)
+   {
+     Config::SetDefault ("ns3::LteHelper::UseCa", BooleanValue (useCa));
+     Config::SetDefault ("ns3::LteHelper::NumberOfComponentCarriers", UintegerValue (2));
+     Config::SetDefault ("ns3::LteHelper::EnbComponentCarrierManager", StringValue ("ns3::RrComponentCarrierManager"));
+   }
+
   Ptr<LteHelper> lteHelper = CreateObject<LteHelper> ();
-  Ptr<PointToPointEpcHelper>  epcHelper = CreateObject<PointToPointEpcHelper> (magMacAddress);
+  Ptr<PointToPointEpcHelper>  epcHelper = CreateObject<PointToPointEpcHelper> ();
   lteHelper->SetEpcHelper (epcHelper);
-  
-  Ptr<Node> pgw = epcHelper->GetPgwNode ();
 
   ConfigStore inputConfig;
   inputConfig.ConfigureDefaults();
@@ -72,7 +88,7 @@ main (int argc, char *argv[])
   // parse again so you can override default values from the command line
   cmd.Parse(argc, argv);
 
-
+  Ptr<Node> pgw = epcHelper->GetPgwNode ();
 
    // Create a single RemoteHost
   NodeContainer remoteHostContainer;
@@ -104,10 +120,10 @@ main (int argc, char *argv[])
 
   // Install Mobility Model
   Ptr<ListPositionAllocator> positionAlloc = CreateObject<ListPositionAllocator> ();
-  for (uint16_t i = 0; i < numberOfNodes; i++)
-    {
-      positionAlloc->Add (Vector(distance * i, 0, 0));
-    }
+
+  positionAlloc->Add (Vector(250, 0, 0));
+  positionAlloc->Add (Vector(0, 0, 0));
+
   MobilityHelper mobility;
   mobility.SetMobilityModel("ns3::ConstantPositionMobilityModel");
   mobility.SetPositionAllocator(positionAlloc);
@@ -138,64 +154,40 @@ main (int argc, char *argv[])
         // side effect: the default EPS bearer will be activated
       }
 
-  // Setup wifi network
-  Ptr<Node> wifiMag, wifiAp;
-  wifiMag = CreateObject <Node> ();
-  wifiAp = CreateObject <Node> ();
-  internet.Install (wifiMag);
-  internet.Install (wifiAp);  
-
-  // p2p network between wifiMag and P-GW
-  p2ph.SetDeviceAttribute ("DataRate", DataRateValue (DataRate ("100Gb/s")));
-  p2ph.SetDeviceAttribute ("Mtu", UintegerValue (1500));
-  p2ph.SetChannelAttribute ("Delay", TimeValue (MilliSeconds (100)));
-  NetDeviceContainer wifiMagLmaDevs = p2ph.Install (wifiMag, pgw);
-  ipv4h.SetBase ("3.0.0.0", "255.0.0.0");
-  Ipv4InterfaceContainer wifiMagLmaIpIfaces = ipv4h.Assign (wifiMagLmaDevs);
-  Ptr<Ipv4StaticRouting> wifiMagStaticRouting = Ipv4RoutingHelper.GetStaticRouting (wifiMag->GetObject<Ipv4> ());
-  wifiMagStaticRouting->SetDefaultRoute (wifiMagLmaIpIfaces.GetAddress (1), wifiMagLmaIpIfaces.GetInterfaceIndex (0));
-
-  // CR-Csma network between wifiMag and wifiAp
-  CsmaHelper csmaHelper;
-  csmaHelper.SetChannelAttribute ("DataRate", DataRateValue (DataRate ("10Gbps")));
-  csmaHelper.SetChannelAttribute ("Delay", TimeValue (MicroSeconds(100)));
-  csmaHelper.SetDeviceAttribute ("Mtu", UintegerValue (1500));
-  NodeContainer wifiMagApNodes;
-  wifiMagApNodes.Add (wifiMag);
-  wifiMagApNodes.Add (wifiAp);
-  NetDeviceContainer wifiMagApDevs = csmaHelper.Install (wifiMagApNodes);
-  wifiMagApDevs.Get (0)->SetAddress (magMacAddress);
 
   // Install and start applications on UEs and remote host
   uint16_t dlPort = 1234;
-  uint16_t ulPort = 2000;
   ApplicationContainer clientApps;
   ApplicationContainer serverApps;
   for (uint32_t u = 0; u < ueNodes.GetN (); ++u)
     {
       ++ulPort;
+      ++otherPort;
       PacketSinkHelper dlPacketSinkHelper ("ns3::UdpSocketFactory", InetSocketAddress (Ipv4Address::GetAny (), dlPort));
-      PacketSinkHelper ulPacketSinkHelper ("ns3::UdpSocketFactory", InetSocketAddress (Ipv4Address::GetAny (), ulPort));
-      serverApps.Add (dlPacketSinkHelper.Install (ueNodes.Get(u)));
       serverApps.Add (ulPacketSinkHelper.Install (remoteHost));
 
-      UdpClientHelper dlClient (ueIpIface.GetAddress (u), dlPort);
+      UdpClientHelper dlClient (remoteHostAddr, dlPort);
       dlClient.SetAttribute ("Interval", TimeValue (MilliSeconds(interPacketInterval)));
-      dlClient.SetAttribute ("MaxPackets", UintegerValue(1000000));
+      dlClient.SetAttribute ("PacketSize", UintegerValue(1472));
 
-      UdpClientHelper ulClient (remoteHostAddr, ulPort);
-      ulClient.SetAttribute ("Interval", TimeValue (MilliSeconds(interPacketInterval)));
-      ulClient.SetAttribute ("MaxPackets", UintegerValue(1000000));
-
-      clientApps.Add (dlClient.Install (remoteHost));
-      clientApps.Add (ulClient.Install (ueNodes.Get(u)));
+      clientApps.Add (dlClient.Install (ueNodes.Get (u)));
     }
+
   serverApps.Start (Seconds (0.01));
   clientApps.Start (Seconds (0.01));
+  Simulator::Schedule (MilliSeconds (100), &GetTotalRx);
+
   lteHelper->EnableTraces ();
+
+  // Uncomment to enable PCAP tracing
+  //p2ph.EnablePcapAll("lena-epc-first");
 
   Simulator::Stop(Seconds(simTime));
   Simulator::Run();
+
+  /*GtkConfigStore config;
+  config.ConfigureAttributes();*/
+
   Simulator::Destroy();
   return 0;
 
