@@ -52,7 +52,7 @@ void
 GetTotalRx ()
 {
   double totalrx = sink->GetTotalRx ();
-  std::cout << totalrx << std::endl;
+  std::cout <<"total RX :" << totalrx << std::endl;
   Simulator::Schedule (MilliSeconds (100), &GetTotalRx);
 }
 
