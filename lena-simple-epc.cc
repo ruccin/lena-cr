@@ -66,7 +66,6 @@ main (int argc, char *argv[])
   CommandLine cmd;
   cmd.AddValue("numberOfNodes", "Number of eNodeBs + UE pairs", numberOfNodes);
   cmd.AddValue("simTime", "Total duration of the simulation [s])", simTime);
-  cmd.AddValue("distance", "Distance between eNBs [m]", distance);
   cmd.AddValue("interPacketInterval", "Inter packet interval [ms])", interPacketInterval);
   cmd.AddValue("useCa", "Whether to use carrier aggregation.", useCa);
   cmd.Parse(argc, argv);
@@ -159,12 +158,13 @@ main (int argc, char *argv[])
   uint16_t dlPort = 1234;
   ApplicationContainer clientApps;
   ApplicationContainer serverApps;
+  
   for (uint32_t u = 0; u < ueNodes.GetN (); ++u)
     {
       ++ulPort;
       ++otherPort;
       PacketSinkHelper dlPacketSinkHelper ("ns3::UdpSocketFactory", InetSocketAddress (Ipv4Address::GetAny (), dlPort));
-      serverApps.Add (ulPacketSinkHelper.Install (remoteHost));
+      serverApps.Add (dlPacketSinkHelper.Install (remoteHost));
 
       UdpClientHelper dlClient (remoteHostAddr, dlPort);
       dlClient.SetAttribute ("Interval", TimeValue (MilliSeconds(interPacketInterval)));
