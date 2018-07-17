@@ -59,7 +59,7 @@ GetTotalRx ()
 void
 Print (Ptr<FlowMonitor> monitor)
 {
-  
+  FlowMonitorHelper flowmon;
   monitor->CheckForLostPackets (MilliSeconds (100));
   monitor->SerializeToXmlFile ("result.xml", true, true);
 
