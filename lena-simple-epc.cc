@@ -144,7 +144,7 @@ main (int argc, char *argv[])
 
   // Install Mobility Model
   Ptr<ListPositionAllocator> positionAlloc = CreateObject<ListPositionAllocator> ();
-  positionAlloc->Add (Vector(50, 0, 0));
+  positionAlloc->Add (Vector(150, 0, 0));
   positionAlloc->Add (Vector(1, 0, 0));
 
   MobilityHelper mobility;
@@ -183,19 +183,16 @@ main (int argc, char *argv[])
   ApplicationContainer serverApps;
   ApplicationContainer clientApps;
 
-  for (uint32_t u = 0; u < ueNodes.GetN (); ++u)
-    {
-      PacketSinkHelper dlPacketSinkHelper ("ns3::TcpSocketFactory", InetSocketAddress (Ipv4Address::GetAny (), dlPort));
-      serverApps.Add (dlPacketSinkHelper.Install (remoteHost));
-      sink = StaticCast<PacketSink> (serverApps.Get (0));
+  PacketSinkHelper dlPacketSinkHelper ("ns3::TcpSocketFactory", InetSocketAddress (Ipv4Address::GetAny (), dlPort));
+  serverApps.Add (dlPacketSinkHelper.Install (remoteHost));
+  sink = StaticCast<PacketSink> (serverApps.Get (0));
 
-      OnOffHelper client ("ns3::TcpSocketFactory", (InetSocketAddress (remoteHostAddr, dlPort)));
-      client.SetAttribute ("PacketSize", UintegerValue (payloadSize));
-      client.SetAttribute ("OnTime", StringValue ("ns3::ConstantRandomVariable[Constant=1]"));
-      client.SetAttribute ("OffTime", StringValue ("ns3::ConstantRandomVariable[Constant=0]"));
-      client.SetAttribute ("DataRate", DataRateValue (DataRate (dataRate)));
-      clientApps.Add (client.Install (ueNodes));
-    }
+  OnOffHelper client ("ns3::TcpSocketFactory", (InetSocketAddress (remoteHostAddr, dlPort)));
+  client.SetAttribute ("PacketSize", UintegerValue (payloadSize));
+  client.SetAttribute ("OnTime", StringValue ("ns3::ConstantRandomVariable[Constant=1]"));
+  client.SetAttribute ("OffTime", StringValue ("ns3::ConstantRandomVariable[Constant=0]"));
+  client.SetAttribute ("DataRate", DataRateValue (DataRate (dataRate)));
+  clientApps.Add (client.Install (ueNodes));
 
   serverApps.Start (Seconds (0.0));
   clientApps.Start (Seconds (1.0));
