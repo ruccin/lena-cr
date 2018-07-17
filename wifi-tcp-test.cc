@@ -194,7 +194,6 @@ main (int argc, char *argv[])
   wifiPhy.Set ("CcaMode1Threshold", DoubleValue (-79));
   wifiPhy.Set ("EnergyDetectionThreshold", DoubleValue (-79 + 3));
   wifiPhy.SetErrorRateModel ("ns3::YansErrorRateModel");
-  wifiPhy.SetAttribute ("ChannelWidth", UintegerValue (5));
   wifiHelper.SetRemoteStationManager ("ns3::ConstantRateWifiManager",
                                       "DataMode", StringValue (phyRate),
                                       "ControlMode", StringValue ("HtMcs0"));
@@ -218,9 +217,9 @@ main (int argc, char *argv[])
   /* Mobility model */
   MobilityHelper mobility;
   Ptr<ListPositionAllocator> positionAlloc = CreateObject<ListPositionAllocator> ();
-  positionAlloc->Add (Vector (100.0, 0.0, 0.0));
-  positionAlloc->Add (Vector (60.0, 0.0, 0.0));
-  positionAlloc->Add (Vector (30.0, 0.0, 0.0));
+  positionAlloc->Add (Vector (250.0, 0.0, 0.0));
+  positionAlloc->Add (Vector (150.0, 0.0, 0.0));
+  positionAlloc->Add (Vector (50.0, 0.0, 0.0));
   positionAlloc->Add (Vector (1.0, 0.0, 0.0));
 
   mobility.SetPositionAllocator (positionAlloc);
