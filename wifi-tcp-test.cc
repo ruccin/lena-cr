@@ -56,6 +56,35 @@ GetTotalRx ()
   Simulator::Schedule (MilliSeconds (100), &GetTotalRx);
 }
 
+void
+Print (Ptr<FlowMonitor> monitor)
+{
+  
+  monitor->CheckForLostPackets (MilliSeconds (100));
+  monitor->SerializeToXmlFile ("result.xml", true, true);
+
+  Ptr<Ipv4FlowClassifier> classifier = DynamicCast<Ipv4FlowClassifier> (flowmon.GetClassifier ());
+  std::map<FlowId, FlowMonitor::FlowStats> stats = monitor->GetFlowStats ();
+
+  AsciiTraceHelper asciiTHFlow;
+  Ptr<OutputStreamWrapper> flowStream = asciiTHFlow.CreateFileStream ("lte01.txt");
+
+  for (std::map<FlowId, FlowMonitor::FlowStats>::const_iterator i = stats.begin (); i != stats.end (); ++i)
+    {
+          Ipv4FlowClassifier::FiveTuple t = classifier->FindFlow (i->first);
+          *flowStream->GetStream () << " Flow " << i->first << " (" << t.sourceAddress << " -> " << t.destinationAddress << ")" << std::endl;
+          *flowStream->GetStream () << " First packet time: " << i->second.timeFirstRxPacket << std::endl;
+          *flowStream->GetStream () << " Tx Packets: " << i->second.txPackets << std::endl;
+          *flowStream->GetStream () << " Rx Packets: " << i->second.rxPackets << std::endl;
+          uint32_t dropes = 0;
+           for (uint32_t reasonCode = 0; reasonCode < i->second.packetsDropped.size (); reasonCode++)
+           {
+        	   dropes+= i->second.packetsDropped[reasonCode];
+           }
+           *flowStream->GetStream () << " Drop packets: " << dropes << std::endl;
+    }
+}
+
 int
 main (int argc, char *argv[])
 {
@@ -259,30 +288,9 @@ main (int argc, char *argv[])
   FlowMonitorHelper flowmon;
   Ptr<FlowMonitor> monitor;
   monitor = flowmon.Install (remoteHost);
-  monitor = flowmon.Install (smallBS);
+  //monitor = flowmon.Install (smallBS);
 
-  monitor->CheckForLostPackets (Time(0.001));
-  monitor->SerializeToXmlFile ("result.xml", true, true);
-/*
-  Ptr<Ipv4FlowClassifier> classifier = DynamicCast<Ipv4FlowClassifier> (flowmon.GetClassifier ());
-  std::map<FlowId, FlowMonitor::FlowStats> stats = monitor->GetFlowStats ();
-
-  AsciiTraceHelper asciiTHFlow;
-  Ptr<OutputStreamWrapper> flowStream = asciiTHFlow.CreateFileStream ("lte01.txt");
-  for (std::map<FlowId, FlowMonitor::FlowStats>::const_iterator i = stats.begin (); i != stats.end (); ++i)
-    {
-          Ipv4FlowClassifier::FiveTuple t = classifier->FindFlow (i->first);
-          *flowStream->GetStream () << " Flow " << i->first << " (" << t.sourceAddress << " -> " << t.destinationAddress << ")" << std::endl;
-          *flowStream->GetStream () << " First packet time: " << i->second.timeFirstRxPacket << std::endl;
-          *flowStream->GetStream () << " Tx Packets: " << i->second.txPackets << std::endl;
-          *flowStream->GetStream () << " Rx Packets: " << i->second.rxPackets << std::endl;
-          uint32_t dropes = 0;
-           for (uint32_t reasonCode = 0; reasonCode < i->second.packetsDropped.size (); reasonCode++)
-           {
-        	   dropes+= i->second.packetsDropped[reasonCode];
-           }
-           *flowStream->GetStream () << " Drop packets: " << dropes << std::endl;
-    }
+  Simulator::Schedule (Seconds (1.0), &Print, monitor);
 
   /* Start Simulation */
   Simulator::Stop (Seconds (simulationTime + 1));
