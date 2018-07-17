@@ -41,11 +41,19 @@ uint64_t lastTotalRx = 0;                     /* The value of the last total rec
 void
 CalculateThroughput ()
 {
-  Time now = Simulator::Now ();                                         /* Return the simulator's virtual time. */
-  double cur = (sink->GetTotalRx () - lastTotalRx) * (double) 8 / 1e5;     /* Convert Application RX Packets to MBits. */
+  Time now = Simulator::Now ();                                         
+  double cur = (sink->GetTotalRx () - lastTotalRx) * (double) 8 / 1e5;  
   std::cout << now.GetSeconds () << "s: \t" << cur << " Mbit/s" << std::endl;
   lastTotalRx = sink->GetTotalRx ();
   Simulator::Schedule (MilliSeconds (100), &CalculateThroughput);
+}
+
+void
+GetTotalRx ()
+{
+  double totalrx = sink->GetTotalRx ();
+  std::cout << totalrx << std::endl;
+  Simulator::Schedule (MilliSeconds (100), &GetTotalRx);
 }
 
 int
@@ -238,7 +246,7 @@ main (int argc, char *argv[])
   /* Start Applications */
   serverApp.Start (Seconds (0.0));
   clientApp.Start (Seconds (1.0));
-  Simulator::Schedule (Seconds (1.1), &CalculateThroughput);
+  Simulator::Schedule (Seconds (1.0), &GetTotalRx);
 
   /* Enable Traces */
   if (pcapTracing)
@@ -250,10 +258,12 @@ main (int argc, char *argv[])
 
   FlowMonitorHelper flowmon;
   Ptr<FlowMonitor> monitor;
-  monitor = flowmon.InstallAll ();
+  monitor = flowmon.Install (remoteHost);
+  monitor = flowmon.Install (smallBS);
+
   monitor->CheckForLostPackets (Time(0.001));
   monitor->SerializeToXmlFile ("result.xml", true, true);
-
+/*
   Ptr<Ipv4FlowClassifier> classifier = DynamicCast<Ipv4FlowClassifier> (flowmon.GetClassifier ());
   std::map<FlowId, FlowMonitor::FlowStats> stats = monitor->GetFlowStats ();
 
@@ -278,7 +288,7 @@ main (int argc, char *argv[])
   Simulator::Stop (Seconds (simulationTime + 1));
   Simulator::Run ();
   Simulator::Destroy ();
-
+/*
   double averageThroughput = ((sink->GetTotalRx () * 8) / (1e6  * simulationTime));
   if (averageThroughput < 50)
     {
@@ -286,6 +296,6 @@ main (int argc, char *argv[])
       exit (1);
     }
   std::cout << "\nAverage throughput: " << averageThroughput << " Mbit/s" << std::endl;
-
+*/
   return 0;
 }
