@@ -158,18 +158,15 @@ main (int argc, char *argv[])
   uint16_t dlPort = 1234;
   ApplicationContainer clientApps;
   ApplicationContainer serverApps;
-  
+
   for (uint32_t u = 0; u < ueNodes.GetN (); ++u)
     {
-      ++ulPort;
-      ++otherPort;
       PacketSinkHelper dlPacketSinkHelper ("ns3::UdpSocketFactory", InetSocketAddress (Ipv4Address::GetAny (), dlPort));
       serverApps.Add (dlPacketSinkHelper.Install (remoteHost));
 
       UdpClientHelper dlClient (remoteHostAddr, dlPort);
       dlClient.SetAttribute ("Interval", TimeValue (MilliSeconds(interPacketInterval)));
       dlClient.SetAttribute ("PacketSize", UintegerValue(1472));
-
       clientApps.Add (dlClient.Install (ueNodes.Get (u)));
     }
 
