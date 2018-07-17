@@ -197,8 +197,8 @@ main (int argc, char *argv[])
       clientApps.Add (client.Install (ueNodes));
     }
 
-  serverApps.Start (Seconds (0.01));
-  clientApps.Start (Seconds (0.01));
+  serverApps.Start (Seconds (0.0));
+  clientApps.Start (Seconds (1.0));
   Simulator::Schedule (MilliSeconds (100), &GetTotalRx);
 
   lteHelper->EnableTraces ();
