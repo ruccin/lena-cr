@@ -51,9 +51,28 @@ CalculateThroughput ()
 void
 GetTotalRx ()
 {
+  Time now = Simulator::Now ();
   double totalrx = sink->GetTotalRx ();
-  std::cout <<"total RX :" << totalrx << std::endl;
+  std::cout << now.GetSeconds () << "s: \t" << "  " << "total RX :" << totalrx << std::endl;
   Simulator::Schedule (MilliSeconds (100), &GetTotalRx);
+}
+
+void
+Prints (Ptr<FlowMonitor> monitor)
+{
+  FlowMonitorHelper flowmon;
+  monitor->CheckForLostPackets();
+
+  Ptr<Ipv4FlowClassifier> classifier = DynamicCast<Ipv4FlowClassifier>(flowmon.GetClassifier());
+  std::map<FlowId, FlowMonitor::FlowStats> stats = monitor->GetFlowStats();
+
+  for (std::map<FlowId, FlowMonitor::FlowStats>::const_iterator iter = stats.begin(); iter != stats.end(); ++iter)
+  {
+    Ipv4FlowClassifier::FiveTuple t = classifier->FindFlow (iter->first);
+    
+    std::cout << "RX Packets: " << iter->second.rxPackets << std::endl;
+  }
+  Simulator::Schedule (MilliSeconds (100), &Prints, monitor);
 }
 
 int
@@ -246,7 +265,7 @@ main (int argc, char *argv[])
   /* Start Applications */
   serverApp.Start (Seconds (0.0));
   clientApp.Start (Seconds (1.0));
-  Simulator::Schedule (Seconds (1.0), &GetTotalRx);
+  //Simulator::Schedule (Seconds (1.0), &GetTotalRx);
 
   /* Enable Traces */
   if (pcapTracing)
@@ -255,6 +274,12 @@ main (int argc, char *argv[])
       wifiPhy.EnablePcap ("AccessPoint", apDevice);
       wifiPhy.EnablePcap ("Station", staDevices);
     }
+
+  Ptr<FlowMonitor> monitor;
+  FlowMonitorHelper flowmon;
+
+  monitor = flowmon.Install (remoteHost);
+  Simulator::Schedule (Seconds (1.0), &Prints, monitor);
 
   /* Start Simulation */
   Simulator::Stop (Seconds (simulationTime + 1));
