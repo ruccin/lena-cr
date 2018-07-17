@@ -163,6 +163,7 @@ main (int argc, char *argv[])
     {
       PacketSinkHelper dlPacketSinkHelper ("ns3::UdpSocketFactory", InetSocketAddress (Ipv4Address::GetAny (), dlPort));
       serverApps.Add (dlPacketSinkHelper.Install (remoteHost));
+      sink = StaticCast<PacketSink> (serverApps.Get (0));
 
       UdpClientHelper dlClient (remoteHostAddr, dlPort);
       dlClient.SetAttribute ("Interval", TimeValue (MilliSeconds(interPacketInterval)));
