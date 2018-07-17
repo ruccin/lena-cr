@@ -52,8 +52,8 @@ void
 GetTotalRx ()
 {
   Time now = Simulator::Now ();
-  double totalrx = sink->GetTotalRx () * 8 / now.GetSeconds ();
-  std::cout << now.GetSeconds () << "s: \t" << "  " << "total RX :" << totalrx << std::endl;
+  double totalrx = sink->GetTotalRx () * 8
+  std::cout << now.GetSeconds () << "s: \t" << "  " << "total throughput :" << totalrx / now.GetSeconds () << std::endl;
   Simulator::Schedule (MilliSeconds (100), &GetTotalRx);
 }
 
