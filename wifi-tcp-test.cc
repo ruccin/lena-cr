@@ -56,35 +56,6 @@ GetTotalRx ()
   Simulator::Schedule (MilliSeconds (100), &GetTotalRx);
 }
 
-void
-Print (Ptr<FlowMonitor> monitor)
-{
-  FlowMonitorHelper flowmon;
-  monitor->CheckForLostPackets (MilliSeconds (100));
-  monitor->SerializeToXmlFile ("result.xml", true, true);
-
-  Ptr<Ipv4FlowClassifier> classifier = DynamicCast<Ipv4FlowClassifier> (flowmon.GetClassifier ());
-  std::map<FlowId, FlowMonitor::FlowStats> stats = monitor->GetFlowStats ();
-
-  AsciiTraceHelper asciiTHFlow;
-  Ptr<OutputStreamWrapper> flowStream = asciiTHFlow.CreateFileStream ("lte01.txt");
-
-  for (std::map<FlowId, FlowMonitor::FlowStats>::const_iterator i = stats.begin (); i != stats.end (); ++i)
-    {
-          Ipv4FlowClassifier::FiveTuple t = classifier->FindFlow (i->first);
-          *flowStream->GetStream () << " Flow " << i->first << " (" << t.sourceAddress << " -> " << t.destinationAddress << ")" << std::endl;
-          *flowStream->GetStream () << " First packet time: " << i->second.timeFirstRxPacket << std::endl;
-          *flowStream->GetStream () << " Tx Packets: " << i->second.txPackets << std::endl;
-          *flowStream->GetStream () << " Rx Packets: " << i->second.rxPackets << std::endl;
-          uint32_t dropes = 0;
-           for (uint32_t reasonCode = 0; reasonCode < i->second.packetsDropped.size (); reasonCode++)
-           {
-        	   dropes+= i->second.packetsDropped[reasonCode];
-           }
-           *flowStream->GetStream () << " Drop packets: " << dropes << std::endl;
-    }
-}
-
 int
 main (int argc, char *argv[])
 {
@@ -92,7 +63,7 @@ main (int argc, char *argv[])
   std::string dataRate = "100Mbps";                  /* Application layer datarate. */
   std::string tcpVariant = "TcpNewReno";             /* TCP variant type. */
   std::string phyRate = "HtMcs7";                    /* Physical layer bitrate. */
-  double simulationTime = 40;                        /* Simulation time in seconds. */
+  double simulationTime = 30;                        /* Simulation time in seconds. */
   bool pcapTracing = false;                          /* PCAP Tracing is enabled or not. */
 
   /* Command line argument parser setup. */
@@ -225,9 +196,9 @@ main (int argc, char *argv[])
   /* Mobility model */
   MobilityHelper mobility;
   Ptr<ListPositionAllocator> positionAlloc = CreateObject<ListPositionAllocator> ();
-  positionAlloc->Add (Vector (10.0, 0.0, 0.0));
-  positionAlloc->Add (Vector (5.0, 0.0, 0.0));
-  positionAlloc->Add (Vector (3.0, 0.0, 0.0));
+  positionAlloc->Add (Vector (100.0, 0.0, 0.0));
+  positionAlloc->Add (Vector (60.0, 0.0, 0.0));
+  positionAlloc->Add (Vector (30.0, 0.0, 0.0));
   positionAlloc->Add (Vector (1.0, 0.0, 0.0));
 
   mobility.SetPositionAllocator (positionAlloc);
@@ -284,13 +255,6 @@ main (int argc, char *argv[])
       wifiPhy.EnablePcap ("AccessPoint", apDevice);
       wifiPhy.EnablePcap ("Station", staDevices);
     }
-
-  FlowMonitorHelper flowmon;
-  Ptr<FlowMonitor> monitor;
-  monitor = flowmon.Install (remoteHost);
-  //monitor = flowmon.Install (smallBS);
-
-  Simulator::Schedule (Seconds (1.0), &Print, monitor);
 
   /* Start Simulation */
   Simulator::Stop (Seconds (simulationTime + 1));
