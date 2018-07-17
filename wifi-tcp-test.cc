@@ -52,7 +52,7 @@ void
 GetTotalRx ()
 {
   Time now = Simulator::Now ();
-  double totalrx = sink->GetTotalRx ();
+  double totalrx = sink->GetTotalRx () * 8 / now.GetSeconds ();
   std::cout << now.GetSeconds () << "s: \t" << "  " << "total RX :" << totalrx << std::endl;
   Simulator::Schedule (MilliSeconds (100), &GetTotalRx);
 }
@@ -266,7 +266,7 @@ main (int argc, char *argv[])
   /* Start Applications */
   serverApp.Start (Seconds (0.0));
   clientApp.Start (Seconds (1.0));
-  //Simulator::Schedule (Seconds (1.0), &GetTotalRx);
+  Simulator::Schedule (Seconds (1.0), &GetTotalRx);
 
   /* Enable Traces */
   if (pcapTracing)
@@ -280,7 +280,7 @@ main (int argc, char *argv[])
   FlowMonitorHelper flowmon;
 
   monitor = flowmon.Install (remoteHost);
-  Simulator::Schedule (Seconds (1.0), &Prints, monitor);
+  //Simulator::Schedule (Seconds (1.0), &Prints, monitor);
 
   /* Start Simulation */
   Simulator::Stop (Seconds (simulationTime + 1));
