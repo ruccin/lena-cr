@@ -70,7 +70,7 @@ Prints (Ptr<FlowMonitor> monitor)
   {
     Ipv4FlowClassifier::FiveTuple t = classifier->FindFlow (iter->first);
     
-    std::cout << "Flow" << i->first << " (" << t.sourceAddress << " -> " << t.destinationAddress << ") " << std::endl;
+    std::cout << "Flow" << iter->first << " (" << t.sourceAddress << " -> " << t.destinationAddress << ") " << std::endl;
     std::cout << "RX Packets: " << iter->second.rxPackets << std::endl;
   }
   Simulator::Schedule (MilliSeconds (100), &Prints, monitor);
