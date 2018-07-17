@@ -54,7 +54,7 @@ GetTotalRx ()
   Time now = Simulator::Now ();
   double totalrx = sink->GetTotalRx () * 8;
   double totalthroughput = totalrx / now.GetSeconds ();
-  std::cout << now.GetSeconds () << "s: \t" << "total RX" << totalrx << " " << "total throughput :" << totalthroughput << std::endl;
+  std::cout << now.GetSeconds () << "s: \t" << "total RX :" << totalrx << " " << "total throughput :" << totalthroughput << " Mbit/s" << std::endl;
   Simulator::Schedule (MilliSeconds (100), &GetTotalRx);
 }
 
