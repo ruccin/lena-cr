@@ -58,6 +58,7 @@ main (int argc, char *argv[])
 {
   uint32_t payloadSize = 1472;                       /* Transport layer payload size in bytes. */
   std::string dataRate = "100Mbps"; 
+  std::string tcpVariant = "TcpNewReno";             /* TCP variant type. */
   uint16_t numberOfNodes = 2;
   double simTime = 30;
   double interPacketInterval = 100;
@@ -77,6 +78,29 @@ main (int argc, char *argv[])
      Config::SetDefault ("ns3::LteHelper::NumberOfComponentCarriers", UintegerValue (2));
      Config::SetDefault ("ns3::LteHelper::EnbComponentCarrierManager", StringValue ("ns3::RrComponentCarrierManager"));
    }
+
+  tcpVariant = std::string ("ns3::") + tcpVariant;
+
+  /* No fragmentation and no RTS/CTS */
+  Config::SetDefault ("ns3::WifiRemoteStationManager::FragmentationThreshold", StringValue ("999999"));
+  Config::SetDefault ("ns3::WifiRemoteStationManager::RtsCtsThreshold", StringValue ("999999"));
+
+  // Select TCP variant
+  if (tcpVariant.compare ("ns3::TcpWestwoodPlus") == 0)
+    { 
+      // TcpWestwoodPlus is not an actual TypeId name; we need TcpWestwood here
+      Config::SetDefault ("ns3::TcpL4Protocol::SocketType", TypeIdValue (TcpWestwood::GetTypeId ()));
+      // the default protocol type in ns3::TcpWestwood is WESTWOOD
+      Config::SetDefault ("ns3::TcpWestwood::ProtocolType", EnumValue (TcpWestwood::WESTWOODPLUS));
+    }
+  else
+    {
+      TypeId tcpTid;
+      NS_ABORT_MSG_UNLESS (TypeId::LookupByNameFailSafe (tcpVariant, &tcpTid), "TypeId " << tcpVariant << " not found");
+      Config::SetDefault ("ns3::TcpL4Protocol::SocketType", TypeIdValue (TypeId::LookupByName (tcpVariant)));
+    }
+
+  Config::SetDefault ("ns3::TcpSocket::SegmentSize", UintegerValue (payloadSize));
 
   Ptr<LteHelper> lteHelper = CreateObject<LteHelper> ();
   Ptr<PointToPointEpcHelper>  epcHelper = CreateObject<PointToPointEpcHelper> ();
