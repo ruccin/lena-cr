@@ -181,6 +181,7 @@ main (int argc, char *argv[])
   // Install and start applications on UEs and remote host
   uint16_t dlPort = 1234;
   ApplicationContainer serverApps;
+  ApplicationContainer clientApps;
 
   for (uint32_t u = 0; u < ueNodes.GetN (); ++u)
     {
@@ -193,7 +194,7 @@ main (int argc, char *argv[])
       client.SetAttribute ("OnTime", StringValue ("ns3::ConstantRandomVariable[Constant=1]"));
       client.SetAttribute ("OffTime", StringValue ("ns3::ConstantRandomVariable[Constant=0]"));
       client.SetAttribute ("DataRate", DataRateValue (DataRate (dataRate)));
-      ApplicationContainer clientApps = client.Install (ueNodes);
+      clientApps.Add (client.Install (ueNodes));
     }
 
   serverApps.Start (Seconds (0.01));
