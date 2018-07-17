@@ -177,7 +177,6 @@ main (int argc, char *argv[])
         // side effect: the default EPS bearer will be activated
       }
 
-
   // Install and start applications on UEs and remote host
   uint16_t dlPort = 1234;
   ApplicationContainer serverApps;
