@@ -56,7 +56,8 @@ GetTotalRx ()
 int
 main (int argc, char *argv[])
 {
-
+  uint32_t payloadSize = 1472;                       /* Transport layer payload size in bytes. */
+  std::string dataRate = "100Mbps"; 
   uint16_t numberOfNodes = 2;
   double simTime = 30;
   double interPacketInterval = 100;
@@ -119,15 +120,12 @@ main (int argc, char *argv[])
 
   // Install Mobility Model
   Ptr<ListPositionAllocator> positionAlloc = CreateObject<ListPositionAllocator> ();
-
-  positionAlloc->Add (Vector(100, 0, 0));
   positionAlloc->Add (Vector(50, 0, 0));
   positionAlloc->Add (Vector(1, 0, 0));
 
   MobilityHelper mobility;
   mobility.SetMobilityModel("ns3::ConstantPositionMobilityModel");
   mobility.SetPositionAllocator(positionAlloc);
-  mobility.Install(remoteHost);
   mobility.Install(enbNodes);
   mobility.Install(ueNodes);
 
@@ -158,19 +156,20 @@ main (int argc, char *argv[])
 
   // Install and start applications on UEs and remote host
   uint16_t dlPort = 1234;
-  ApplicationContainer clientApps;
   ApplicationContainer serverApps;
 
   for (uint32_t u = 0; u < ueNodes.GetN (); ++u)
     {
-      PacketSinkHelper dlPacketSinkHelper ("ns3::UdpSocketFactory", InetSocketAddress (Ipv4Address::GetAny (), dlPort));
+      PacketSinkHelper dlPacketSinkHelper ("ns3::TcpSocketFactory", InetSocketAddress (Ipv4Address::GetAny (), dlPort));
       serverApps.Add (dlPacketSinkHelper.Install (remoteHost));
       sink = StaticCast<PacketSink> (serverApps.Get (0));
 
-      UdpClientHelper dlClient (remoteHostAddr, dlPort);
-      dlClient.SetAttribute ("Interval", TimeValue (MilliSeconds(interPacketInterval)));
-      dlClient.SetAttribute ("PacketSize", UintegerValue(1472));
-      clientApps.Add (dlClient.Install (ueNodes.Get (u)));
+      OnOffHelper client ("ns3::TcpSocketFactory", (InetSocketAddress (remoteHostAddr, dlPort)));
+      client.SetAttribute ("PacketSize", UintegerValue (payloadSize));
+      client.SetAttribute ("OnTime", StringValue ("ns3::ConstantRandomVariable[Constant=1]"));
+      client.SetAttribute ("OffTime", StringValue ("ns3::ConstantRandomVariable[Constant=0]"));
+      client.SetAttribute ("DataRate", DataRateValue (DataRate (dataRate)));
+      ApplicationContainer clientApps = client.Install (ueNodes);
     }
 
   serverApps.Start (Seconds (0.01));
