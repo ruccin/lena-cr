@@ -121,11 +121,13 @@ main (int argc, char *argv[])
   Ptr<ListPositionAllocator> positionAlloc = CreateObject<ListPositionAllocator> ();
 
   positionAlloc->Add (Vector(250, 0, 0));
+  positionAlloc->Add (Vector(200, 0, 0));
   positionAlloc->Add (Vector(1, 0, 0));
 
   MobilityHelper mobility;
   mobility.SetMobilityModel("ns3::ConstantPositionMobilityModel");
   mobility.SetPositionAllocator(positionAlloc);
+  mobility.Install(remoteHost);
   mobility.Install(enbNodes);
   mobility.Install(ueNodes);
 
