@@ -29,6 +29,7 @@
 #include "ns3/applications-module.h"
 #include "ns3/point-to-point-helper.h"
 #include "ns3/config-store.h"
+#include "ns3/lte-global-pathloss-database.h"
 //#include "ns3/gtk-config-store.h"
 
 using namespace ns3;
@@ -154,7 +155,7 @@ main (int argc, char *argv[])
   mobility.Install(ueNodes);
 
   // Set Path loss model
-  lteHelper->SetAttribute ("PathlossModel", StringValue ("LogDistancePropagationLossModel"));
+  lteHelper->SetAttribute ("PathlossModel", StringValue ("ns3::LogDistancePropagationLossModel"));
 
 
   // Install LTE Devices to the nodes
