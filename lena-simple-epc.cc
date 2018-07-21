@@ -147,7 +147,7 @@ main (int argc, char *argv[])
 
   // Install Mobility Model
   Ptr<ListPositionAllocator> positionAlloc = CreateObject<ListPositionAllocator> ();
-  positionAlloc->Add (Vector(250, 0, 0));
+  positionAlloc->Add (Vector(300, 0, 0));
   positionAlloc->Add (Vector(1, 0, 0));
 
   MobilityHelper mobility;
