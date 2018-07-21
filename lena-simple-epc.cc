@@ -104,7 +104,7 @@ main (int argc, char *argv[])
 
   Config::SetDefault ("ns3::TcpSocket::SegmentSize", UintegerValue (payloadSize));
 
-  Config::SetDefault ("ns3::LogDistancePropagationLossModel::ReferenceDistance", DoubleValue (50));
+  //Config::SetDefault ("ns3::LogDistancePropagationLossModel::ReferenceDistance", DoubleValue (50));
 
   Ptr<LteHelper> lteHelper = CreateObject<LteHelper> ();
   Ptr<PointToPointEpcHelper>  epcHelper = CreateObject<PointToPointEpcHelper> ();
@@ -148,8 +148,8 @@ main (int argc, char *argv[])
 
   // Install Mobility Model
   Ptr<ListPositionAllocator> positionAlloc = CreateObject<ListPositionAllocator> ();
-  positionAlloc->Add (Vector(50, 0, 0));
-  positionAlloc->Add (Vector(1, 0, 0));
+  positionAlloc->Add (Vector(250, 0, 0));
+  positionAlloc->Add (Vector(0, 0, 0));
 
   MobilityHelper mobility;
   mobility.SetMobilityModel("ns3::ConstantPositionMobilityModel");
@@ -157,9 +157,9 @@ main (int argc, char *argv[])
   mobility.Install(enbNodes);
   mobility.Install(ueNodes);
 
-  // Set Path loss model
-  //lteHelper->SetAttribute ("PathlossModel", StringValue ("ns3::LogDistancePropagationLossModel"));
-
+  // Set Path loss model and fading model
+  lteHelper->SetAttribute ("PathlossModel", StringValue ("ns3::LogDistancePropagationLossModel"));
+  lteHelper->SetAttribute ("FadingModel", StringValue ("ns3::FastFadingLossModel"));
 
   // Install LTE Devices to the nodes
   NetDeviceContainer enbLteDevs = lteHelper->InstallEnbDevice (enbNodes);
