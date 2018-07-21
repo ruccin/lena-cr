@@ -73,6 +73,7 @@ Prints (Ptr<FlowMonitor> monitor)
     
     std::cout << "Flow" << iter->first << " (" << t.sourceAddress << " -> " << t.destinationAddress << ") " << std::endl;
     std::cout << "RX Packets: " << iter->second.rxPackets << std::endl;
+    std::cout << "  Throughput: " << iter->second.rxBytes * 8.0 / 9.0 / 1000 / 1000  << " Mbps\n";
   }
   Simulator::Schedule (MilliSeconds (100), &Prints, monitor);
 }
@@ -130,7 +131,8 @@ main (int argc, char *argv[])
   /* Set up Legacy Channel */
   YansWifiChannelHelper wifiChannel;
   wifiChannel.SetPropagationDelay ("ns3::ConstantSpeedPropagationDelayModel");
-  wifiChannel.AddPropagationLoss ("ns3::FriisPropagationLossModel", "Frequency", DoubleValue (5e9));
+  wifiChannel.SetPropagationLossModel ("ns3::LogDistancePropagationLossModel");
+  //wifiChannel.AddPropagationLoss ("ns3::FriisPropagationLossModel", "Frequency", DoubleValue (5e9));
 
   /* Create p2p network between wifiap and remotehost */
   NodeContainer networkNodes;
@@ -265,7 +267,7 @@ main (int argc, char *argv[])
   /* Start Applications */
   serverApp.Start (Seconds (0.0));
   clientApp.Start (Seconds (1.0));
-  Simulator::Schedule (Seconds (1.0), &GetTotalRx);
+  //Simulator::Schedule (Seconds (1.0), &GetTotalRx);
 
   /* Enable Traces */
   if (pcapTracing)
@@ -275,11 +277,9 @@ main (int argc, char *argv[])
       wifiPhy.EnablePcap ("Station", staDevices);
     }
 
-  Ptr<FlowMonitor> monitor;
   FlowMonitorHelper flowmon;
-
-  monitor = flowmon.Install (remoteHost);
-  //Simulator::Schedule (Seconds (1.0), &Prints, monitor);
+  Ptr<FlowMonitor> monitor = flowmon.InstallAll ();
+  Simulator::Schedule (Secondes (1.0), &Prints, monitor);
 
   /* Start Simulation */
   Simulator::Stop (Seconds (simulationTime));
