@@ -282,7 +282,7 @@ main (int argc, char *argv[])
     }
 
   FlowMonitorHelper flowmon;
-  Ptr<FlowMonitor> monitor = flowmon.InstallAll ();
+  Ptr<FlowMonitor> monitor = flowmon.Install (remoteHost);
   Simulator::Schedule (Seconds (1.0), &Prints, monitor);
 
   /* Start Simulation */
