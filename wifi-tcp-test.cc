@@ -123,9 +123,9 @@ main (int argc, char *argv[])
   /* Configure TCP Options */
   Config::SetDefault ("ns3::TcpSocket::SegmentSize", UintegerValue (payloadSize));
 
-  Config::SetDefault ("ns3::ThreeLogDistancePropagationLossModel::Distance0", DoubleValue (0));
-  Config::SetDefault ("ns3::ThreeLogDistancePropagationLossModel::Distance1", DoubleValue (50));
-  Config::SetDefault ("ns3::ThreeLogDistancePropagationLossModel::Distance2", DoubleValue (100));
+  //Config::SetDefault ("ns3::ThreeLogDistancePropagationLossModel::Distance0", DoubleValue (0));
+  //Config::SetDefault ("ns3::ThreeLogDistancePropagationLossModel::Distance1", DoubleValue (50));
+  //Config::SetDefault ("ns3::ThreeLogDistancePropagationLossModel::Distance2", DoubleValue (100));
 
   WifiMacHelper wifiMac;
   WifiHelper wifiHelper;
@@ -222,8 +222,8 @@ main (int argc, char *argv[])
   /* Mobility model */
   MobilityHelper mobility;
   Ptr<ListPositionAllocator> positionAlloc = CreateObject<ListPositionAllocator> ();
-  positionAlloc->Add (Vector (100.0, 0.0, 0.0));
-  positionAlloc->Add (Vector (50.0, 0.0, 0.0));
+  positionAlloc->Add (Vector (300.0, 0.0, 0.0));
+  positionAlloc->Add (Vector (150.0, 0.0, 0.0));
   positionAlloc->Add (Vector (0.0, 0.0, 0.0));
 
   mobility.SetPositionAllocator (positionAlloc);
