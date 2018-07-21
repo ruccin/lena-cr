@@ -103,6 +103,8 @@ main (int argc, char *argv[])
 
   Config::SetDefault ("ns3::TcpSocket::SegmentSize", UintegerValue (payloadSize));
 
+  Config::SetDefault ("ns3::LogDistancePropagationLossModel::ReferenceDistance", DoubleValue (300));
+
   Ptr<LteHelper> lteHelper = CreateObject<LteHelper> ();
   Ptr<PointToPointEpcHelper>  epcHelper = CreateObject<PointToPointEpcHelper> ();
   lteHelper->SetEpcHelper (epcHelper);
@@ -155,7 +157,7 @@ main (int argc, char *argv[])
   mobility.Install(ueNodes);
 
   // Set Path loss model
-  lteHelper->SetAttribute ("PathlossModel", StringValue ("ns3::LogDistancePropagationLossModel"));
+  //lteHelper->SetAttribute ("PathlossModel", StringValue ("ns3::LogDistancePropagationLossModel"));
 
 
   // Install LTE Devices to the nodes
