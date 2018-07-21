@@ -281,7 +281,7 @@ main (int argc, char *argv[])
 
   FlowMonitorHelper flowmon;
   Ptr<FlowMonitor> monitor = flowmon.InstallAll ();
-  Simulator::Schedule (Secondes (1.0), &Prints, monitor);
+  Simulator::Schedule (Seconds (1.0), &Prints, monitor);
 
   /* Start Simulation */
   Simulator::Stop (Seconds (simulationTime));
