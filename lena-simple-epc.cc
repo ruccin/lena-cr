@@ -147,11 +147,11 @@ main (int argc, char *argv[])
   ueNodes.Create(numberOfueNodes);
 
   // Set Path loss model
-  //lteHelper->SetAttribute ("PathlossModel", StringValue ("ns3::LogDistancePropagationLossModel"));
+  lteHelper->SetAttribute ("PathlossModel", StringValue ("ns3::LogDistancePropagationLossModel"));
 
   // Install Mobility Model
   Ptr<ListPositionAllocator> positionAlloc = CreateObject<ListPositionAllocator> ();
-  positionAlloc->Add (Vector(250, 0, 0));
+  positionAlloc->Add (Vector(400, 0, 0));
   positionAlloc->Add (Vector(0, 0, 0));
 
   MobilityHelper mobility;
