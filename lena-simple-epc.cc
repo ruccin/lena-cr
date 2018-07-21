@@ -61,14 +61,14 @@ main (int argc, char *argv[])
   uint32_t payloadSize = 1472;                       /* Transport layer payload size in bytes. */
   std::string dataRate = "100Mbps"; 
   std::string tcpVariant = "TcpNewReno";             /* TCP variant type. */
-  uint16_t numberOfNodes = 2;
+  uint16_t numberOfenbNodes = 1;
+  uint16_t numberOfueNodes = 1;
   double simTime = 30;
   double interPacketInterval = 100;
   bool useCa = false;
 
   // Command line arguments
   CommandLine cmd;
-  cmd.AddValue("numberOfNodes", "Number of eNodeBs + UE pairs", numberOfNodes);
   cmd.AddValue("simTime", "Total duration of the simulation [s])", simTime);
   cmd.AddValue("interPacketInterval", "Inter packet interval [ms])", interPacketInterval);
   cmd.AddValue("useCa", "Whether to use carrier aggregation.", useCa);
@@ -143,8 +143,8 @@ main (int argc, char *argv[])
 
   NodeContainer ueNodes;
   NodeContainer enbNodes;
-  enbNodes.Create(numberOfNodes);
-  ueNodes.Create(numberOfNodes);
+  enbNodes.Create(numberOfenbNodes);
+  ueNodes.Create(numberOfueNodes);
 
   // Install Mobility Model
   Ptr<ListPositionAllocator> positionAlloc = CreateObject<ListPositionAllocator> ();
@@ -179,11 +179,8 @@ main (int argc, char *argv[])
     }
 
   // Attach one UE per eNodeB
-  for (uint16_t i = 0; i < numberOfNodes; i++)
-      {
-        lteHelper->Attach (ueLteDevs.Get(i), enbLteDevs.Get(i));
+  lteHelper->Attach (ueLteDevs.Get(0), enbLteDevs.Get(0));
         // side effect: the default EPS bearer will be activated
-      }
 
   // Install and start applications on UEs and remote host
   uint16_t dlPort = 1234;
