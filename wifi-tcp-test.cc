@@ -75,7 +75,7 @@ Prints (Ptr<FlowMonitor> monitor)
     std::cout << "RX Packets: " << iter->second.rxPackets << std::endl;
     std::cout << "  Throughput: " << iter->second.rxBytes * 8.0 / 9.0 / 1000 / 1000  << " Mbps\n";
   }
-  Simulator::Schedule (Seconds (30), &Prints, monitor);
+  //Simulator::Schedule (Seconds (1), &Prints, monitor);
 }
 
 int
@@ -283,7 +283,7 @@ main (int argc, char *argv[])
 
   FlowMonitorHelper flowmon;
   Ptr<FlowMonitor> monitor = flowmon.InstallAll ();
-  Simulator::Schedule (Seconds (1.0), &Prints, monitor);
+  Simulator::Schedule (Seconds (simulationTime), &Prints, monitor);
 
   /* Start Simulation */
   Simulator::Stop (Seconds (simulationTime));
