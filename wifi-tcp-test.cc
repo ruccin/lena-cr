@@ -84,6 +84,7 @@ main (int argc, char *argv[])
   std::string dataRate = "100Mbps";                  /* Application layer datarate. */
   std::string tcpVariant = "TcpNewReno";             /* TCP variant type. */
   std::string phyRate = "HtMcs7";                    /* Physical layer bitrate. */
+  std::string phyMode = "OfdmRate54Mbps";
   double simulationTime = 30;                        /* Simulation time in seconds. */
   bool pcapTracing = false;                          /* PCAP Tracing is enabled or not. */
 
@@ -129,7 +130,7 @@ main (int argc, char *argv[])
 
   WifiMacHelper wifiMac;
   WifiHelper wifiHelper;
-  wifiHelper.SetStandard (WIFI_PHY_STANDARD_80211n_5GHZ);
+  wifiHelper.SetStandard (WIFI_PHY_STANDARD_80211ax_5GHZ);
 
   /* Set up Legacy Channel */
   YansWifiChannelHelper wifiChannel;
@@ -191,9 +192,9 @@ main (int argc, char *argv[])
   YansWifiPhyHelper wifiPhy = YansWifiPhyHelper::Default ();
   wifiPhy.SetChannel (wifiChannel.Create ());
   wifiPhy.Set ("Antennas", UintegerValue (4));
-  //wifiPhy.Set ("TxPowerStart", DoubleValue (10.0));
-  //wifiPhy.Set ("TxPowerEnd", DoubleValue (10.0));
-  //wifiPhy.Set ("TxPowerLevels", UintegerValue (1));
+  wifiPhy.Set ("TxPowerStart", DoubleValue (20.0));
+  wifiPhy.Set ("TxPowerEnd", DoubleValue (20.0));
+  wifiPhy.Set ("TxPowerLevels", UintegerValue (2));
   wifiPhy.Set ("TxGain", DoubleValue (0));
   wifiPhy.Set ("RxGain", DoubleValue (0));
   wifiPhy.Set ("RxNoiseFigure", DoubleValue (10));
@@ -201,8 +202,8 @@ main (int argc, char *argv[])
   wifiPhy.Set ("EnergyDetectionThreshold", DoubleValue (-79 + 3));
   wifiPhy.SetErrorRateModel ("ns3::YansErrorRateModel");
   wifiHelper.SetRemoteStationManager ("ns3::ConstantRateWifiManager",
-                                      "DataMode", StringValue (phyRate),
-                                      "ControlMode", StringValue ("HtMcs0"));
+                                      "DataMode", StringValue (phyMode),
+                                      "ControlMode", StringValue (phyMode));
 
   /* Configure AP */
   Ssid ssid = Ssid ("network");
