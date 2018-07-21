@@ -59,9 +59,8 @@ GetTotalRx ()
 }
 
 void
-Prints (Ptr<FlowMonitor> monitor)
+Prints (Ptr<FlowMonitor> monitor, FlowMonitorHelper flowmon)
 {
-  FlowMonitorHelper flowmon;
   monitor->CheckForLostPackets();
 
   Ptr<Ipv4FlowClassifier> classifier = DynamicCast<Ipv4FlowClassifier>(flowmon.GetClassifier());
@@ -75,7 +74,7 @@ Prints (Ptr<FlowMonitor> monitor)
     std::cout << "RX Packets: " << iter->second.rxPackets << std::endl;
     std::cout << "  Throughput: " << iter->second.rxBytes * 8.0 / 9.0 / 1000 / 1000  << " Mbps\n";
   }
-  //Simulator::Schedule (Seconds (1), &Prints, monitor);
+  Simulator::Schedule (MilliSeconds (100), &Prints, monitor, flowmon);
 }
 
 int
@@ -283,7 +282,7 @@ main (int argc, char *argv[])
 
   FlowMonitorHelper flowmon;
   Ptr<FlowMonitor> monitor = flowmon.InstallAll ();
-  Simulator::Schedule (Seconds (simulationTime), &Prints, monitor);
+  Simulator::Schedule (Seconds (1.1), &Prints, monitor, flowmon);
 
   /* Start Simulation */
   Simulator::Stop (Seconds (simulationTime));
