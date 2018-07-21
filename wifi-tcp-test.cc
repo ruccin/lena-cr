@@ -124,6 +124,8 @@ main (int argc, char *argv[])
   /* Configure TCP Options */
   Config::SetDefault ("ns3::TcpSocket::SegmentSize", UintegerValue (payloadSize));
 
+  Config::SetDefault ("ns3::LogDistancePropagationLossModel::ReferenceDistance", DoubleValue (300));
+
   WifiMacHelper wifiMac;
   WifiHelper wifiHelper;
   wifiHelper.SetStandard (WIFI_PHY_STANDARD_80211n_5GHZ);
@@ -131,7 +133,7 @@ main (int argc, char *argv[])
   /* Set up Legacy Channel */
   YansWifiChannelHelper wifiChannel;
   wifiChannel.SetPropagationDelay ("ns3::ConstantSpeedPropagationDelayModel");
-  wifiChannel.SetPropagationLossModel ("ns3::LogDistancePropagationLossModel");
+  //wifiChannel.SetPropagationLossModel ("ns3::LogDistancePropagationLossModel");
   //wifiChannel.AddPropagationLoss ("ns3::FriisPropagationLossModel", "Frequency", DoubleValue (5e9));
 
   /* Create p2p network between wifiap and remotehost */
@@ -219,9 +221,9 @@ main (int argc, char *argv[])
   /* Mobility model */
   MobilityHelper mobility;
   Ptr<ListPositionAllocator> positionAlloc = CreateObject<ListPositionAllocator> ();
+  positionAlloc->Add (Vector (300.0, 0.0, 0.0));
   positionAlloc->Add (Vector (150.0, 0.0, 0.0));
-  positionAlloc->Add (Vector (50.0, 0.0, 0.0));
-  positionAlloc->Add (Vector (1.0, 0.0, 0.0));
+  positionAlloc->Add (Vector (0.0, 0.0, 0.0));
 
   mobility.SetPositionAllocator (positionAlloc);
   mobility.SetMobilityModel ("ns3::ConstantPositionMobilityModel");
