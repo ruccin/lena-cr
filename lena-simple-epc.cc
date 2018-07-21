@@ -104,7 +104,7 @@ main (int argc, char *argv[])
 
   Config::SetDefault ("ns3::TcpSocket::SegmentSize", UintegerValue (payloadSize));
 
-  //Config::SetDefault ("ns3::LogDistancePropagationLossModel::ReferenceDistance", DoubleValue (300));
+  Config::SetDefault ("ns3::LogDistancePropagationLossModel::ReferenceDistance", DoubleValue (50));
 
   Ptr<LteHelper> lteHelper = CreateObject<LteHelper> ();
   Ptr<PointToPointEpcHelper>  epcHelper = CreateObject<PointToPointEpcHelper> ();
