@@ -75,7 +75,7 @@ Prints (Ptr<FlowMonitor> monitor)
     std::cout << "RX Packets: " << iter->second.rxPackets << std::endl;
     std::cout << "  Throughput: " << iter->second.rxBytes * 8.0 / 9.0 / 1000 / 1000  << " Mbps\n";
   }
-  Simulator::Schedule (MilliSeconds (100), &Prints, monitor);
+  Simulator::Schedule (Seconds (30), &Prints, monitor);
 }
 
 int
