@@ -124,7 +124,9 @@ main (int argc, char *argv[])
   /* Configure TCP Options */
   Config::SetDefault ("ns3::TcpSocket::SegmentSize", UintegerValue (payloadSize));
 
-  Config::SetDefault ("ns3::LogDistancePropagationLossModel::ReferenceDistance", DoubleValue (300));
+  Config::SetDefault ("ns3::ThreeLogDistancePropagationLossModel::Distance0", DoubleValue (0));
+  Config::SetDefault ("ns3::ThreeLogDistancePropagationLossModel::Distance1", DoubleValue (150));
+  Config::SetDefault ("ns3::ThreeLogDistancePropagationLossModel::Distance2", DoubleValue (300));
 
   WifiMacHelper wifiMac;
   WifiHelper wifiHelper;
@@ -134,7 +136,7 @@ main (int argc, char *argv[])
   YansWifiChannelHelper wifiChannel;
   wifiChannel.SetPropagationDelay ("ns3::ConstantSpeedPropagationDelayModel");
   //wifiChannel.SetPropagationLossModel ("ns3::LogDistancePropagationLossModel");
-  //wifiChannel.AddPropagationLoss ("ns3::FriisPropagationLossModel", "Frequency", DoubleValue (5e9));
+  wifiChannel.AddPropagationLoss ("ns3::FriisPropagationLossModel", "Frequency", DoubleValue (5e9));
 
   /* Create p2p network between wifiap and remotehost */
   NodeContainer networkNodes;
