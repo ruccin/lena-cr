@@ -158,7 +158,7 @@ main (int argc, char *argv[])
   mobility.Install(ueNodes);
 
   // Set Path loss model
-  //lteHelper->SetAttribute ("PathlossModel", StringValue ("ns3::LogDistancePropagationLossModel"));
+  lteHelper->SetAttribute ("PathlossModel", StringValue ("ns3::LogDistancePropagationLossModel"));
 
 
   // Install LTE Devices to the nodes
