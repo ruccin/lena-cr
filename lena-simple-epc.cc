@@ -146,6 +146,9 @@ main (int argc, char *argv[])
   enbNodes.Create(numberOfenbNodes);
   ueNodes.Create(numberOfueNodes);
 
+  // Set Path loss model
+  lteHelper->SetAttribute ("PathlossModel", StringValue ("ns3::LogDistancePropagationLossModel"));
+
   // Install Mobility Model
   Ptr<ListPositionAllocator> positionAlloc = CreateObject<ListPositionAllocator> ();
   positionAlloc->Add (Vector(250, 0, 0));
@@ -156,10 +159,6 @@ main (int argc, char *argv[])
   mobility.SetPositionAllocator(positionAlloc);
   mobility.Install(enbNodes);
   mobility.Install(ueNodes);
-
-  // Set Path loss model and fading model
-  lteHelper->SetAttribute ("PathlossModel", StringValue ("ns3::LogDistancePropagationLossModel"));
-  lteHelper->SetAttribute ("FadingModel", StringValue ("ns3::FastFadingLossModel"));
 
   // Install LTE Devices to the nodes
   NetDeviceContainer enbLteDevs = lteHelper->InstallEnbDevice (enbNodes);
