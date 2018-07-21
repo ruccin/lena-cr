@@ -59,7 +59,7 @@ GetTotalRx ()
 }
 
 void
-Prints (Ptr<FlowMonitor> monitor, FlowMonitorHelper flowmon)
+Prints (Ptr<FlowMonitor> monitor, FlowMonitorHelper& flowmon)
 {
   monitor->CheckForLostPackets();
 
