@@ -30,6 +30,7 @@
 #include "ns3/point-to-point-helper.h"
 #include "ns3/config-store.h"
 #include "ns3/lte-global-pathloss-database.h"
+#include "ns3/flow-monitor-module.h"
 //#include "ns3/gtk-config-store.h"
 
 using namespace ns3;

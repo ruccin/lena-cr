@@ -223,7 +223,7 @@ main (int argc, char *argv[])
   MobilityHelper mobility;
   Ptr<ListPositionAllocator> positionAlloc = CreateObject<ListPositionAllocator> ();
   positionAlloc->Add (Vector (300.0, 0.0, 0.0));
-  positionAlloc->Add (Vector (150.0, 0.0, 0.0));
+  positionAlloc->Add (Vector (100.0, 0.0, 0.0));
   positionAlloc->Add (Vector (0.0, 0.0, 0.0));
 
   mobility.SetPositionAllocator (positionAlloc);
