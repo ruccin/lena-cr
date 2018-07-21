@@ -299,8 +299,6 @@ main (int argc, char *argv[])
       //   StartTime of the OnOffApplication is at about "second 1"
       // and
       //   Simulator::Stops at "second 10".
-      if (i->first > 2)
-        {
           Ipv4FlowClassifier::FiveTuple t = classifier->FindFlow (i->first);
           std::cout << "Flow " << i->first - 2 << " (" << t.sourceAddress << " -> " << t.destinationAddress << ")\n";
           std::cout << "  Tx Packets: " << i->second.txPackets << "\n";
@@ -309,7 +307,6 @@ main (int argc, char *argv[])
           std::cout << "  Rx Packets: " << i->second.rxPackets << "\n";
           std::cout << "  Rx Bytes:   " << i->second.rxBytes << "\n";
           std::cout << "  Throughput: " << i->second.rxBytes * 8.0 / 9.0 / 1000 / 1000  << " Mbps\n";
-        }
     }
 
 
