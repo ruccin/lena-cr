@@ -282,7 +282,7 @@ main (int argc, char *argv[])
     }
 
   FlowMonitorHelper flowmon;
-  Ptr<FlowMonitor> monitor = flowmon.Install (staWifiNode);
+  Ptr<FlowMonitor> monitor = flowmon.InstallAll ();
   Simulator::Schedule (Seconds (1.0), &Prints, monitor);
 
   /* Start Simulation */
