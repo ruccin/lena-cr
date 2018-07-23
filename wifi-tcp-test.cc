@@ -191,7 +191,6 @@ main (int argc, char *argv[])
   /* Setup Physical Layer */
   YansWifiPhyHelper wifiPhy = YansWifiPhyHelper::Default ();
   wifiPhy.SetChannel (wifiChannel.Create ());
-  wifiPhy.Set ("Antennas", UintegerValue (4));
   wifiPhy.Set ("TxPowerStart", DoubleValue (10.0));
   wifiPhy.Set ("TxPowerEnd", DoubleValue (10.0));
   wifiPhy.Set ("TxPowerLevels", UintegerValue (1));
