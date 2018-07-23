@@ -192,9 +192,9 @@ main (int argc, char *argv[])
   YansWifiPhyHelper wifiPhy = YansWifiPhyHelper::Default ();
   wifiPhy.SetChannel (wifiChannel.Create ());
   wifiPhy.Set ("Antennas", UintegerValue (4));
-  wifiPhy.Set ("TxPowerStart", DoubleValue (20.0));
-  wifiPhy.Set ("TxPowerEnd", DoubleValue (20.0));
-  wifiPhy.Set ("TxPowerLevels", UintegerValue (2));
+  wifiPhy.Set ("TxPowerStart", DoubleValue (10.0));
+  wifiPhy.Set ("TxPowerEnd", DoubleValue (10.0));
+  wifiPhy.Set ("TxPowerLevels", UintegerValue (1));
   wifiPhy.Set ("TxGain", DoubleValue (0));
   wifiPhy.Set ("RxGain", DoubleValue (0));
   wifiPhy.Set ("RxNoiseFigure", DoubleValue (10));
@@ -225,7 +225,7 @@ main (int argc, char *argv[])
   MobilityHelper mobility;
   Ptr<ListPositionAllocator> positionAlloc = CreateObject<ListPositionAllocator> ();
   positionAlloc->Add (Vector (400.0, 0.0, 0.0));
-  positionAlloc->Add (Vector (90.0, 0.0, 0.0));
+  positionAlloc->Add (Vector (80.0, 0.0, 0.0));
   positionAlloc->Add (Vector (0.0, 0.0, 0.0));
 
   mobility.SetPositionAllocator (positionAlloc);
