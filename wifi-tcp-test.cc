@@ -123,16 +123,6 @@ main (int argc, char *argv[])
   /* Configure TCP Options */
   Config::SetDefault ("ns3::TcpSocket::SegmentSize", UintegerValue (payloadSize));
 
-  WifiMacHelper wifiMac;
-  WifiHelper wifiHelper;
-  wifiHelper.SetStandard (WIFI_PHY_STANDARD_80211ac);
-
-  /* Set up Legacy Channel */
-  YansWifiChannelHelper wifiChannel;
-  wifiChannel.SetPropagationDelay ("ns3::ConstantSpeedPropagationDelayModel");
-  wifiChannel.AddPropagationLoss ("ns3::LogDistancePropagationLossModel");
-  //wifiChannel.AddPropagationLoss ("ns3::FriisPropagationLossModel");
-
   /* Create p2p network between wifiap and remotehost */
   NodeContainer networkNodes;
   networkNodes.Create (2);
@@ -183,6 +173,16 @@ main (int argc, char *argv[])
   ipv4h.SetBase ("2.0.0.0", "255.0.0.0");
   Ipv4InterfaceContainer csmaIpIface = ipv4h.Assign (csmaDevs);
 
+  WifiMacHelper wifiMac;
+  WifiHelper wifiHelper;
+  wifiHelper.SetStandard (WIFI_PHY_STANDARD_80211ac);
+
+  /* Set up Legacy Channel */
+  YansWifiChannelHelper wifiChannel;
+  wifiChannel.SetPropagationDelay ("ns3::ConstantSpeedPropagationDelayModel");
+  wifiChannel.AddPropagationLoss ("ns3::LogDistancePropagationLossModel");
+  //wifiChannel.AddPropagationLoss ("ns3::FriisPropagationLossModel");
+
   /* Setup Physical Layer */
   YansWifiPhyHelper wifiPhy = YansWifiPhyHelper::Default ();
   wifiPhy.SetChannel (wifiChannel.Create ());
@@ -202,15 +202,13 @@ main (int argc, char *argv[])
   /* Configure AP */
   Ssid ssid = Ssid ("network");
   wifiMac.SetType ("ns3::ApWifiMac",
-                   "Ssid", SsidValue (ssid),
-                   "EnableBeaconJitter", BooleanValue (true));
+                   "Ssid", SsidValue (ssid));
 
   Ptr<NetDevice> apDevice = (wifiHelper.Install (wifiPhy, wifiMac, apWifiNode)).Get (0);
 
   /* Configure STA */
   wifiMac.SetType ("ns3::StaWifiMac",
-                   "Ssid", SsidValue (ssid),
-                   "ActiveProbing", BooleanValue (false));
+                   "Ssid", SsidValue (ssid));
 
   Ptr<NetDevice> staDevices = (wifiHelper.Install (wifiPhy, wifiMac, staWifiNode)).Get (0);
 
@@ -220,9 +218,9 @@ main (int argc, char *argv[])
   /* Mobility model */
   MobilityHelper mobility;
   Ptr<ListPositionAllocator> positionAlloc = CreateObject<ListPositionAllocator> ();
-  positionAlloc->Add (Vector (100.0, 0.0, 0.0));
-  positionAlloc->Add (Vector (50.0, 0.0, 0.0));
-  positionAlloc->Add (Vector (0.0, 0.0, 0.0));
+  positionAlloc->Add (Vector (100.0, 30.0, 0.0));
+  positionAlloc->Add (Vector (55.0, 15.0, 0.0));
+  positionAlloc->Add (Vector (5.0, 10.0, 0.0));
 
   mobility.SetPositionAllocator (positionAlloc);
   mobility.SetMobilityModel ("ns3::ConstantPositionMobilityModel");
