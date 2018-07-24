@@ -155,13 +155,13 @@ main (int argc, char *argv[])
   Config::SetDefault ("ns3::LteEnbPhy::TxPower", DoubleValue (35.0));
   Config::SetDefault ("ns3::LteUePhy::TxPower", DoubleValue (20.0));
 
+  // Set Path loss model
+  lteHelper->SetAttribute ("PathlossModel", StringValue ("ns3:FriisPropagationLossModel"));
+
   NodeContainer ueNodes;
   NodeContainer enbNodes;
   enbNodes.Create(numberOfenbNodes);
   ueNodes.Create(numberOfueNodes);
-
-  // Set Path loss model
-  //lteHelper->SetAttribute ("PathlossModel", StringValue ("ns3::LogDistancePropagationLossModel"));
 
   // Install Mobility Model
   Ptr<ListPositionAllocator> positionAlloc = CreateObject<ListPositionAllocator> ();
