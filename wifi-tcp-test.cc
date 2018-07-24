@@ -130,7 +130,7 @@ main (int argc, char *argv[])
   /* Set up Legacy Channel */
   YansWifiChannelHelper wifiChannel;
   wifiChannel.SetPropagationDelay ("ns3::ConstantSpeedPropagationDelayModel");
-  wifiChannel.AddPropagationLoss ("ns3::LogDistancePropagationLossModel");
+  wifiChannel.AddPropagationLoss ("ns3::RangePropagationLossModel");
   //wifiChannel.AddPropagationLoss ("ns3::FriisPropagationLossModel", "Frequency", DoubleValue (5e9));
 
   /* Create p2p network between wifiap and remotehost */
@@ -202,13 +202,15 @@ main (int argc, char *argv[])
   /* Configure AP */
   Ssid ssid = Ssid ("network");
   wifiMac.SetType ("ns3::ApWifiMac",
-                   "Ssid", SsidValue (ssid));
+                   "Ssid", SsidValue (ssid),
+                   "EnableBeaconJitter", BooleanValue (true));
 
   Ptr<NetDevice> apDevice = (wifiHelper.Install (wifiPhy, wifiMac, apWifiNode)).Get (0);
 
   /* Configure STA */
   wifiMac.SetType ("ns3::StaWifiMac",
-                   "Ssid", SsidValue (ssid));
+                   "Ssid", SsidValue (ssid),
+                   "ActiveProbing", BooleanValue (false));
 
   Ptr<NetDevice> staDevices = (wifiHelper.Install (wifiPhy, wifiMac, staWifiNode)).Get (0);
 
