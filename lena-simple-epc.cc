@@ -154,7 +154,7 @@ main (int argc, char *argv[])
   Config::SetDefault ("ns3::LteUePhy::TxPower", DoubleValue (20.0));
 
   // Set Path loss model
-  lteHelper->SetAttribute ("PathlossModel", StringValue ("ns3::FriisPropagationLossModel", "Frequency", DoubleValue (5180e6));
+  lteHelper->SetAttribute ("PathlossModel", StringValue ("ns3::FriisPropagationLossModel", "Frequency", DoubleValue (5e9));
   NodeContainer ueNodes;
   NodeContainer enbNodes;
   enbNodes.Create(numberOfenbNodes);
