@@ -140,15 +140,11 @@ main (int argc, char *argv[])
   Ptr<Ipv4StaticRouting> remoteHostStaticRouting = ipv4RoutingHelper.GetStaticRouting (remoteHost->GetObject<Ipv4> ());
   remoteHostStaticRouting->AddNetworkRouteTo (Ipv4Address ("7.0.0.0"), Ipv4Mask ("255.0.0.0"), 1);
 
-  // Set Path loss model
-  lteHelper->SetAttribute ("PathlossModel", StringValue ("ns3:TwoRayGroundPropagationLossModel"));
-
   // LTE configuration parametes
   lteHelper->SetSchedulerType ("ns3::PfFfMacScheduler");
   lteHelper->SetSchedulerAttribute ("UlCqiFilter", EnumValue (FfMacScheduler::PUSCH_UL_CQI));
   // LTE-U DL transmission @5180 MHz
   lteHelper->SetEnbDeviceAttribute ("DlEarfcn", UintegerValue (255444));
-  lteHelper->SetEnbDeviceAttribute ("DlBandwidth", UintegerValue (100));
   // needed for initial cell search
   lteHelper->SetUeDeviceAttribute ("DlEarfcn", UintegerValue (255444));
   // LTE calibration
@@ -156,6 +152,9 @@ main (int argc, char *argv[])
   //lteHelper->SetEnbAntennaModelAttribute ("Gain", DoubleValue (5.0));
   Config::SetDefault ("ns3::LteEnbPhy::TxPower", DoubleValue (35.0));
   Config::SetDefault ("ns3::LteUePhy::TxPower", DoubleValue (20.0));
+
+  // Set Path loss model
+  lteHelper->SetAttribute ("PathlossModel", StringValue ("ns3:FriisPropagationLossModel", "Frequency", DoubleValue (5.180e6)));
 
   NodeContainer ueNodes;
   NodeContainer enbNodes;
