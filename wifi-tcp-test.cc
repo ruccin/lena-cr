@@ -83,7 +83,7 @@ main (int argc, char *argv[])
   uint32_t payloadSize = 1472;                       /* Transport layer payload size in bytes. */
   std::string dataRate = "100Mbps";                  /* Application layer datarate. */
   std::string tcpVariant = "TcpNewReno";             /* TCP variant type. */
-  std::string phyRate = "VhtMcs9";                    /* Physical layer bitrate. */
+  //std::string phyRate = "VhtMcs9";                    /* Physical layer bitrate. */
   double simulationTime = 30;                        /* Simulation time in seconds. */
   bool pcapTracing = false;                          /* PCAP Tracing is enabled or not. */
 
@@ -94,7 +94,7 @@ main (int argc, char *argv[])
   cmd.AddValue ("tcpVariant", "Transport protocol to use: TcpNewReno, "
                 "TcpHybla, TcpHighSpeed, TcpHtcp, TcpVegas, TcpScalable, TcpVeno, "
                 "TcpBic, TcpYeah, TcpIllinois, TcpWestwood, TcpWestwoodPlus, TcpLedbat ", tcpVariant);
-  cmd.AddValue ("phyRate", "Physical layer bitrate", phyRate);
+  //cmd.AddValue ("phyRate", "Physical layer bitrate", phyRate);
   cmd.AddValue ("simulationTime", "Simulation time in seconds", simulationTime);
   cmd.AddValue ("pcap", "Enable/disable PCAP Tracing", pcapTracing);
   cmd.Parse (argc, argv);
@@ -125,7 +125,7 @@ main (int argc, char *argv[])
 
   WifiMacHelper wifiMac;
   WifiHelper wifiHelper;
-  wifiHelper.SetStandard (WIFI_PHY_STANDARD_80211ac);
+  wifiHelper.SetStandard (WIFI_PHY_STANDARD_80211ax_2_4GHZ);
 
   /* Set up Legacy Channel */
   YansWifiChannelHelper wifiChannel;
@@ -196,8 +196,8 @@ main (int argc, char *argv[])
   wifiPhy.Set ("EnergyDetectionThreshold", DoubleValue (-79 + 3));
   wifiPhy.SetErrorRateModel ("ns3::YansErrorRateModel");
   wifiHelper.SetRemoteStationManager ("ns3::ConstantRateWifiManager",
-                                      "DataMode", StringValue (phyRate),
-                                      "ControlMode", StringValue ("VhtMcs0"));
+                                      "DataMode", StringValue ("HeMcs9"),
+                                      "ControlMode", StringValue ("HeMcs0"));
 
   /* Configure AP */
   Ssid ssid = Ssid ("network");
