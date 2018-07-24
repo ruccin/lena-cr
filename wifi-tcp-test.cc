@@ -179,8 +179,8 @@ main (int argc, char *argv[])
 
   /* Set up Legacy Channel */
   YansWifiChannelHelper wifiChannel;
-  wifiChannel.SetPropagationDelayModel ("ns3::ConstantSpeedPropagationDelayModel");
-  wifiChannel.SetPropagationLossModel ("ns3::LogDistancePropagationLossModel");
+  wifiChannel.SetPropagationDelay ("ns3::ConstantSpeedPropagationDelayModel");
+  wifiChannel.AddPropagationLoss ("ns3::LogDistancePropagationLossModel");
   //wifiChannel.AddPropagationLoss ("ns3::FriisPropagationLossModel");
   //wifiChannel.AddPropagationLoss ("ns3::RangePropagationLossModel");
 
