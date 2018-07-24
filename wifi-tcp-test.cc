@@ -83,7 +83,7 @@ main (int argc, char *argv[])
   uint32_t payloadSize = 1472;                       /* Transport layer payload size in bytes. */
   std::string dataRate = "100Mbps";                  /* Application layer datarate. */
   std::string tcpVariant = "TcpNewReno";             /* TCP variant type. */
-  std::string phyRate = "HtMcs7";                    /* Physical layer bitrate. */
+  std::string phyRate = "VHtMcs9";                    /* Physical layer bitrate. */
   double simulationTime = 30;                        /* Simulation time in seconds. */
   bool pcapTracing = false;                          /* PCAP Tracing is enabled or not. */
 
@@ -123,19 +123,15 @@ main (int argc, char *argv[])
   /* Configure TCP Options */
   Config::SetDefault ("ns3::TcpSocket::SegmentSize", UintegerValue (payloadSize));
 
-  Config::SetDefault ("ns3::ThreeLogDistancePropagationLossModel::Distance0", DoubleValue (0));
-  Config::SetDefault ("ns3::ThreeLogDistancePropagationLossModel::Distance1", DoubleValue (20));
-  Config::SetDefault ("ns3::ThreeLogDistancePropagationLossModel::Distance2", DoubleValue (100));
-
   WifiMacHelper wifiMac;
   WifiHelper wifiHelper;
-  wifiHelper.SetStandard (WIFI_PHY_STANDARD_80211n_5GHZ);
+  wifiHelper.SetStandard (WIFI_PHY_STANDARD_80211ac);
 
   /* Set up Legacy Channel */
   YansWifiChannelHelper wifiChannel;
   wifiChannel.SetPropagationDelay ("ns3::ConstantSpeedPropagationDelayModel");
-  //wifiChannel.AddPropagationLoss ("ns3::ThreeLogDistancePropagationLossModel");
-  wifiChannel.AddPropagationLoss ("ns3::FriisPropagationLossModel", "Frequency", DoubleValue (5e9));
+  wifiChannel.AddPropagationLoss ("ns3::LogDistancePropagationLossModel");
+  //wifiChannel.AddPropagationLoss ("ns3::FriisPropagationLossModel", "Frequency", DoubleValue (5e9));
 
   /* Create p2p network between wifiap and remotehost */
   NodeContainer networkNodes;
@@ -201,7 +197,7 @@ main (int argc, char *argv[])
   wifiPhy.SetErrorRateModel ("ns3::YansErrorRateModel");
   wifiHelper.SetRemoteStationManager ("ns3::ConstantRateWifiManager",
                                       "DataMode", StringValue (phyRate),
-                                      "ControlMode", StringValue ("HtMcs0"));
+                                      "ControlMode", StringValue ("VHtMcs0"));
 
   /* Configure AP */
   Ssid ssid = Ssid ("network");
