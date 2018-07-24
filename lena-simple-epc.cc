@@ -151,7 +151,7 @@ main (int argc, char *argv[])
   lteHelper->SetUeDeviceAttribute ("DlEarfcn", UintegerValue (255444));
   // LTE calibration
   lteHelper->SetEnbAntennaModelType ("ns3::IsotropicAntennaModel");
-  lteHelper->SetEnbAntennaModelAttribute ("Gain",   DoubleValue (5.0));
+  //lteHelper->SetEnbAntennaModelAttribute ("Gain", DoubleValue (5.0));
   Config::SetDefault ("ns3::LteEnbPhy::TxPower", DoubleValue (35.0));
   Config::SetDefault ("ns3::LteUePhy::TxPower", DoubleValue (20.0));
 
