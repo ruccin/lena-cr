@@ -158,6 +158,7 @@ main (int argc, char *argv[])
   // Set Path loss model
   lteHelper->SetAttribute ("PathlossModel", StringValue ("ns3:FriisPropagationLossModel"));
 
+
   NodeContainer ueNodes;
   NodeContainer enbNodes;
   enbNodes.Create(numberOfenbNodes);
