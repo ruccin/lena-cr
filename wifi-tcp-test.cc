@@ -130,7 +130,7 @@ main (int argc, char *argv[])
   /* Set up Legacy Channel */
   YansWifiChannelHelper wifiChannel;
   wifiChannel.SetPropagationDelay ("ns3::ConstantSpeedPropagationDelayModel");
-  wifiChannel.AddPropagationLoss ("ns3::RangePropagationLossModel");
+  wifiChannel.AddPropagationLoss ("ns3::RangePropagationLossModel", "MaxRange", DoubleValue (200));
   //wifiChannel.AddPropagationLoss ("ns3::FriisPropagationLossModel", "Frequency", DoubleValue (5e9));
 
   /* Create p2p network between wifiap and remotehost */
@@ -220,8 +220,8 @@ main (int argc, char *argv[])
   /* Mobility model */
   MobilityHelper mobility;
   Ptr<ListPositionAllocator> positionAlloc = CreateObject<ListPositionAllocator> ();
-  positionAlloc->Add (Vector (100.0, 0.0, 0.0));
-  positionAlloc->Add (Vector (20.0, 0.0, 0.0));
+  positionAlloc->Add (Vector (200.0, 0.0, 0.0));
+  positionAlloc->Add (Vector (80.0, 0.0, 0.0));
   positionAlloc->Add (Vector (0.0, 0.0, 0.0));
 
   mobility.SetPositionAllocator (positionAlloc);
