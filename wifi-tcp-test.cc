@@ -125,7 +125,7 @@ main (int argc, char *argv[])
 
   WifiMacHelper wifiMac;
   WifiHelper wifiHelper;
-  wifiHelper.SetStandard (WIFI_PHY_STANDARD_80211ax_5GHZ);
+  wifiHelper.SetStandard (WIFI_PHY_STANDARD_80211ac);
 
   /* Set up Legacy Channel */
   YansWifiChannelHelper wifiChannel;
@@ -196,8 +196,8 @@ main (int argc, char *argv[])
   wifiPhy.Set ("EnergyDetectionThreshold", DoubleValue (-79 + 3));
   wifiPhy.SetErrorRateModel ("ns3::YansErrorRateModel");
   wifiHelper.SetRemoteStationManager ("ns3::ConstantRateWifiManager",
-                                      "DataMode", StringValue ("HeMcs9"),
-                                      "ControlMode", StringValue ("HeMcs0"));
+                                      "DataMode", StringValue ("VhtMcs9"),
+                                      "ControlMode", StringValue ("VhtMcs0"));
 
   /* Configure AP */
   Ssid ssid = Ssid ("network");
