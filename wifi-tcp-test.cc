@@ -83,7 +83,7 @@ main (int argc, char *argv[])
   uint32_t payloadSize = 1472;                       /* Transport layer payload size in bytes. */
   std::string dataRate = "100Mbps";                  /* Application layer datarate. */
   std::string tcpVariant = "TcpNewReno";             /* TCP variant type. */
-  std::string phyRate = "VHtMcs9";                    /* Physical layer bitrate. */
+  std::string phyRate = "VhtMcs9";                    /* Physical layer bitrate. */
   double simulationTime = 30;                        /* Simulation time in seconds. */
   bool pcapTracing = false;                          /* PCAP Tracing is enabled or not. */
 
@@ -197,7 +197,7 @@ main (int argc, char *argv[])
   wifiPhy.SetErrorRateModel ("ns3::YansErrorRateModel");
   wifiHelper.SetRemoteStationManager ("ns3::ConstantRateWifiManager",
                                       "DataMode", StringValue (phyRate),
-                                      "ControlMode", StringValue ("VHtMcs0"));
+                                      "ControlMode", StringValue ("VhtMcs0"));
 
   /* Configure AP */
   Ssid ssid = Ssid ("network");
