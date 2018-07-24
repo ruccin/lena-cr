@@ -84,7 +84,6 @@ main (int argc, char *argv[])
   std::string dataRate = "100Mbps";                  /* Application layer datarate. */
   std::string tcpVariant = "TcpNewReno";             /* TCP variant type. */
   std::string phyRate = "HtMcs7";                    /* Physical layer bitrate. */
-  std::string phyMode = "OfdmRate54Mbps";
   double simulationTime = 30;                        /* Simulation time in seconds. */
   bool pcapTracing = false;                          /* PCAP Tracing is enabled or not. */
 
@@ -201,8 +200,8 @@ main (int argc, char *argv[])
   wifiPhy.Set ("EnergyDetectionThreshold", DoubleValue (-79 + 3));
   wifiPhy.SetErrorRateModel ("ns3::YansErrorRateModel");
   wifiHelper.SetRemoteStationManager ("ns3::ConstantRateWifiManager",
-                                      "DataMode", StringValue (phyMode),
-                                      "ControlMode", StringValue (phyMode));
+                                      "DataMode", StringValue (phyRate),
+                                      "ControlMode", StringValue (HtMcs0));
 
   /* Configure AP */
   Ssid ssid = Ssid ("network");
@@ -223,7 +222,7 @@ main (int argc, char *argv[])
   /* Mobility model */
   MobilityHelper mobility;
   Ptr<ListPositionAllocator> positionAlloc = CreateObject<ListPositionAllocator> ();
-  positionAlloc->Add (Vector (100.0, 0.0, 0.0));
+  positionAlloc->Add (Vector (200.0, 0.0, 0.0));
   positionAlloc->Add (Vector (70.0, 0.0, 0.0));
   positionAlloc->Add (Vector (0.0, 0.0, 0.0));
 
