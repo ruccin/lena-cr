@@ -156,7 +156,7 @@ main (int argc, char *argv[])
   Config::SetDefault ("ns3::LteUePhy::TxPower", DoubleValue (20.0));
 
   // Set Path loss model
-  lteHelper->SetAttribute ("PathlossModel", StringValue ("ns3:FriisPropagationLossModel"));
+  lteHelper->SetAttribute ("PathlossModel", StringValue ("ns3:TwoRayGroundPropagationLossModel"));
 
   NodeContainer ueNodes;
   NodeContainer enbNodes;
@@ -165,8 +165,8 @@ main (int argc, char *argv[])
 
   // Install Mobility Model
   Ptr<ListPositionAllocator> positionAlloc = CreateObject<ListPositionAllocator> ();
-  positionAlloc->Add (Vector(400, 0, 0));
-  positionAlloc->Add (Vector(0, 0, 0));
+  positionAlloc->Add (Vector(400, 20, 0));
+  positionAlloc->Add (Vector(5, 10, 0));
 
   MobilityHelper mobility;
   mobility.SetMobilityModel("ns3::ConstantPositionMobilityModel");
