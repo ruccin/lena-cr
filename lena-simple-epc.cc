@@ -156,7 +156,7 @@ main (int argc, char *argv[])
   Config::SetDefault ("ns3::LteUePhy::TxPower", DoubleValue (20.0));
 
   // Set Path loss model
-  lteHelper->SetAttribute ("PathlossModel", StringValue ("ns3:TwoRayGroundPropagationLossModel"));
+  lteHelper->SetAttribute ("PathlossModel", StringValue ("ns3:LogDistancePropagationLossModel"));
 
   NodeContainer ueNodes;
   NodeContainer enbNodes;
