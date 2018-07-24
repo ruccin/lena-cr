@@ -140,6 +140,9 @@ main (int argc, char *argv[])
   Ptr<Ipv4StaticRouting> remoteHostStaticRouting = ipv4RoutingHelper.GetStaticRouting (remoteHost->GetObject<Ipv4> ());
   remoteHostStaticRouting->AddNetworkRouteTo (Ipv4Address ("7.0.0.0"), Ipv4Mask ("255.0.0.0"), 1);
 
+  // Set Path loss model
+  lteHelper->SetAttribute ("PathlossModel", StringValue ("ns3:TwoRayGroundPropagationLossModel"));
+
   // LTE configuration parametes
   lteHelper->SetSchedulerType ("ns3::PfFfMacScheduler");
   lteHelper->SetSchedulerAttribute ("UlCqiFilter", EnumValue (FfMacScheduler::PUSCH_UL_CQI));
@@ -154,9 +157,6 @@ main (int argc, char *argv[])
   Config::SetDefault ("ns3::LteEnbPhy::TxPower", DoubleValue (35.0));
   Config::SetDefault ("ns3::LteUePhy::TxPower", DoubleValue (20.0));
 
-  // Set Path loss model
-  lteHelper->SetAttribute ("PathlossModel", StringValue ("ns3:LogDistancePropagationLossModel"));
-
   NodeContainer ueNodes;
   NodeContainer enbNodes;
   enbNodes.Create(numberOfenbNodes);
@@ -164,8 +164,8 @@ main (int argc, char *argv[])
 
   // Install Mobility Model
   Ptr<ListPositionAllocator> positionAlloc = CreateObject<ListPositionAllocator> ();
-  positionAlloc->Add (Vector(400, 20, 0));
-  positionAlloc->Add (Vector(5, 10, 0));
+  positionAlloc->Add (Vector(400, 0, 0));
+  positionAlloc->Add (Vector(5, 0, 0));
 
   MobilityHelper mobility;
   mobility.SetMobilityModel("ns3::ConstantPositionMobilityModel");

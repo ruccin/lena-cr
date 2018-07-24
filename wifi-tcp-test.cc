@@ -219,9 +219,9 @@ main (int argc, char *argv[])
   /* Mobility model */
   MobilityHelper mobility;
   Ptr<ListPositionAllocator> positionAlloc = CreateObject<ListPositionAllocator> ();
-  positionAlloc->Add (Vector (150.0, 30.0, 0.0));
-  positionAlloc->Add (Vector (85.0, 15.0, 0.0));
-  positionAlloc->Add (Vector (5.0, 10.0, 0.0));
+  positionAlloc->Add (Vector (150.0, 0.0, 0.0));
+  positionAlloc->Add (Vector (85.0, 0.0, 0.0));
+  positionAlloc->Add (Vector (5.0, 0.0, 0.0));
 
   mobility.SetPositionAllocator (positionAlloc);
   mobility.SetMobilityModel ("ns3::ConstantPositionMobilityModel");
