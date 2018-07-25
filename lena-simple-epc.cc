@@ -156,6 +156,7 @@ main (int argc, char *argv[])
   // Set Path loss model
   lteHelper->SetAttribute ("PathlossModel", StringValue ("ns3::FriisPropagationLossModel"));
   //lteHelper->SetPathlossModelAttribute ("ReferenceDistance", DoubleValue (400));
+  lteHelper->SetPathlossModelAttribute ("Frequency", DoubleValue (5e9));
 
   NodeContainer ueNodes;
   NodeContainer enbNodes;
