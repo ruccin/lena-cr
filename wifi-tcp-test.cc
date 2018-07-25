@@ -124,6 +124,7 @@ main (int argc, char *argv[])
   Config::SetDefault ("ns3::TcpSocket::SegmentSize", UintegerValue (payloadSize));
 
   //Config::SetDefault ("ns3::RangePropagationLossModel::MaxRange", DoubleValue (200));
+  Config::SetDefault ("ns3::LogDistancePropagationLossModel::ReferenceDistance", DoubleValue (200));
 
   /* Create p2p network between wifiap and remotehost */
   NodeContainer networkNodes;
@@ -183,8 +184,8 @@ main (int argc, char *argv[])
   /* Set up Legacy Channel */
   YansWifiChannelHelper wifiChannel;
   wifiChannel.SetPropagationDelay ("ns3::ConstantSpeedPropagationDelayModel");
-  wifiChannel.AddPropagationLoss ("ns3::LogDistancePropagationLossModel", "ReferenceDistance", DoubleValue (85));
-  //wifiChannel.AddPropagationLoss ("ns3::RangePropagationLossModel");
+  //wifiChannel.AddPropagationLoss ("ns3::LogDistancePropagationLossModel", "ReferenceDistance", DoubleValue (85));
+  wifiChannel.AddPropagationLoss ("ns3::FriisPropagationLossModel");
 
   /* Setup Physical Layer */
   YansWifiPhyHelper wifiPhy = YansWifiPhyHelper::Default ();
