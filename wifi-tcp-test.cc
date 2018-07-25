@@ -80,7 +80,7 @@ Prints (Ptr<FlowMonitor> monitor, FlowMonitorHelper flowmon)
 int
 main (int argc, char *argv[])
 {
-  uint32_t payloadSize = 1472;                       /* Transport layer payload size in bytes. */
+  uint32_t payloadSize = 1000;                       /* Transport layer payload size in bytes. */
   std::string dataRate = "100Mbps";                  /* Application layer datarate. */
   std::string tcpVariant = "TcpNewReno";             /* TCP variant type. */
   //std::string phyRate = "VhtMcs9";                    /* Physical layer bitrate. */
