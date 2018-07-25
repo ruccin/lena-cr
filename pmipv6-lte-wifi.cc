@@ -30,13 +30,15 @@
 #include "ns3/csma-module.h"
 #include "ns3/wifi-module.h"
 #include "ns3/bridge-module.h"
-#include "ns3/flow-monitor-module.h"
 
 using namespace ns3;
 
+/**
+ * Sample simulation script for LTE+EPC. It instantiates several eNodeB,
+ * attaches one UE per eNodeB starts a flow for each UE to  and from a remote host.
+ * It also  starts yet another flow between each UE pair.
+ */
 NS_LOG_COMPONENT_DEFINE ("LenaPmipv6");
-
-
 
 void PrintCompleteNodeInfo(Ptr<Node> node)
 {
@@ -66,9 +68,7 @@ void PrintCompleteNodeInfo(Ptr<Node> node)
 
 void RxTrace (std::string context, Ptr<const Packet> packet, Ptr<Ipv6> ipv6, uint32_t interfaceId)
 {
-  Ipv6Header ipv6Header;
-  packet->PeekHeader (ipv6Header);
-  NS_LOG_DEBUG (context << " " << ipv6Header << " " << interfaceId);
+  NS_LOG_DEBUG (context << " " << interfaceId);
 }
 
 void TxTrace (std::string context, Ptr<const Packet> packet, Ptr<Ipv6> ipv6, uint32_t interfaceId)
@@ -76,7 +76,6 @@ void TxTrace (std::string context, Ptr<const Packet> packet, Ptr<Ipv6> ipv6, uin
   Ipv6Header ipv6Header;
   packet->PeekHeader (ipv6Header);
   NS_LOG_DEBUG (context << " " << ipv6Header << " " << interfaceId);
-
 }
 
 void DropTrace (std::string context, const Ipv6Header & ipv6Header, Ptr<const Packet> packet, Ipv6L3Protocol::DropReason dropReason, Ptr<Ipv6> ipv6, uint32_t interfaceId)
@@ -91,17 +90,6 @@ void PacketSinkRxTrace (std::string context, Ptr<const Packet> packet, const Add
   NS_LOG_UNCOND (context << " " << seqTs.GetTs () << "->" << Simulator::Now() << ": " << seqTs.GetSeq());
 }
 
-
-void wifiThroughput (ApplicationContainer Apps)
-{
-  Ptr<PacketSink> sink = DynamicCast<PacketSink> (Apps.Get (1));
-  uint64_t totalRecvPacket = sink->GetTotalRx ();
-  NS_LOG_UNCOND ("Total Bytes Received by sink packet :" << totalRecvPacket);
-  
-  //double throughputB = (totalRecvPacket * 1024 * 8) / 20;
-  //NS_LOG_UNCOND ("Throughput :" <<  throughput);
-}
-
 struct Args
 {
   Ptr<Node> ueNode;
@@ -113,23 +101,12 @@ struct Args
   Ipv6Address remoteHostAddr;
 };
 
-void installFlowMonitorB (Args args)
-{
-  FlowMonitorHelper flowmon2;
-  NodeContainer wifiDev;
-  wifiDev.Add (args.ueNode);
-  wifiDev.Add (args.remoteHost);
-
-  Ptr<FlowMonitor> monitorB = flowmon2.Install (wifiDev);
-}
-
 void InstallApplications (Args args)
 {
   NS_LOG_UNCOND ("Installing Applications");
   // Install and start applications on UEs and remote host
   uint16_t dlPort = 1234;
   uint16_t ulPort = 2000;
-
   ApplicationContainer clientApps;
   ApplicationContainer serverApps;
 
@@ -137,22 +114,20 @@ void InstallApplications (Args args)
   PacketSinkHelper ulPacketSinkHelper ("ns3::UdpSocketFactory", Inet6SocketAddress (Ipv6Address::GetAny (), ulPort));
   serverApps.Add (dlPacketSinkHelper.Install (args.ueNode));
   serverApps.Add (ulPacketSinkHelper.Install (args.remoteHost));
-  serverApps.Start (Seconds (1));
 
-  UdpClientHelper dlClientA (args.ueIpIface.GetAddress (0, 1), dlPort);
-  dlClientA.SetAttribute ("Interval", TimeValue (MilliSeconds(args.interPacketInterval)));
-  dlClientA.SetAttribute ("MaxPackets", UintegerValue (args.maxPackets));
-  dlClientA.SetAttribute ("PacketSize", UintegerValue (1472));
+  UdpClientHelper dlClient (args.ueIpIface.GetAddress (0, 1), dlPort);
+  dlClient.SetAttribute ("Interval", TimeValue (MilliSeconds(args.interPacketInterval)));
+  dlClient.SetAttribute ("MaxPackets", UintegerValue (args.maxPackets));
+  dlClient.SetAttribute ("PacketSize", UintegerValue (1000));
+  UdpClientHelper ulClient (args.remoteHostAddr, ulPort);
+  ulClient.SetAttribute ("Interval", TimeValue (MilliSeconds(args.interPacketInterval)));
+  ulClient.SetAttribute ("MaxPackets", UintegerValue(args.maxPackets));
+  ulClient.SetAttribute ("PacketSize", UintegerValue (1000));
 
-  UdpClientHelper ulClientA (args.remoteHostAddr, ulPort);
-  ulClientA.SetAttribute ("Interval", TimeValue (MilliSeconds(args.interPacketInterval)));
-  ulClientA.SetAttribute ("MaxPackets", UintegerValue(args.maxPackets));
-  ulClientA.SetAttribute ("PacketSize", UintegerValue (1472));
-
-  clientApps.Add (dlClientA.Install (args.remoteHost));
-  clientApps.Add (ulClientA.Install (args.ueNode));
+  clientApps.Add (dlClient.Install (args.remoteHost));
+  clientApps.Add (ulClient.Install (args.ueNode));
   Config::Connect ("/NodeList/*/ApplicationList/*/$ns3::PacketSink/Rx", MakeCallback(&PacketSinkRxTrace));
-
+  serverApps.Start (Seconds (1));
   clientApps.Start (Seconds (1));
 }
 
@@ -208,8 +183,8 @@ void InstallWifi (WifiHelper wifi, YansWifiPhyHelper wifiPhy, NqosWifiMacHelper 
 int
 main (int argc, char *argv[])
 {
-  uint32_t maxPackets = 0xff;
-  double simTime = 31;
+  uint32_t maxPackets = 1000;
+  double simTime = 30;
   double interPacketInterval = 1000;
 
   // Command line arguments
@@ -268,13 +243,17 @@ main (int argc, char *argv[])
   MobilityHelper mobility;
   mobility.SetMobilityModel ("ns3::ConstantPositionMobilityModel");
   Ptr<ListPositionAllocator> enbPositionAlloc = CreateObject<ListPositionAllocator> ();
-  enbPositionAlloc->Add (Vector(4000, 0, 0));
+  enbPositionAlloc->Add (Vector(400, 0, 0));
   mobility.SetPositionAllocator (enbPositionAlloc);
   mobility.Install (enbNode);
   Ptr<ListPositionAllocator> uePositionAlloc = CreateObject<ListPositionAllocator> ();
-  uePositionAlloc->Add (Vector (0, 0, 0));
+  uePositionAlloc->Add (Vector (5, 20, 0));
   mobility.SetPositionAllocator (uePositionAlloc);
   mobility.Install (ueNode);
+
+  // Set Path loss model
+  lteHelper->SetAttribute ("PathlossModel", StringValue ("ns3::LogDistancePropagationLossModel"));
+  lteHelper->SetPathlossModelAttribute ("ReferenceDistance", DoubleValue (400));
 
   // Install LTE Devices to the UE and eNB nodes
   Ptr<NetDevice> enbLteDev = (lteHelper->InstallEnbDevice (NodeContainer (enbNode))).Get (0);
@@ -287,6 +266,7 @@ main (int argc, char *argv[])
   ueIpIface = epcHelper->AssignWithoutAddress (ueLteDev);
 
   // Attach UE to eNB
+  // side effect: the default EPS bearer will be activated
   lteHelper->Attach (ueLteDev, enbLteDev, false);
 
   // Setup Wifi network
@@ -297,6 +277,13 @@ main (int argc, char *argv[])
   internet.Install (wifiAp);
   StopDad (wifiMag);
   StopDad (wifiAp);
+
+  // Install Mobility Model for wifiMag
+  Ptr<ListPositionAllocator> wifiMagPositionAlloc = CreateObject<ListPositionAllocator> ();
+  wifiMagPositionAlloc->Add (Vector(200, 0, 0));
+  mobility.SetMobilityModel ("ns3::ConstantPositionMobilityModel");
+  mobility.SetPositionAllocator (wifiMagPositionAlloc);
+  mobility.Install (wifiMag);
 
   // Create p2p network between wifiMag and and LMA (P-GW).
   p2ph.SetDeviceAttribute ("DataRate", DataRateValue (DataRate ("100Gb/s")));
@@ -329,7 +316,16 @@ main (int argc, char *argv[])
   WifiHelper wifi = WifiHelper::Default ();
   NqosWifiMacHelper wifiMac = NqosWifiMacHelper::Default ();
   YansWifiChannelHelper wifiChannel = YansWifiChannelHelper::Default ();
+  wifiChannel.AddPropagationLoss ("ns3::LogDistancePropagationLossModel", "ReferenceDistance", DoubleValue (85));
   wifiPhy.SetChannel (wifiChannel.Create ());
+  wifiPhy.Set ("TxPowerStart", DoubleValue (23.0));
+  wifiPhy.Set ("TxPowerEnd", DoubleValue (23.0));
+  wifiPhy.Set ("TxPowerLevels", UintegerValue (2));
+  wifiPhy.Set ("TxGain", DoubleValue (0));
+  wifiPhy.Set ("RxGain", DoubleValue (0));
+  wifiPhy.Set ("RxNoiseFigure", DoubleValue (10));
+  wifiPhy.Set ("CcaMode1Threshold", DoubleValue (-64.8));
+  wifiPhy.Set ("EnergyDetectionThreshold", DoubleValue (-61.8));
   wifiMac.SetType ("ns3::ApWifiMac",
                    "Ssid", SsidValue (ssid),
                    "BeaconGeneration", BooleanValue (true),
@@ -342,7 +338,7 @@ main (int argc, char *argv[])
 
   // Install mobility model on AP.
   Ptr<ListPositionAllocator> wifiApPositionAlloc = CreateObject<ListPositionAllocator> ();
-  wifiApPositionAlloc->Add (Vector(2000, 0, 0));
+  wifiApPositionAlloc->Add (Vector(85, 0, 0));
   mobility.SetMobilityModel ("ns3::ConstantPositionMobilityModel");
   mobility.SetPositionAllocator (wifiApPositionAlloc);
   mobility.Install (wifiAp);
@@ -351,8 +347,7 @@ main (int argc, char *argv[])
   wifiMac.SetType ("ns3::StaWifiMac",
                    "Ssid", SsidValue (ssid),
                    "ActiveProbing", BooleanValue (false));
-  Simulator::Schedule (Seconds (5), &InstallWifi, wifi, wifiPhy, wifiMac, ueNode, ueLteDev->GetAddress ());
-
+  Simulator::Schedule (Seconds (20), &InstallWifi, wifi, wifiPhy, wifiMac, ueNode, ueLteDev->GetAddress ());
 
   // Add Wifi Mag functionality to WifiMag node.
   Pmipv6MagHelper magHelper;
@@ -386,7 +381,7 @@ main (int argc, char *argv[])
   args.interPacketInterval = interPacketInterval;
   args.maxPackets = maxPackets;
   args.remoteHostAddr = remoteHostAddr;
-  Simulator::Schedule (Seconds (11), &InstallApplications, args);
+  Simulator::Schedule (Seconds (10), &InstallApplications, args);
 
   // Print Information
   NodeContainer nodes;
@@ -397,14 +392,36 @@ main (int argc, char *argv[])
   nodes.Add (wifiAp);
   PrintNodesInfo (epcHelper, nodes);
   // Schedule print information
-  Simulator::Schedule (Seconds (6), &PrintNodesInfo, epcHelper, nodes);
+  Simulator::Schedule (Seconds (23), &PrintNodesInfo, epcHelper, nodes);
 
-  //Simulator::Schedule (Seconds (20), &LteThroughput, serverApps);
-  //Simulator::Schedule (Seconds (simTime), &wifiThroughput, serverApps);
+  FlowMonitorHelper flowmon;
+  Ptr<FlowMonitor> monitor = flowmon.InstallAll ();
 
   // Run simulation
   Simulator::Stop(Seconds(simTime));
   Simulator::Run();
+/*
+  monitor->CheckForLostPackets ();
+  Ptr<Ipv4FlowClassifier> classifier = DynamicCast<Ipv4FlowClassifier> (flowmon.GetClassifier ());
+  FlowMonitor::FlowStatsContainer stats = monitor->GetFlowStats ();
+  for (std::map<FlowId, FlowMonitor::FlowStats>::const_iterator i = stats.begin (); i != stats.end (); ++i)
+    {
+      // first 2 FlowIds are for ECHO apps, we don't want to display them
+      //
+      // Duration for throughput measurement is 9.0 seconds, since
+      //   StartTime of the OnOffApplication is at about "second 1"
+      // and
+      //   Simulator::Stops at "second 10".
+          Ipv4FlowClassifier::FiveTuple t = classifier->FindFlow (i->first);
+          std::cout << "Flow " << i->first - 2 << " (" << t.sourceAddress << " -> " << t.destinationAddress << ")\n";
+          std::cout << "  Tx Packets: " << i->second.txPackets << "\n";
+          std::cout << "  Tx Bytes:   " << i->second.txBytes << "\n";
+          std::cout << "  TxOffered:  " << i->second.txBytes * 8.0 / 9.0 / 1000 / 1000  << " Mbps\n";
+          std::cout << "  Rx Packets: " << i->second.rxPackets << "\n";
+          std::cout << "  Rx Bytes:   " << i->second.rxBytes << "\n";
+          std::cout << "  Throughput: " << i->second.rxBytes * 8.0 / 9.0 / 1000 / 1000  << " Mbps\n";
+    }
+*/
   Simulator::Destroy();
   return 0;
 }
