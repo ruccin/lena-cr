@@ -103,8 +103,6 @@ main (int argc, char *argv[])
 
   Config::SetDefault ("ns3::TcpSocket::SegmentSize", UintegerValue (payloadSize));
 
-  Config::SetDefault ("ns3::LogDistancePropagationLossModel::ReferenceDistance", DoubleValue (200));
-
   Ptr<LteHelper> lteHelper = CreateObject<LteHelper> ();
   Ptr<PointToPointEpcHelper>  epcHelper = CreateObject<PointToPointEpcHelper> ();
   lteHelper->SetEpcHelper (epcHelper);
@@ -154,9 +152,9 @@ main (int argc, char *argv[])
   Config::SetDefault ("ns3::LteUePhy::TxPower", DoubleValue (20.0));
 
   // Set Path loss model
-  lteHelper->SetAttribute ("PathlossModel", StringValue ("ns3::FriisPropagationLossModel"));
+  lteHelper->SetAttribute ("PathlossModel", StringValue ("ns3::LogDistancePropagationLossModel"));
   //lteHelper->SetPathlossModelAttribute ("ReferenceDistance", DoubleValue (400));
-  lteHelper->SetPathlossModelAttribute ("Frequency", DoubleValue (5e9));
+  lteHelper->SetPathlossModelAttribute ("ReferenceDistance", DoubleValue (400));
 
   NodeContainer ueNodes;
   NodeContainer enbNodes;

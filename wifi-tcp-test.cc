@@ -168,7 +168,7 @@ main (int argc, char *argv[])
   csmaHelper.SetChannelAttribute ("Delay", TimeValue (MicroSeconds (100)));
   //csmaHelper.SetDeviceAttribute ("Mtu", UintegerValue (1500));
   csmaHelper.SetDeviceAttribute ("EncapsulationMode", StringValue ("Llc"));
-  
+
   NodeContainer csmaContainer;
   csmaContainer.Add (smallBS);
   csmaContainer.Add (apWifiNode);
@@ -179,13 +179,13 @@ main (int argc, char *argv[])
 
   WifiMacHelper wifiMac;
   WifiHelper wifiHelper;
-  wifiHelper.SetStandard (WIFI_PHY_STANDARD_80211ac);
+  wifiHelper.SetStandard (WIFI_PHY_STANDARD_80211n_2_4GHZ);
 
   /* Set up Legacy Channel */
   YansWifiChannelHelper wifiChannel;
   wifiChannel.SetPropagationDelay ("ns3::ConstantSpeedPropagationDelayModel");
   //wifiChannel.AddPropagationLoss ("ns3::LogDistancePropagationLossModel", "ReferenceDistance", DoubleValue (85));
-  wifiChannel.AddPropagationLoss ("ns3::FriisPropagationLossModel", "Frequency", DoubleValue (5e9));
+  //wifiChannel.AddPropagationLoss ("ns3::FriisPropagationLossModel", "Frequency", DoubleValue (24000));
 
   /* Setup Physical Layer */
   YansWifiPhyHelper wifiPhy = YansWifiPhyHelper::Default ();
