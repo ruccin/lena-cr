@@ -154,8 +154,8 @@ main (int argc, char *argv[])
   Config::SetDefault ("ns3::LteUePhy::TxPower", DoubleValue (20.0));
 
   // Set Path loss model
-  lteHelper->SetAttribute ("PathlossModel", StringValue ("ns3::RangePropagationLossModel"));
-  lteHelper->SetPathlossModelAttribute ("MaxRange", DoubleValue (400));
+  lteHelper->SetAttribute ("PathlossModel", StringValue ("ns3::LogDistancePropagationLossModel"));
+  lteHelper->SetPathlossModelAttribute ("ReferenceDistance", DoubleValue (400));
 
   NodeContainer ueNodes;
   NodeContainer enbNodes;
