@@ -62,7 +62,7 @@ main (int argc, char *argv[])
   std::string tcpVariant = "TcpNewReno";             /* TCP variant type. */
   uint16_t numberOfenbNodes = 1;
   uint16_t numberOfueNodes = 1;
-  double simTime = 60;
+  double simTime = 30;
   double interPacketInterval = 100;
   bool useCa = false;
 
