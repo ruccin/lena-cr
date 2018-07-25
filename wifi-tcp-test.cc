@@ -164,9 +164,10 @@ main (int argc, char *argv[])
   csmaHelper.SetChannelAttribute ("DataRate", DataRateValue (DataRate ("10Gbps")));
   csmaHelper.SetChannelAttribute ("Delay", TimeValue (MicroSeconds (100)));
   csmaHelper.SetDeviceAttribute ("Mtu", UintegerValue (1500));
+  csmaHelper.SetDeviceAttribute ("EncapsulationMode", StringValue ("Llc"));
   
   NodeContainer csmaContainer;
-  csmaContainer.Add (smallBS);
+  csmaContainer.Add (smadllBS);
   csmaContainer.Add (apWifiNode);
 
   NetDeviceContainer csmaDevs = csmaHelper.Install (csmaContainer);
@@ -181,7 +182,7 @@ main (int argc, char *argv[])
   YansWifiChannelHelper wifiChannel;
   wifiChannel.SetPropagationDelay ("ns3::ConstantSpeedPropagationDelayModel");
   //wifiChannel.AddPropagationLoss ("ns3::LogDistancePropagationLossModel");
-  wifiChannel.AddPropagationLoss ("ns3::RangePropagationLossModel");
+  wifiChannel.AddPropagationLoss ("ns3::RangePropagationLossModel", "MaxRange", DoubleValue (85));
 
   /* Setup Physical Layer */
   YansWifiPhyHelper wifiPhy = YansWifiPhyHelper::Default ();
@@ -219,7 +220,7 @@ main (int argc, char *argv[])
   MobilityHelper mobility;
   Ptr<ListPositionAllocator> positionAlloc = CreateObject<ListPositionAllocator> ();
   positionAlloc->Add (Vector (200.0, 30.0, 0.0));
-  positionAlloc->Add (Vector (95.0, 15.0, 0.0));
+  positionAlloc->Add (Vector (85.0, 15.0, 0.0));
   positionAlloc->Add (Vector (5.0, 10.0, 0.0));
 
   mobility.SetPositionAllocator (positionAlloc);
