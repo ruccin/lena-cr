@@ -163,7 +163,7 @@ main (int argc, char *argv[])
   CsmaHelper csmaHelper;
   csmaHelper.SetChannelAttribute ("DataRate", DataRateValue (DataRate ("10Gbps")));
   csmaHelper.SetChannelAttribute ("Delay", TimeValue (MicroSeconds (100)));
-  csmaHelper.SetDeviceAttribute ("Mtu", UintegerValue (1500));
+  //csmaHelper.SetDeviceAttribute ("Mtu", UintegerValue (1500));
   csmaHelper.SetDeviceAttribute ("EncapsulationMode", StringValue ("Llc"));
   
   NodeContainer csmaContainer;
