@@ -57,7 +57,7 @@ GetTotalRx ()
 int
 main (int argc, char *argv[])
 {
-  uint32_t payloadSize = 1472;                       /* Transport layer payload size in bytes. */
+  uint32_t payloadSize = 1000;                       /* Transport layer payload size in bytes. */
   std::string dataRate = "100Mbps"; 
   std::string tcpVariant = "TcpNewReno";             /* TCP variant type. */
   uint16_t numberOfenbNodes = 1;
