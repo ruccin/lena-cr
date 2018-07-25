@@ -167,7 +167,7 @@ main (int argc, char *argv[])
   csmaHelper.SetDeviceAttribute ("EncapsulationMode", StringValue ("Llc"));
   
   NodeContainer csmaContainer;
-  csmaContainer.Add (smadllBS);
+  csmaContainer.Add (smallBS);
   csmaContainer.Add (apWifiNode);
 
   NetDeviceContainer csmaDevs = csmaHelper.Install (csmaContainer);
