@@ -123,7 +123,7 @@ main (int argc, char *argv[])
   /* Configure TCP Options */
   Config::SetDefault ("ns3::TcpSocket::SegmentSize", UintegerValue (payloadSize));
 
-  Config::SetDefault ("ns3::RangePropagationLossModel::MaxRange", DoubleValue (200));
+  //Config::SetDefault ("ns3::RangePropagationLossModel::MaxRange", DoubleValue (200));
 
   /* Create p2p network between wifiap and remotehost */
   NodeContainer networkNodes;
