@@ -62,7 +62,7 @@ main (int argc, char *argv[])
   std::string tcpVariant = "TcpNewReno";             /* TCP variant type. */
   uint16_t numberOfenbNodes = 1;
   uint16_t numberOfueNodes = 1;
-  double simTime = 30;
+  double simTime = 60;
   double interPacketInterval = 100;
   bool useCa = false;
 
@@ -128,7 +128,7 @@ main (int argc, char *argv[])
   PointToPointHelper p2ph;
   p2ph.SetDeviceAttribute ("DataRate", DataRateValue (DataRate ("100Gb/s")));
   p2ph.SetDeviceAttribute ("Mtu", UintegerValue (1500));
-  p2ph.SetChannelAttribute ("Delay", TimeValue (Seconds (0.010)));
+  p2ph.SetChannelAttribute ("Delay", TimeValue (MilliSeconds (100)));
   NetDeviceContainer internetDevices = p2ph.Install (pgw, remoteHost);
   Ipv4AddressHelper ipv4h;
   ipv4h.SetBase ("1.0.0.0", "255.0.0.0");
