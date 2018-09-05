@@ -40,6 +40,7 @@
 #include <stdio.h>
 #include <time.h>
 #include <string.h>
+#include <stdarg.h>
 
 #include "config.h" /* for HAVE_*_H definitions */
 
@@ -135,32 +136,20 @@ int main(int argc, char **argv)
 //
 
 	/* Enable the compression profiles you need */
-	printf("\nenable several ROHC compression profiles\n");
+	printf("\nenable the ROHC TCP compression profiles\n");
 //! [enable ROHC compression profile]
-	if(!rohc_comp_enable_profile(compressor, ROHC_PROFILE_UNCOMPRESSED))
+	if(!rohc_comp_enable_profile(compressor, ROHC_PROFILE_TCP))
 	{
-		fprintf(stderr, "failed to enable the Uncompressed profile\n");
+		fprintf(stderr, "failed to enable the TCP profile\n");
 		goto release_compressor;
 	}
-	if(!rohc_comp_enable_profile(compressor, ROHC_PROFILE_IP))
-	{
-		fprintf(stderr, "failed to enable the IP-only profile\n");
-		goto release_compressor;
-	}
-//! [enable ROHC compression profile]
-//! [enable ROHC compression profiles]
-	if(!rohc_comp_enable_profiles(compressor, ROHC_PROFILE_UDP,
-	                              ROHC_PROFILE_UDPLITE, -1))
-	{
-		fprintf(stderr, "failed to enable the IP/UDP and IP/UDP-Lite "
-		        "profiles\n");
-		goto release_compressor;
-	}
-//! [enable ROHC compression profiles]
 
+//! [enable ROHC compression profiles]
 
 	/* create a fake IP packet for the purpose of this simple program */
-	printf("\nbuild a fake IP packet\n");
+	printf("\nbuild a fake IP/TCP packet\n");
+	
+	/* IPv4 header */
 	rohc_buf_byte_at(ip_packet, 0) = 4 << 4; /* IP version 4 */
 	rohc_buf_byte_at(ip_packet, 0) |= 5; /* IHL: min. IPv4 header length
 	                                        (in 32-bit words) */
@@ -173,7 +162,7 @@ int main(int argc, char **argv)
 	rohc_buf_byte_at(ip_packet, 6) = 0; /* Fragment Offset and IP flags */
 	rohc_buf_byte_at(ip_packet, 7) = 0;
 	rohc_buf_byte_at(ip_packet, 8) = 1; /* TTL */
-	rohc_buf_byte_at(ip_packet, 9) = 134; /* Protocol: unassigned number */
+	rohc_buf_byte_at(ip_packet, 9) = 6; /* Protocol: TCP */
 	rohc_buf_byte_at(ip_packet, 10) = 0xa9; /* IP Checksum */
 	rohc_buf_byte_at(ip_packet, 11) = 0x3f;
 	rohc_buf_byte_at(ip_packet, 12) = 0x01; /* Source address */
@@ -185,8 +174,30 @@ int main(int argc, char **argv)
 	rohc_buf_byte_at(ip_packet, 18) = 0x07;
 	rohc_buf_byte_at(ip_packet, 19) = 0x08;
 
+	/* TCP header */
+	rohc_buf_byte_at(ip_packet, 20) = 0x42; /* source port */
+	rohc_buf_byte_at(ip_packet, 21) = 0x42;
+	rohc_buf_byte_at(ip_packet, 22) = 0x27; /* destination port = 10042 */
+	rohc_buf_byte_at(ip_packet, 23) = 0x3a;
+	rohc_buf_byte_at(ip_packet, 24) = 0x00; /* Sequence number */
+	rohc_buf_byte_at(ip_packet, 25) = 0x00;
+	rohc_buf_byte_at(ip_packet, 26) = 0x00;
+	rohc_buf_byte_at(ip_packet, 27) = 0x00;
+	rohc_buf_byte_at(ip_packet, 28) = 0x00; /* Ack number */
+	rohc_buf_byte_at(ip_packet, 29) = 0x00;
+	rohc_buf_byte_at(ip_packet, 30) = 0x00;
+	rohc_buf_byte_at(ip_packet, 31) = 0x00;
+	rohc_buf_byte_at(ip_packet, 32) = 0x00; /* HLEN + reservation */
+	rohc_buf_byte_at(ip_packet, 33) = 0x00; /* URG... */
+	rohc_buf_byte_at(ip_packet, 34) = 0x00; /* Window size */
+	rohc_buf_byte_at(ip_packet, 35) = 0x00;
+	rohc_buf_byte_at(ip_packet, 36) = 0x00; /* Checksum = 0 */
+	rohc_buf_byte_at(ip_packet, 37) = 0x00; 
+	rohc_buf_byte_at(ip_packet, 38) = 0x00; /* Urgent pointer */
+	rohc_buf_byte_at(ip_packet, 39) = 0x00;
+
 	/* copy the payload just after the IP header */
-	memcpy(rohc_buf_data_at(ip_packet, 5 * 4), FAKE_PAYLOAD, strlen(FAKE_PAYLOAD));
+	memcpy(rohc_buf_data_at(ip_packet, 40), FAKE_PAYLOAD, strlen(FAKE_PAYLOAD));
 
 	/* dump the newly-created IP packet on terminal */
 	for(i = 0; i < ip_packet.len; i++)
@@ -201,7 +212,6 @@ int main(int argc, char **argv)
 	{
 		printf("\n");
 	}
-
 
 	/* Now, compress this fake IP packet */
 	printf("\ncompress the fake IP packet\n");
@@ -260,12 +270,6 @@ int main(int argc, char **argv)
 //! [destroy ROHC compressor]
 	rohc_comp_free(compressor);
 //! [destroy ROHC compressor]
-
-
-	printf("\nThe program ended successfully. The ROHC packet is larger than the "
-	       "IP packet (39 bytes versus 38 bytes). This is expected since we only "
-	       "compress one packet in this simple example. Keep in mind that ROHC "
-	       "is designed to compress streams of packets not one single packet.\n\n");
 
 	return 0;
 
