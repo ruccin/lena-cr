@@ -223,8 +223,7 @@ main (int argc, char *argv[])
 
   PacketSinkHelper client ("ns3::UdpSocketFactory", InetSocketAddress (Ipv4Address::GetAny (), dlPort));
   clientApps.Add (client.Install (remoteHost));
-  client.SetAttribute ("PacketSize", UintegerValue (payloadSize));
-  client.SetAttribute ("DataRate", DataRateValue (DataRate (dataRate)));
+  sink = StaticCast<PacketSink> (clientApps.Get (0));
 
 
   //serverApps.Start (Seconds (0.0));
