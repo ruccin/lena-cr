@@ -208,7 +208,7 @@ main (int argc, char *argv[])
   //ApplicationContainer serverApps;
   ApplicationContainer clientApps;
 
-/*
+
   PacketSinkHelper dlPacketSinkHelper ("ns3::TcpSocketFactory", InetSocketAddress (Ipv4Address::GetAny (), dlPort));
   serverApps.Add (dlPacketSinkHelper.Install (remoteHost));
   sink = StaticCast<PacketSink> (serverApps.Get (0));
@@ -219,14 +219,10 @@ main (int argc, char *argv[])
   client.SetAttribute ("OffTime", StringValue ("ns3::ConstantRandomVariable[Constant=0]"));
   client.SetAttribute ("DataRate", DataRateValue (DataRate (dataRate)));
   clientApps.Add (client.Install (ueNodes));
-*/
-
-  PacketSinkHelper client ("ns3::UdpSocketFactory", InetSocketAddress (Ipv4Address::GetAny (), dlPort));
-  clientApps.Add (client.Install (remoteHost));
-  sink = StaticCast<PacketSink> (clientApps.Get (0));
 
 
-  //serverApps.Start (Seconds (0.0));
+
+  serverApps.Start (Seconds (0.0));
   clientApps.Start (Seconds (0.0));
   //Simulator::Schedule (MilliSeconds (100), &GetTotalRx);
 
@@ -259,7 +255,8 @@ main (int argc, char *argv[])
           std::cout << "Flow " << i->first - 2 << " (" << t.sourceAddress << " -> " << t.destinationAddress << ")\n";
           std::cout << "  Tx Packets: " << i->second.txPackets << "\n";
           std::cout << "  Tx Bytes:   " << i->second.txBytes << "\n";
-          std::cout << "  Throughput:  " << i->second.txBytes * 8.0 / simTime / 1000 / 1000  << " Mbps\n";
+          std::cout << "  Throughput:  " << i->second.txBytes * 8.0 / 9.0 / 1000 / 1000  << " Mbps\n";
+          std::cout << "  Rx Bytes:   " << i->second.rxBytes << "\n";
     }
 
 
