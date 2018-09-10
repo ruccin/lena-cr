@@ -205,7 +205,7 @@ main (int argc, char *argv[])
 
 
   uint16_t dlPort = 1234;
-  //ApplicationContainer serverApps;
+  ApplicationContainer serverApps;
   ApplicationContainer clientApps;
 
 
