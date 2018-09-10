@@ -258,15 +258,14 @@ main (int argc, char *argv[])
   Ipv4InterfaceContainer staInterface;
   staInterface = address.Assign (staDevices);
 
-  Ipv4StaticRoutingHelper ipv4RoutingHelper;
   Ptr<Ipv4StaticRouting> staStaticRouting = ipv4RoutingHelper.GetStaticRouting (wifiNode.Get (1)->GetObject<Ipv4> ());
-  staStaticRouting->AddHostRouteTo (internetDevices.GetAddress (1), Ipv4Address ("10.0.0.1"), 1);
+  staStaticRouting->AddHostRouteTo (internetIpIfaces.GetAddress (1), Ipv4Address ("10.0.0.1"), 1);
 
   Ptr<Ipv4StaticRouting> apStaticRouting = ipv4RoutingHelper.GetStaticRouting (wifiNode.Get (0)->GetObject<Ipv4> ());
-  apStaticRouting->AddHostRouteTo (internetDevices.GetAddress (1), Ipv4Address("2.0.0.1"), 1);
+  apStaticRouting->AddHostRouteTo (internetIpIfaces.GetAddress (1), Ipv4Address("2.0.0.1"), 1);
 
   Ptr<Ipv4StaticRouting> PgwStaticRouting = ipv4RoutingHelper.GetStaticRouting (pgw->GetObject<Ipv4> ());
-  PgwStaticRouting->AddHostRouteTo (internetDevices.GetAddress (1), internetDevices.GetAddress (0), 1);
+  PgwStaticRouting->AddHostRouteTo (internetIpIfaces.GetAddress (1), internetIpIfaces.GetAddress (0), 1);
 
 
   uint16_t dlPort = 1234;
