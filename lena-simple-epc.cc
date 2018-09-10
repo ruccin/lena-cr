@@ -172,7 +172,8 @@ main (int argc, char *argv[])
 //
   NodeContainer wifiNodes;
   wifiNodes.Create (2);
-  Ptr<Node> wifiNode = wifiNodes.Get ();
+  Ptr<Node> apwifiNode = wifiNodes.Get (0);
+  Ptr<Node> stawifiNode = wifiNodes.Get (1);
 
   OlsrHelper olsr;
   Ipv4StaticRoutingHelper staticRouting;
@@ -182,8 +183,8 @@ main (int argc, char *argv[])
 
   InternetStackHelper internet_olsr;
   internet_olsr.SetRoutingHelper (list);
-  internet_olsr.Install (wifiNode.Get (0));
-  internet_olsr.Install (wifiNode.Get (1));
+  internet_olsr.Install (apwifiNode);
+  internet_olsr.Install (stawifiNode);
   internet_olsr.Install (pgw);
   internet_olsr.Install (remoteHostContainer);
 
@@ -194,7 +195,7 @@ main (int argc, char *argv[])
   csmaHelper.SetDeviceAttribute ("EncapsulationMode", StringValue ("Mac"));
 
   NodeContainer csmaContainer;
-  csmaContainer.Add (wifiNode.Get (1));
+  csmaContainer.Add (apwifiNode);
   csmaContainer.Add (pgw);
 
   NetDeviceContainer csmaDevs = csmaHelper.Install (csmaContainer);
@@ -229,16 +230,16 @@ main (int argc, char *argv[])
   wifiMac.SetType ("ns3::ApWifiMac",
                    "Ssid", SsidValue (ssid));
 
-  Ptr<NetDevice> apDevice = (wifiHelper.Install (wifiPhy, wifiMac, wifiNode.Get (1))).Get (0);
+  Ptr<NetDevice> apDevice = (wifiHelper.Install (wifiPhy, wifiMac, apwifiNode)).Get (0);
 
   /* Configure STA */
   wifiMac.SetType ("ns3::StaWifiMac",
                    "Ssid", SsidValue (ssid));
 
-  Ptr<NetDevice> staDevices = (wifiHelper.Install (wifiPhy, wifiMac, wifiNode.Get (0))).Get (0);
+  Ptr<NetDevice> staDevices = (wifiHelper.Install (wifiPhy, wifiMac, stawifiNode)).Get (0);
 
   BridgeHelper bridgeHelper;
-  Ptr<NetDevice> wifiApBrDev = (bridgeHelper.Install (wifiNode.Get (1), NetDeviceContainer (apDevice, csmaDevs.Get (1)))).Get (0);
+  Ptr<NetDevice> wifiApBrDev = (bridgeHelper.Install (apwifiNode, NetDeviceContainer (apDevice, csmaDevs.Get (1)))).Get (0);
 
   MobilityHelper mobility2;
   Ptr<ListPositionAllocator> positionAlloc = CreateObject<ListPositionAllocator> ();
@@ -247,21 +248,21 @@ main (int argc, char *argv[])
 
   mobility2.SetPositionAllocator (positionAlloc);
   mobility2.SetMobilityModel ("ns3::ConstantPositionMobilityModel");
-  mobility2.Install (wifiNode.Get (1));  
-  mobility2.Install (wifiNode.Get (0));
+  mobility2.Install (apwifiNode);  
+  mobility2.Install (stawifiNode);
 
  /* Internet stack */
   Ipv4AddressHelper address;
   address.SetBase ("10.0.0.0", "255.255.255.0");
   Ipv4InterfaceContainer apInterface;
-  apInterface = address.Assign (apDevice);
+  apInterface = address.Assign (apwifiNode);
   Ipv4InterfaceContainer staInterface;
-  staInterface = address.Assign (staDevices);
+  staInterface = address.Assign (stawifiNode);
 
-  Ptr<Ipv4StaticRouting> staStaticRouting = ipv4RoutingHelper.GetStaticRouting (wifiNode.Get (1)->GetObject<Ipv4> ());
+  Ptr<Ipv4StaticRouting> staStaticRouting = ipv4RoutingHelper.GetStaticRouting (apwifiNode->GetObject<Ipv4> ());
   staStaticRouting->AddHostRouteTo (internetIpIfaces.GetAddress (1), Ipv4Address ("10.0.0.1"), 1);
 
-  Ptr<Ipv4StaticRouting> apStaticRouting = ipv4RoutingHelper.GetStaticRouting (wifiNode.Get (0)->GetObject<Ipv4> ());
+  Ptr<Ipv4StaticRouting> apStaticRouting = ipv4RoutingHelper.GetStaticRouting (stawifiNode->GetObject<Ipv4> ());
   apStaticRouting->AddHostRouteTo (internetIpIfaces.GetAddress (1), Ipv4Address("2.0.0.1"), 1);
 
   Ptr<Ipv4StaticRouting> PgwStaticRouting = ipv4RoutingHelper.GetStaticRouting (pgw->GetObject<Ipv4> ());
@@ -289,7 +290,7 @@ main (int argc, char *argv[])
   client2.SetAttribute ("OnTime", StringValue ("ns3::ConstantRandomVariable[Constant=1]"));
   client2.SetAttribute ("OffTime", StringValue ("ns3::ConstantRandomVariable[Constant=0]"));
   client2.SetAttribute ("DataRate", DataRateValue (DataRate (dataRate)));
-  clientApps.Add (client2.Install (wifiNode.Get (0)));
+  clientApps.Add (client2.Install (stawifiNode));
 
   serverApps.Start (Seconds (0.0));
   clientApps.Start (Seconds (0.0));
