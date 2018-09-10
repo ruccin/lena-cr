@@ -68,44 +68,12 @@ main (int argc, char *argv[])
   uint16_t numberOfueNodes = 1;
   double simTime = 10;
   double interPacketInterval = 100;
-  bool useCa = false;
 
   // Command line arguments
   CommandLine cmd;
   cmd.AddValue("simTime", "Total duration of the simulation [s])", simTime);
   cmd.AddValue("interPacketInterval", "Inter packet interval [ms])", interPacketInterval);
-  cmd.AddValue("useCa", "Whether to use carrier aggregation.", useCa);
   cmd.Parse(argc, argv);
-
-  if (useCa)
-   {
-     Config::SetDefault ("ns3::LteHelper::UseCa", BooleanValue (useCa));
-     Config::SetDefault ("ns3::LteHelper::NumberOfComponentCarriers", UintegerValue (2));
-     Config::SetDefault ("ns3::LteHelper::EnbComponentCarrierManager", StringValue ("ns3::RrComponentCarrierManager"));
-   }
-
-  tcpVariant = std::string ("ns3::") + tcpVariant;
-
-  /* No fragmentation and no RTS/CTS */
-  Config::SetDefault ("ns3::WifiRemoteStationManager::FragmentationThreshold", StringValue ("999999"));
-  Config::SetDefault ("ns3::WifiRemoteStationManager::RtsCtsThreshold", StringValue ("999999"));
-
-  // Select TCP variant
-  if (tcpVariant.compare ("ns3::TcpWestwoodPlus") == 0)
-    { 
-      // TcpWestwoodPlus is not an actual TypeId name; we need TcpWestwood here
-      Config::SetDefault ("ns3::TcpL4Protocol::SocketType", TypeIdValue (TcpWestwood::GetTypeId ()));
-      // the default protocol type in ns3::TcpWestwood is WESTWOOD
-      Config::SetDefault ("ns3::TcpWestwood::ProtocolType", EnumValue (TcpWestwood::WESTWOODPLUS));
-    }
-  else
-    {
-      TypeId tcpTid;
-      NS_ABORT_MSG_UNLESS (TypeId::LookupByNameFailSafe (tcpVariant, &tcpTid), "TypeId " << tcpVariant << " not found");
-      Config::SetDefault ("ns3::TcpL4Protocol::SocketType", TypeIdValue (TypeId::LookupByName (tcpVariant)));
-    }
-
-  Config::SetDefault ("ns3::TcpSocket::SegmentSize", UintegerValue (payloadSize));
 
   Ptr<LteHelper> lteHelper = CreateObject<LteHelper> ();
   Ptr<PointToPointEpcHelper>  epcHelper = CreateObject<PointToPointEpcHelper> ();
@@ -158,7 +126,7 @@ main (int argc, char *argv[])
   // Set Path loss model
   lteHelper->SetAttribute ("PathlossModel", StringValue ("ns3::FriisPropagationLossModel"));
   //lteHelper->SetPathlossModelAttribute ("ReferenceDistance", DoubleValue (400));
-  lteHelper->SetPathlossModelAttribute ("Frequency", DoubleValue (240000000));
+  //lteHelper->SetPathlossModelAttribute ("Frequency", DoubleValue (5.));
 
   NodeContainer ueNodes;
   NodeContainer enbNodes;
