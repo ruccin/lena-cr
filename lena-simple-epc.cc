@@ -266,9 +266,6 @@ main (int argc, char *argv[])
   Ptr<Ipv4StaticRouting> apStaticRouting = ipv4RoutingHelper.GetStaticRouting (stawifiNode->GetObject<Ipv4> ());
   apStaticRouting->AddHostRouteTo (internetIpIfaces.GetAddress (1), Ipv4Address("2.0.0.1"), 1);
 
-  Ptr<Ipv4StaticRouting> PgwStaticRouting = ipv4RoutingHelper.GetStaticRouting (pgw->GetObject<Ipv4> ());
-  PgwStaticRouting->AddHostRouteTo (internetIpIfaces.GetAddress (1), internetIpIfaces.GetAddress (0), 1);
-
 
   uint16_t dlPort = 1234;
   ApplicationContainer serverApps;
