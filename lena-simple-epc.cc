@@ -30,7 +30,11 @@
 #include "ns3/point-to-point-helper.h"
 #include "ns3/config-store.h"
 #include "ns3/flow-monitor-module.h"
-//#include "ns3/gtk-config-store.h"
+#include "ns3/wifi-module.h"
+#include "ns3/csma-module.h"
+#include "ns3/olsr-helper.h"
+#include "ns3/olsr-routing-protocol.h"
+#include "ns3/bridge-module.h"
 
 using namespace ns3;
 
@@ -62,7 +66,7 @@ main (int argc, char *argv[])
   std::string tcpVariant = "TcpNewReno";             /* TCP variant type. */
   uint16_t numberOfenbNodes = 1;
   uint16_t numberOfueNodes = 1;
-  double simTime = 30;
+  double simTime = 10;
   double interPacketInterval = 100;
   bool useCa = false;
 
@@ -139,8 +143,8 @@ main (int argc, char *argv[])
   remoteHostStaticRouting->AddNetworkRouteTo (Ipv4Address ("7.0.0.0"), Ipv4Mask ("255.0.0.0"), 1);
 
   // LTE configuration parametes
-  lteHelper->SetSchedulerType ("ns3::PfFfMacScheduler");
-  lteHelper->SetSchedulerAttribute ("UlCqiFilter", EnumValue (FfMacScheduler::PUSCH_UL_CQI));
+  //lteHelper->SetSchedulerType ("ns3::PfFfMacScheduler");
+  //lteHelper->SetSchedulerAttribute ("UlCqiFilter", EnumValue (FfMacScheduler::PUSCH_UL_CQI));
   // LTE-U DL transmission @5180 MHz
   //lteHelper->SetEnbDeviceAttribute ("DlEarfcn", UintegerValue (255444));
   // needed for initial cell search
@@ -152,9 +156,9 @@ main (int argc, char *argv[])
   Config::SetDefault ("ns3::LteUePhy::TxPower", DoubleValue (20.0));
 
   // Set Path loss model
-  lteHelper->SetAttribute ("PathlossModel", StringValue ("ns3::LogDistancePropagationLossModel"));
+  lteHelper->SetAttribute ("PathlossModel", StringValue ("ns3::FriisPropagationLossModel"));
   //lteHelper->SetPathlossModelAttribute ("ReferenceDistance", DoubleValue (400));
-  lteHelper->SetPathlossModelAttribute ("ReferenceDistance", DoubleValue (400));
+  lteHelper->SetPathlossModelAttribute ("Frequency", DoubleValue (240000000));
 
   NodeContainer ueNodes;
   NodeContainer enbNodes;
@@ -163,8 +167,8 @@ main (int argc, char *argv[])
 
   // Install Mobility Model
   Ptr<ListPositionAllocator> positionAlloc = CreateObject<ListPositionAllocator> ();
-  positionAlloc->Add (Vector(400, 20, 0));
-  positionAlloc->Add (Vector(5, 10, 0));
+  positionAlloc->Add (Vector(4010, 0, 0));
+  positionAlloc->Add (Vector(10, 0, 0));
 
   MobilityHelper mobility;
   mobility.SetMobilityModel("ns3::ConstantPositionMobilityModel");
@@ -195,9 +199,10 @@ main (int argc, char *argv[])
 
   // Install and start applications on UEs and remote host
   uint16_t dlPort = 1234;
-  ApplicationContainer serverApps;
+  //ApplicationContainer serverApps;
   ApplicationContainer clientApps;
 
+/*
   PacketSinkHelper dlPacketSinkHelper ("ns3::TcpSocketFactory", InetSocketAddress (Ipv4Address::GetAny (), dlPort));
   serverApps.Add (dlPacketSinkHelper.Install (remoteHost));
   sink = StaticCast<PacketSink> (serverApps.Get (0));
@@ -208,9 +213,16 @@ main (int argc, char *argv[])
   client.SetAttribute ("OffTime", StringValue ("ns3::ConstantRandomVariable[Constant=0]"));
   client.SetAttribute ("DataRate", DataRateValue (DataRate (dataRate)));
   clientApps.Add (client.Install (ueNodes));
+*/
 
-  serverApps.Start (Seconds (0.0));
-  clientApps.Start (Seconds (1.0));
+  PacketSinkHelper client ("ns3::UdpSocketFactory", InetSocketAddress (Ipv4Address::GetAny (), dlPort));
+  clientApps.Add (client.Install (remoteHost));
+  client.SetAttribute ("PacketSize", UintegerValue (payloadSize));
+  client.SetAttribute ("DataRate", DataRateValue (DataRate (dataRate)));
+
+
+  //serverApps.Start (Seconds (0.0));
+  clientApps.Start (Seconds (0.0));
   //Simulator::Schedule (MilliSeconds (100), &GetTotalRx);
 
   lteHelper->EnableTraces ();
@@ -221,7 +233,7 @@ main (int argc, char *argv[])
   FlowMonitorHelper flowmon;
   Ptr<FlowMonitor> monitor = flowmon.InstallAll ();
 
-  Simulator::Stop(Seconds(simTime));
+  Simulator::Stop(Seconds(simTime + 1));
   Simulator::Run();
 
   /*GtkConfigStore config;
@@ -242,10 +254,7 @@ main (int argc, char *argv[])
           std::cout << "Flow " << i->first - 2 << " (" << t.sourceAddress << " -> " << t.destinationAddress << ")\n";
           std::cout << "  Tx Packets: " << i->second.txPackets << "\n";
           std::cout << "  Tx Bytes:   " << i->second.txBytes << "\n";
-          std::cout << "  TxOffered:  " << i->second.txBytes * 8.0 / 9.0 / 1000 / 1000  << " Mbps\n";
-          std::cout << "  Rx Packets: " << i->second.rxPackets << "\n";
-          std::cout << "  Rx Bytes:   " << i->second.rxBytes << "\n";
-          std::cout << "  Throughput: " << i->second.rxBytes * 8.0 / 9.0 / 1000 / 1000  << " Mbps\n";
+          std::cout << "  Throughput:  " << i->second.txBytes * 8.0 / simTime / 1000 / 1000  << " Mbps\n";
     }
 
 

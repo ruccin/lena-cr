@@ -187,8 +187,8 @@ int main(int argc, char **argv)
 	rohc_buf_byte_at(ip_packet, 29) = 0x00;
 	rohc_buf_byte_at(ip_packet, 30) = 0x00;
 	rohc_buf_byte_at(ip_packet, 31) = 0x00;
-	rohc_buf_byte_at(ip_packet, 32) = 0x00; /* HLEN + reservation */
-	rohc_buf_byte_at(ip_packet, 33) = 0x00; /* URG... */
+	rohc_buf_byte_at(ip_packet, 32) = 0x00; /* HLEN + reserv */
+	rohc_buf_byte_at(ip_packet, 33) = 0x00; /* ... */
 	rohc_buf_byte_at(ip_packet, 34) = 0x00; /* Window size */
 	rohc_buf_byte_at(ip_packet, 35) = 0x00;
 	rohc_buf_byte_at(ip_packet, 36) = 0x00; /* Checksum = 0 */
