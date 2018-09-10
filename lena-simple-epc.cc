@@ -170,6 +170,103 @@ main (int argc, char *argv[])
 //
 //
 //
+  NodeContainer wifiNodes;
+  wifiNodes.Create (5);
+  Ptr<Node> wifiNode = wifiNodes.Get ();
+
+  OlsrHelper olsr;
+  Ipv4StaticRoutingHelper staticRouting;
+  Ipv4ListRoutingHelper list;
+  list.Add (staticRouting, 0);
+  list.Add (olsr, 10);
+
+  InternetStackHelper internet_olsr;
+  internet_olsr.SetRoutingHelper (list);
+  internet_olsr.Install (wifiNodes.Get (0));
+  internet_olsr.Install (wifiNodes.Get (1));
+  internet_olsr.Install (pgw);
+  internet_olsr.Install (remoteHostContainer);
+
+  CsmaHelper csmaHelper;
+  csmaHelper.SetChannelAttribute ("DataRate", DataRateValue (DataRate ("100Mbps")));
+  csmaHelper.SetChannelAttribute ("Delay", TimeValue (MicroSeconds (100)));
+  //csmaHelper.SetDeviceAttribute ("Mtu", UintegerValue (1500));
+  csmaHelper.SetDeviceAttribute ("EncapsulationMode", StringValue ("Mac"));
+
+  NodeContainer csmaContainer;
+  csmaContainer.Add (wifiNodes.Get (1));
+  csmaContainer.Add (pgw);
+
+  NetDeviceContainer csmaDevs = csmaHelper.Install (csmaContainer);
+  ipv4h.SetBase ("2.0.0.0", "255.0.0.0");
+  Ipv4InterfaceContainer csmaIpIface = ipv4h.Assign (csmaDevs);
+
+  WifiMacHelper wifiMac;
+  WifiHelper wifiHelper;
+  wifiHelper.SetStandard (WIFI_PHY_STANDARD_80211ac);
+
+  YansWifiChannelHelper wifiChannel;
+  wifiChannel.SetPropagationDelay ("ns3::ConstantSpeedPropagationDelayModel");
+  wifiChannel.AddPropagationLoss ("ns3::FriisPropagationLossModel");
+
+  YansWifiPhyHelper wifiPhy = YansWifiPhyHelper::Default ();
+  wifiPhy.SetChannel (wifiChannel.Create ());
+  wifiPhy.Set ("TxPowerStart", DoubleValue (23.0));
+  wifiPhy.Set ("TxPowerEnd", DoubleValue (23.0));
+  wifiPhy.Set ("TxPowerLevels", UintegerValue (2));
+  wifiPhy.Set ("TxGain", DoubleValue (0));
+  wifiPhy.Set ("RxGain", DoubleValue (0));
+  wifiPhy.Set ("RxNoiseFigure", DoubleValue (10));
+  wifiPhy.Set ("CcaMode1Threshold", DoubleValue (-64.8));
+  wifiPhy.Set ("EnergyDetectionThreshold", DoubleValue (-61.8));
+  wifiPhy.SetErrorRateModel ("ns3::YansErrorRateModel");
+  wifiHelper.SetRemoteStationManager ("ns3::ConstantRateWifiManager",
+                                      "DataMode", StringValue ("VhtMcs9"),
+                                      "ControlMode", StringValue ("VhtMcs0"));
+  
+  /* Configure AP */
+  Ssid ssid = Ssid ("network");
+  wifiMac.SetType ("ns3::ApWifiMac",
+                   "Ssid", SsidValue (ssid));
+
+  Ptr<NetDevice> apDevice = (wifiHelper.Install (wifiPhy, wifiMac, wifiNodes.Get (1))).Get (0);
+
+  /* Configure STA */
+  wifiMac.SetType ("ns3::StaWifiMac",
+                   "Ssid", SsidValue (ssid));
+
+  Ptr<NetDevice> staDevices = (wifiHelper.Install (wifiPhy, wifiMac, wifiNodes.Get (0))).Get (0);
+
+  BridgeHelper bridgeHelper;
+  Ptr<NetDevice> wifiApBrDev = (bridgeHelper.Install (wifiNodes.Get (1), NetDeviceContainer (apDevice, csmaDevs.Get (1)))).Get (0);
+
+  MobilityHelper mobility;
+  Ptr<ListPositionAllocator> positionAlloc = CreateObject<ListPositionAllocator> ();
+  positionAlloc->Add (Vector (2010.0, 0.0, 0.0));
+  positionAlloc->Add (Vector (10.0, 10.0, 0.0));
+
+  mobility.SetPositionAllocator (positionAlloc);
+  mobility.SetMobilityModel ("ns3::ConstantPositionMobilityModel");
+  mobility.Install (wifiNodes.Get (1));  
+  mobility.Install (wifiNodes.Get (0));
+
+ /* Internet stack */
+  Ipv4AddressHelper address;
+  address.SetBase ("10.0.0.0", "255.255.255.0");
+  Ipv4InterfaceContainer apInterface;
+  apInterface = address.Assign (apDevice);
+  Ipv4InterfaceContainer staInterface;
+  staInterface = address.Assign (staDevices);
+
+  Ipv4StaticRoutingHelper ipv4RoutingHelper;
+  Ptr<Ipv4StaticRouting> staStaticRouting = ipv4RoutingHelper.GetStaticRouting (wifiNodes.Get (1)->GetObject<Ipv4> ());
+  staStaticRouting->AddHostRouteTo (internetDevices.GetAddress (1), Ipv4Address ("10.0.0.1"), 1);
+
+  Ptr<Ipv4StaticRouting> apStaticRouting = ipv4RoutingHelper.GetStaticRouting (wifiNodes.Get (0)->GetObject<Ipv4> ());
+  apStaticRouting->AddHostRouteTo (internetDevices.GetAddress (1), Ipv4Address("2.0.0.1"), 1);
+
+  Ptr<Ipv4StaticRouting> PgwStaticRouting = ipv4RoutingHelper.GetStaticRouting (pgw->GetObject<Ipv4> ());
+  PgwStaticRouting->AddHostRouteTo (internetDevices.GetAddress (1), internetDevices.GetAddress (0), 1);
 
 
   uint16_t dlPort = 1234;
@@ -177,18 +274,23 @@ main (int argc, char *argv[])
   ApplicationContainer clientApps;
 
 
-  PacketSinkHelper dlPacketSinkHelper ("ns3::TcpSocketFactory", InetSocketAddress (Ipv4Address::GetAny (), dlPort));
+  PacketSinkHelper dlPacketSinkHelper ("ns3::UdpSocketFactory", InetSocketAddress (Ipv4Address::GetAny (), dlPort));
   serverApps.Add (dlPacketSinkHelper.Install (remoteHost));
   sink = StaticCast<PacketSink> (serverApps.Get (0));
 
-  OnOffHelper client ("ns3::TcpSocketFactory", (InetSocketAddress (remoteHostAddr, dlPort)));
-  client.SetAttribute ("PacketSize", UintegerValue (payloadSize));
-  client.SetAttribute ("OnTime", StringValue ("ns3::ConstantRandomVariable[Constant=1]"));
-  client.SetAttribute ("OffTime", StringValue ("ns3::ConstantRandomVariable[Constant=0]"));
-  client.SetAttribute ("DataRate", DataRateValue (DataRate (dataRate)));
-  clientApps.Add (client.Install (ueNodes));
+  OnOffHelper client1 ("ns3::UdpSocketFactory", (InetSocketAddress (remoteHostAddr, dlPort)));
+  client1.SetAttribute ("PacketSize", UintegerValue (payloadSize));
+  client1.SetAttribute ("OnTime", StringValue ("ns3::ConstantRandomVariable[Constant=1]"));
+  client1.SetAttribute ("OffTime", StringValue ("ns3::ConstantRandomVariable[Constant=0]"));
+  client1.SetAttribute ("DataRate", DataRateValue (DataRate (dataRate)));
+  clientApps.Add (client1.Install (ueNodes));
 
-
+  OnOffHelper client2 ("ns3::UdpSocketFactory", (InetSocketAddress (remoteHostAddr, dlPort)));
+  client2.SetAttribute ("PacketSize", UintegerValue (payloadSize));
+  client2.SetAttribute ("OnTime", StringValue ("ns3::ConstantRandomVariable[Constant=1]"));
+  client2.SetAttribute ("OffTime", StringValue ("ns3::ConstantRandomVariable[Constant=0]"));
+  client2.SetAttribute ("DataRate", DataRateValue (DataRate (dataRate)));
+  clientApps.Add (client2.Install (wifiNodes.Get (0)));
 
   serverApps.Start (Seconds (0.0));
   clientApps.Start (Seconds (0.0));
