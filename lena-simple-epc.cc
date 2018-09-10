@@ -242,11 +242,11 @@ main (int argc, char *argv[])
   Ptr<NetDevice> wifiApBrDev = (bridgeHelper.Install (apwifiNode, NetDeviceContainer (apDevice, csmaDevs.Get (1)))).Get (0);
 
   MobilityHelper mobility2;
-  Ptr<ListPositionAllocator> positionAlloc = CreateObject<ListPositionAllocator> ();
-  positionAlloc->Add (Vector (2010.0, 0.0, 0.0));
-  positionAlloc->Add (Vector (10.0, 10.0, 0.0));
+  Ptr<ListPositionAllocator> positionAlloc2 = CreateObject<ListPositionAllocator> ();
+  positionAlloc2->Add (Vector (2010.0, 0.0, 0.0));
+  positionAlloc2->Add (Vector (10.0, 10.0, 0.0));
 
-  mobility2.SetPositionAllocator (positionAlloc);
+  mobility2.SetPositionAllocator (positionAlloc2);
   mobility2.SetMobilityModel ("ns3::ConstantPositionMobilityModel");
   mobility2.Install (apwifiNode);  
   mobility2.Install (stawifiNode);
