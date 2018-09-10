@@ -236,7 +236,7 @@ main (int argc, char *argv[])
   wifiMac.SetType ("ns3::StaWifiMac",
                    "Ssid", SsidValue (ssid));
 
-  Ptr<NetDevice> staDevices = (wifiHelper.Install (wifiPhy, wifiMac, stawifiNode)).Get (0);
+  Ptr<NetDevice> staDevice = (wifiHelper.Install (wifiPhy, wifiMac, stawifiNode)).Get (0);
 
   BridgeHelper bridgeHelper;
   Ptr<NetDevice> wifiApBrDev = (bridgeHelper.Install (apwifiNode, NetDeviceContainer (apDevice, csmaDevs.Get (1)))).Get (0);
@@ -255,9 +255,9 @@ main (int argc, char *argv[])
   Ipv4AddressHelper address;
   address.SetBase ("10.0.0.0", "255.255.255.0");
   Ipv4InterfaceContainer apInterface;
-  apInterface = address.Assign (apwifiNode);
+  apInterface = address.Assign (apDevice);
   Ipv4InterfaceContainer staInterface;
-  staInterface = address.Assign (stawifiNode);
+  staInterface = address.Assign (staDevice);
 
   Ptr<Ipv4StaticRouting> staStaticRouting = ipv4RoutingHelper.GetStaticRouting (apwifiNode->GetObject<Ipv4> ());
   staStaticRouting->AddHostRouteTo (internetIpIfaces.GetAddress (1), Ipv4Address ("10.0.0.1"), 1);
