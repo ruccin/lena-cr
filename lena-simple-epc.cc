@@ -199,8 +199,9 @@ main (int argc, char *argv[])
   csmaContainer.Add (pgw);
 
   NetDeviceContainer csmaDevs = csmaHelper.Install (csmaContainer);
-  ipv4h.SetBase ("2.0.0.0", "255.0.0.0");
-  Ipv4InterfaceContainer csmaIpIface = ipv4h.Assign (csmaDevs);
+  Ipv4AddressHelper ipv4w;
+  ipv4w.SetBase ("2.0.0.0", "255.0.0.0");
+  Ipv4InterfaceContainer csmaIpIface = ipv4w.Assign (csmaDevs);
 
   WifiMacHelper wifiMac;
   WifiHelper wifiHelper;
